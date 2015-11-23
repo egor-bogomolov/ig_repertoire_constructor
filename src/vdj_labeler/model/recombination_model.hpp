@@ -5,7 +5,7 @@
 #include <map>
 #include <string>
 #include <fstream>
-
+#include <vector>
 
 using std::string;
 using std::map;
@@ -14,16 +14,16 @@ using std::vector;
 class IgGeneProbabilityModel {
     map<string, double> ig_gene_probabilities_;
 
-public:
+ public:
     IgGeneProbabilityModel() = delete;
 
-    IgGeneProbabilityModel(map<string, double>);
+    explicit IgGeneProbabilityModel(map<string, double>);
 
     IgGeneProbabilityModel(const IgGeneProbabilityModel&) = default;
 
     IgGeneProbabilityModel(IgGeneProbabilityModel&&) = default;
 
-    IgGeneProbabilityModel& operator=(const IgGeneProbabilityModel&) = default; 
+    IgGeneProbabilityModel& operator=(const IgGeneProbabilityModel&) = default;
 
     IgGeneProbabilityModel& operator=(IgGeneProbabilityModel&&) = default;
 
@@ -31,19 +31,18 @@ public:
 
     map<string, double>& GetGeneProbabilities() { return ig_gene_probabilities_; }
     const map<string, double>& GetGeneProbabilities() const {
-        return ig_gene_probabilities_; 
+        return ig_gene_probabilities_;
     }
 
-    void SetGeneProbabilities(map<string, double>& ig_gene_probabilities) {
+    void SetGeneProbabilities(const map<string, double>& ig_gene_probabilities) {
         ig_gene_probabilities_ = ig_gene_probabilities;
     }
 
-    // double operator[](const string& index_string) { return ig_gene_probabilities_[index_string]; }
     double GetProbabilityByGeneName(const string&) const;
 
     size_t size() const;
 
-    IgGeneProbabilityModel(std::ifstream&);
+    explicit IgGeneProbabilityModel(std::ifstream&);
 
     void print(std::ostream& out);
 };
@@ -53,9 +52,9 @@ public:
 class NongenomicInsertionModel {
     static const size_t alphabet_size_;
     vector<double> insertion_probabilities_;
-    vector<vector<double>> transition_matrix_; // (4, vector<double>(alphabet_size));
+    vector<vector<double>> transition_matrix_;
 
-public:
+ public:
     NongenomicInsertionModel() = delete;
 
     NongenomicInsertionModel(vector<double>, vector<vector<double>>);
@@ -84,7 +83,7 @@ public:
         transition_matrix_ = transition_matrix;
     }
 
-    NongenomicInsertionModel(std::ifstream&);
+    explicit NongenomicInsertionModel(std::ifstream&);
 
     void print(std::ostream& out);
 };
@@ -93,10 +92,10 @@ class PalindromeDeletionModel {
     using DeletionTableMap = map<string, map<int, double>>;
     DeletionTableMap deletion_table_;
 
-public:
+ public:
     PalindromeDeletionModel() = delete;
 
-    PalindromeDeletionModel(DeletionTableMap deletion_table);
+    explicit PalindromeDeletionModel(DeletionTableMap deletion_table);
 
     PalindromeDeletionModel(const PalindromeDeletionModel&) = default;
 
@@ -115,10 +114,9 @@ public:
         deletion_table_ = deletion_table;
     }
 
-    PalindromeDeletionModel(std::ifstream&);
+    explicit PalindromeDeletionModel(std::ifstream&);
 
     void print(std::ostream& out);
-
 };
 
 class HCProbabilityRecombinationModel {
@@ -134,10 +132,47 @@ class HCProbabilityRecombinationModel {
     PalindromeDeletionModel DLeft_palindrome_deletion_model_;
     PalindromeDeletionModel DRight_palindrome_deletion_model_;
 
-public:
+ public:
     HCProbabilityRecombinationModel() = delete;
 
-    HCProbabilityRecombinationModel(std::ifstream&);
+    HCProbabilityRecombinationModel(const HCProbabilityRecombinationModel&) = default;
+
+    HCProbabilityRecombinationModel(HCProbabilityRecombinationModel&&) = default;
+
+    HCProbabilityRecombinationModel& operator=(const HCProbabilityRecombinationModel&) = default;
+
+    HCProbabilityRecombinationModel& operator=(HCProbabilityRecombinationModel&&) = default;
+
+    virtual ~HCProbabilityRecombinationModel() = default;
+
+    IgGeneProbabilityModel GetVGeneProbabilityModel() { return V_gene_probability_model_; }
+    const IgGeneProbabilityModel& GetVGeneProbabilityModel() const {
+        return V_gene_probability_model_;
+    }
+
+    IgGeneProbabilityModel GetDGeneProbabilityModel() { return D_gene_probability_model_; }
+    const IgGeneProbabilityModel& GetDGeneProbabilityModel() const {
+        return D_gene_probability_model_;
+    }
+
+    IgGeneProbabilityModel GetJGeneProbabilityModel() { return J_gene_probability_model_; }
+    const IgGeneProbabilityModel& GetJGeneProbabilityModel() const {
+        return J_gene_probability_model_;
+    }
+
+    void SetVGeneProbabilityModel(const IgGeneProbabilityModel V_gene_probability_model) {
+        V_gene_probability_model_ = V_gene_probability_model;
+    }
+
+    void SetDGeneProbabilityModel(const IgGeneProbabilityModel D_gene_probability_model) {
+        D_gene_probability_model_ = D_gene_probability_model;
+    }
+
+    void SetJGeneProbabilityModel(const IgGeneProbabilityModel J_gene_probability_model) {
+        J_gene_probability_model_ = J_gene_probability_model;
+    }
+
+    explicit HCProbabilityRecombinationModel(std::ifstream&);
 
     void print(std::ostream& out);
 };
