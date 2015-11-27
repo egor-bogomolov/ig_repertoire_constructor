@@ -30,6 +30,7 @@ void IgGeneDatabase::AddGenesFromFile(std::string filename) {
         IgGenePtr ig_gene_ptr(new IgGene(read_headers[i], read_seqs[i]));
         ig_genes_.push_back(ig_gene_ptr);
         gene_name_map_[string(toCString(read_headers[i]))] = ig_gene_ptr;
+        gene_index_map_[string(toCString(read_headers[i]))] = i;
     }
 }
 
@@ -41,6 +42,11 @@ IgGenePtr IgGeneDatabase::GetByIndex(size_t index) const {
 IgGenePtr IgGeneDatabase::GetByName(std::string gene_name) const {
     assert(gene_name_map_.find(gene_name) != gene_name_map_.end());
     return gene_name_map_.at(gene_name);
+}
+
+size_t IgGeneDatabase::GetIndexByName(std::string gene_name) const {
+    assert(gene_index_map_.find(gene_name) != gene_index_map_.end());
+    return gene_index_map_.at(gene_name);
 }
 
 std::ostream& operator<<(std::ostream &out, const IgGeneDatabase &ig_gene_db) {

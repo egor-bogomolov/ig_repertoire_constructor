@@ -42,6 +42,7 @@ class IgGeneDatabase {
     IgGeneType gene_type_;
     std::vector<IgGenePtr> ig_genes_;
     std::map<std::string, IgGenePtr> gene_name_map_;
+    std::map<std::string, size_t> gene_index_map_;
 
 public:
     IgGeneDatabase(IgGeneType gene_type) :
@@ -62,6 +63,8 @@ public:
     citerator cend() const { return ig_genes_.cend(); }
 
     IgGenePtr GetByName(std::string gene_name) const;
+
+    size_t GetIndexByName(std::string gene_name) const;
 };
 
 std::ostream& operator<<(std::ostream &out, const IgGeneDatabase &ig_gene_db);
