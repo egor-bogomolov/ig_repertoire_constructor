@@ -10,6 +10,10 @@ struct AlignmentPositions {
     std::pair<size_t, size_t> query_pos;
     std::pair<size_t, size_t> subject_pos;
 
+    AlignmentPositions() :
+        query_pos(std::make_pair(size_t(-1), size_t(-1))),
+        subject_pos(std::make_pair(size_t(-1), size_t(-1))) { }
+
     AlignmentPositions(std::pair<size_t, size_t> new_query_pos,
               std::pair<size_t, size_t> new_subject_pos) :
             query_pos(new_query_pos),
@@ -24,6 +28,11 @@ struct IgGeneAlignmentPositions {
     AlignmentPositions alignment;
     IgGenePtr ig_gene;
     ReadPtr read;
+
+    IgGeneAlignmentPositions() :
+        alignment(),
+        ig_gene(NULL),
+        read(NULL) { }
 
     IgGeneAlignmentPositions(AlignmentPositions new_alignment,
                              IgGenePtr new_ig_gene,

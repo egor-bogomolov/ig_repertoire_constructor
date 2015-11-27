@@ -20,6 +20,7 @@ FastqReadArchive::FastqReadArchive(std::string fastq_file_fname) {
         ReadPtr read_ptr(new Read(read_headers[i], read_seqs[i]));
         reads_.push_back(read_ptr);
         name_read_map_[string(toCString(read_headers[i]))] = read_ptr;
+        read_index_map_[read_ptr] = i;
     }
 }
 
@@ -37,4 +38,9 @@ ReadPtr FastqReadArchive::operator[](size_t index) const {
 ReadPtr FastqReadArchive::GetReadByName(std::string read_name) const {
     assert(name_read_map_.find(read_name) != name_read_map_.end());
     return name_read_map_.at(read_name);
+}
+
+size_t FastqReadArchive::GetIndexByRead(ReadPtr read_ptr) const {
+    assert(read_index_map_.find(read_ptr) != read_index_map_.end());
+    return read_index_map_.at(read_ptr);
 }
