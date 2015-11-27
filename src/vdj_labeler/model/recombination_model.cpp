@@ -13,7 +13,7 @@ using boost::tokenizer;
 using boost::escaped_list_separator;
 using Tokenizer = tokenizer<escaped_list_separator<char>>;
 
-IgGeneProbabilityModel::IgGeneProbabilityModel(map<string, double> ig_gene_probabilities) :
+IgGeneProbabilityModel::IgGeneProbabilityModel(IgGeneProbabilityMap& ig_gene_probabilities) :
         ig_gene_probabilities_(ig_gene_probabilities) { }
 
 
@@ -38,9 +38,10 @@ IgGeneProbabilityModel::IgGeneProbabilityModel(std::ifstream& in) {
     }
 }
 
-void IgGeneProbabilityModel::print(std::ostream& out) {
-    for (auto& gene : ig_gene_probabilities_)
+std::ostream& operator<<(std::ostream& out, const IgGeneProbabilityModel& model) {
+    for (auto& gene : model.GetGeneProbabilities())
         out << "Gene_id: " << gene.first << ", " << "Gene probability: " << gene.second << "\n";
+    return out;
 }
 
 
@@ -50,7 +51,7 @@ const size_t NongenomicInsertionModel::alphabet_size_ = 4;
 
 NongenomicInsertionModel::NongenomicInsertionModel(
             vector<double> insertion_probabilities,
-            vector<vector<double>> transition_matrix) :
+            NongenomicInsertionMatrix transition_matrix) :
         insertion_probabilities_(insertion_probabilities),
         transition_matrix_(transition_matrix) { }
 
@@ -78,26 +79,44 @@ NongenomicInsertionModel::NongenomicInsertionModel(std::ifstream& in) {
     }
 }
 
-void NongenomicInsertionModel::print(std::ostream& out) {
+double NongenomicInsertionModel::GetInsertionProbabilityByLength(const unsigned int ins_length) const {
+    assert(ins_length < insertion_probabilities_.size());
+    return insertion_probabilities_[ins_length];
+}
+
+double NongenomicInsertionModel::GetTransitionProbability(char in, char out) const {
+    string alphabet = "ACGT";
+    size_t in_pos = alphabet.find(in);
+    size_t out_pos = alphabet.find(out);
+    assert(in_pos != string::npos);
+    assert(out_pos != string::npos);
+    return transition_matrix_[in_pos][out_pos];
+}
+
+std::ostream& operator<<(std::ostream& out, const NongenomicInsertionModel& model) {
     out << "Length, Probability" << "\n";
-    for (auto it = insertion_probabilities_.begin(); it != insertion_probabilities_.end(); ++it)
-        out << it - insertion_probabilities_.begin() << ", " << *it << "\n";
+    for (auto it = model.GetInsertionProbabilities().begin();
+            it != model.GetInsertionProbabilities().end(); ++it)
+        out << it - model.GetInsertionProbabilities().begin() << ", " << *it << "\n";
     out << "\n";
 
     out << "Markov chain transition matrix" << "\n";
     out << "\tA\tC\tG\tT" << "\n";
     string alphabet = "ACGT";
-    for (auto it1 = transition_matrix_.begin(); it1 != transition_matrix_.end(); ++it1) {
-        out << alphabet[it1 - transition_matrix_.begin()] << ": ";
+    for (auto it1 = model.GetTransitionMatrix().begin();
+            it1 != model.GetTransitionMatrix().end(); ++it1) {
+        out << alphabet[it1 - model.GetTransitionMatrix().begin()] << ": ";
         for (auto it2 = it1->begin(); it2 != it1->end(); ++it2)
             out << *it2 << " \n"[it2 == it1->end() - 1];
     }
+    return out;
 }
 
 /**************************************************************************************************/
 
 PalindromeDeletionModel::PalindromeDeletionModel(DeletionTableMap deletion_table) :
     deletion_table_(deletion_table) { }
+
 
 PalindromeDeletionModel::PalindromeDeletionModel(std::ifstream& in) {
     assert(in.is_open());
@@ -132,24 +151,24 @@ PalindromeDeletionModel::PalindromeDeletionModel(std::ifstream& in) {
     }
 }
 
-void PalindromeDeletionModel::print(std::ostream& out) {
-    if (deletion_table_.empty())
-        return;
+std::ostream& operator<<(std::ostream& out, const PalindromeDeletionModel& model) {
+    if (model.GetDeletionTable().empty())
+        return out;
     out << "Gene id, Length of palindrome\n";
 
-    auto& gene = (*(deletion_table_.begin())).second;
+    auto& gene = (*(model.GetDeletionTable().begin())).second;
     for (auto& key_value : gene)
         out << key_value.first << " ";
     out << "\n";
 
-    for (auto& gene : deletion_table_) {
+    for (auto& gene : model.GetDeletionTable()) {
         out << gene.first << ": ";
         for (auto& probability : gene.second)
             out << probability.second << " ";
         out << "\n";
     }
+    return out;
 }
-
 /**************************************************************************************************/
 
 HCProbabilityRecombinationModel::HCProbabilityRecombinationModel(std::ifstream& in) :
@@ -164,25 +183,26 @@ HCProbabilityRecombinationModel::HCProbabilityRecombinationModel(std::ifstream& 
         DRight_palindrome_deletion_model_(in) {
 }
 
-void HCProbabilityRecombinationModel::print(std::ostream& out) {
+std::ostream& operator<<(std::ostream& out, const HCProbabilityRecombinationModel& model) {
     out << "V gene probabilities:\n";
-    V_gene_probability_model_.print(out);
+    out << model.GetVGeneProbabilityModel();
     out << "\nD gene probabilities:\n";
-    D_gene_probability_model_.print(out);
+    out << model.GetDGeneProbabilityModel();
     out << "\nJ gene probabilities:\n";
-    J_gene_probability_model_.print(out);
+    out << model.GetJGeneProbabilityModel();
 
     out << "\nVD nongenomic insertions model:\n";
-    VD_nongenomic_insertion_model_.print(out);
+    out << model.GetVDNongenomicInsertionModel();
     out << "\nDJ nongenomic insertions model:\n";
-    DJ_nongenomic_insertion_model_.print(out);
+    out << model.GetDJNongenomicInsertionModel();
 
     out << "\nV palindrome deletion model:\n";
-    V_palindrome_deletion_model_.print(out);
+    out << model.GetVPalindromeDeletionModel();
     out << "\nJ palindrome deletion model:\n";
-    J_palindrome_deletion_model_.print(out);
+    out << model.GetJPalindromeDeletionModel();
     out << "\nD left palindrome deletion model:\n";
-    DLeft_palindrome_deletion_model_.print(out);
+    out << model.GetDLeftPalindromeDeletionModel();
     out << "\nD right palindrome deletion model:\n";
-    DRight_palindrome_deletion_model_.print(out);
+    out << model.GetDRightPalindromeDeletionModel();
+    return out;
 }

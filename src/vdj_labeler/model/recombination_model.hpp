@@ -12,12 +12,13 @@ using std::map;
 using std::vector;
 
 class IgGeneProbabilityModel {
-    map<string, double> ig_gene_probabilities_;
+    using IgGeneProbabilityMap = map<string, double>;
+    IgGeneProbabilityMap ig_gene_probabilities_;
 
  public:
     IgGeneProbabilityModel() = delete;
 
-    explicit IgGeneProbabilityModel(map<string, double>);
+    explicit IgGeneProbabilityModel(IgGeneProbabilityMap&);
 
     IgGeneProbabilityModel(const IgGeneProbabilityModel&) = default;
 
@@ -29,35 +30,38 @@ class IgGeneProbabilityModel {
 
     virtual ~IgGeneProbabilityModel() = default;
 
-    map<string, double>& GetGeneProbabilities() { return ig_gene_probabilities_; }
-    const map<string, double>& GetGeneProbabilities() const {
+    const IgGeneProbabilityMap& GetGeneProbabilities() const {
         return ig_gene_probabilities_;
     }
 
-    void SetGeneProbabilities(const map<string, double>& ig_gene_probabilities) {
+    void SetGeneProbabilities(const IgGeneProbabilityMap& ig_gene_probabilities) {
         ig_gene_probabilities_ = ig_gene_probabilities;
     }
+
+    using citerator = IgGeneProbabilityMap::const_iterator;
+
+    citerator cbegin() const { return ig_gene_probabilities_.cbegin(); }
+    citerator cend() const { return ig_gene_probabilities_.cend(); }
 
     double GetProbabilityByGeneName(const string&) const;
 
     size_t size() const;
 
     explicit IgGeneProbabilityModel(std::ifstream&);
-
-    void print(std::ostream& out);
 };
 
-
+std::ostream& operator<<(std::ostream&, const IgGeneProbabilityModel&);
 
 class NongenomicInsertionModel {
     static const size_t alphabet_size_;
     vector<double> insertion_probabilities_;
-    vector<vector<double>> transition_matrix_;
+    using NongenomicInsertionMatrix=vector<vector<double>>;
+    NongenomicInsertionMatrix transition_matrix_;
 
  public:
     NongenomicInsertionModel() = delete;
 
-    NongenomicInsertionModel(vector<double>, vector<vector<double>>);
+    NongenomicInsertionModel(vector<double>, NongenomicInsertionMatrix);
 
     NongenomicInsertionModel(const NongenomicInsertionModel&) = default;
 
@@ -69,24 +73,27 @@ class NongenomicInsertionModel {
 
     virtual ~NongenomicInsertionModel() = default;
 
-    vector<double> GetInsertionProbabilities() { return insertion_probabilities_; }
     const vector<double>& GetInsertionProbabilities() const { return insertion_probabilities_; }
 
-    vector<vector<double>> GetTransitionMatrix() { return transition_matrix_; }
-    const vector<vector<double>>& GetTransitionMatrix() const { return transition_matrix_; }
+    double GetInsertionProbabilityByLength(const unsigned int) const;
+
+    const NongenomicInsertionMatrix& GetTransitionMatrix() const { return transition_matrix_; }
 
     void SetInsertionProbabilities(const vector<double>& insertion_probabilities) {
         insertion_probabilities_ = insertion_probabilities;
     }
 
-    void SetTransitionMatrix(const vector<vector<double>>& transition_matrix) {
+    void SetTransitionMatrix(const NongenomicInsertionMatrix& transition_matrix) {
         transition_matrix_ = transition_matrix;
     }
 
     explicit NongenomicInsertionModel(std::ifstream&);
 
-    void print(std::ostream& out);
+    double GetTransitionProbability(char, char) const;
 };
+
+std::ostream& operator<<(std::ostream&, const NongenomicInsertionModel&);
+
 
 class PalindromeDeletionModel {
     using DeletionTableMap = map<string, map<int, double>>;
@@ -107,17 +114,21 @@ class PalindromeDeletionModel {
 
     virtual ~PalindromeDeletionModel() = default;
 
-    DeletionTableMap GetDeletionTable() { return deletion_table_; }
     const DeletionTableMap& GetDeletionTable() const { return deletion_table_; }
 
     void SetDeletionTable(const DeletionTableMap& deletion_table) {
         deletion_table_ = deletion_table;
     }
 
-    explicit PalindromeDeletionModel(std::ifstream&);
+    using citerator = DeletionTableMap::const_iterator;
 
-    void print(std::ostream& out);
+    citerator cbegin() const { return deletion_table_.cbegin(); }
+    citerator cend() const { return deletion_table_.cend(); }
+
+    explicit PalindromeDeletionModel(std::ifstream&);
 };
+
+std::ostream& operator<<(std::ostream&, const PalindromeDeletionModel&);
 
 class HCProbabilityRecombinationModel {
     IgGeneProbabilityModel V_gene_probability_model_;
@@ -145,20 +156,41 @@ class HCProbabilityRecombinationModel {
 
     virtual ~HCProbabilityRecombinationModel() = default;
 
-    IgGeneProbabilityModel GetVGeneProbabilityModel() { return V_gene_probability_model_; }
     const IgGeneProbabilityModel& GetVGeneProbabilityModel() const {
         return V_gene_probability_model_;
     }
 
-    IgGeneProbabilityModel GetDGeneProbabilityModel() { return D_gene_probability_model_; }
     const IgGeneProbabilityModel& GetDGeneProbabilityModel() const {
         return D_gene_probability_model_;
     }
 
-    IgGeneProbabilityModel GetJGeneProbabilityModel() { return J_gene_probability_model_; }
     const IgGeneProbabilityModel& GetJGeneProbabilityModel() const {
         return J_gene_probability_model_;
     }
+
+    const NongenomicInsertionModel& GetVDNongenomicInsertionModel() const {
+        return VD_nongenomic_insertion_model_;
+    } 
+
+    const NongenomicInsertionModel& GetDJNongenomicInsertionModel() const {
+        return DJ_nongenomic_insertion_model_;
+    } 
+
+    const PalindromeDeletionModel& GetVPalindromeDeletionModel() const {
+        return V_palindrome_deletion_model_;
+    } 
+
+    const PalindromeDeletionModel& GetJPalindromeDeletionModel() const {
+        return J_palindrome_deletion_model_;
+    } 
+
+    const PalindromeDeletionModel& GetDLeftPalindromeDeletionModel() const {
+        return DLeft_palindrome_deletion_model_;
+    } 
+
+    const PalindromeDeletionModel& GetDRightPalindromeDeletionModel() const {
+        return DRight_palindrome_deletion_model_;
+    } 
 
     void SetVGeneProbabilityModel(const IgGeneProbabilityModel V_gene_probability_model) {
         V_gene_probability_model_ = V_gene_probability_model;
@@ -173,6 +205,6 @@ class HCProbabilityRecombinationModel {
     }
 
     explicit HCProbabilityRecombinationModel(std::ifstream&);
-
-    void print(std::ostream& out);
 };
+
+std::ostream& operator<<(std::ostream&, const HCProbabilityRecombinationModel&);
