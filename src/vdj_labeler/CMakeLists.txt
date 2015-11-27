@@ -28,6 +28,7 @@ add_executable(vdj_labeler
                 vdj_alignments/vj_alignment_info.cpp
                 vdj_alignments/aligners/right_v_tail_aligner.cpp
                 vdj_alignments/aligners/left_j_tail_aligner.cpp
+                vdj_alignments/aligners/simple_d_aligner.cpp
                 vdj_alignments/vdj_hits.cpp
                 vdj_alignments/vdj_hits_storage.cpp
                 vdj_alignments/vdj_hits_calculators/custom_vdj_hits_calculator.cpp

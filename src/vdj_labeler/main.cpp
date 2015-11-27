@@ -61,24 +61,6 @@ int main(int, char**) {
     INFO(vj_alignment_info.size() << " alignment lines were extracted from " << vj_alignment_fname);
     INFO(vj_alignment_info);
 
-    INFO("Alignment of right tails of V starts");
-    RightVTailAligner raligner;
-    for(size_t i = 0; i < vj_alignment_info.size(); i++) {
-        auto v_alignment = raligner.ComputeAlignment(vj_alignment_info.GetVAlignmentByIndex(i));
-        std::cout << *v_alignment << std::endl;
-        std::cout << "---------" << std::endl;
-    }
-    INFO("Alignment of right tails of V ends");
-
-    INFO("Alignment of left tails of J starts");
-    LeftJTailAligner laligner;
-    for(size_t i = 0; i < vj_alignment_info.size(); i++) {
-        auto j_alignment = laligner.ComputeAlignment(vj_alignment_info.GetJAlignmentByIndex(i));
-        std::cout << *j_alignment << std::endl;
-        std::cout << "---------" << std::endl;
-    }
-    INFO("Alignment of left tails of J ends");
-
     INFO("Best VDJ hits alignment calculation starts");
     RightVTailAligner v_aligner;
     InfoBasedVJHitsCalculator v_hits_calc(IgGeneType::variable_gene, reads_archive, vj_alignment_info, v_aligner);
@@ -87,6 +69,7 @@ int main(int, char**) {
     LeftJTailAligner j_aligner;
     InfoBasedVJHitsCalculator j_hits_calc(IgGeneType::join_gene, reads_archive, vj_alignment_info, j_aligner);
     CustomVDJHitsCalculator vdj_hits_calc(reads_archive, v_hits_calc, d_hits_calc, j_hits_calc);
+    vdj_hits_calc.ComputeHits();
     INFO("Best VDJ hits alignment calculation ends");
 
     INFO("VDJ labeler ends");
