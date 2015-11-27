@@ -23,5 +23,5 @@ public:
 
     int RightCleavageLength() const { return right_cleavage_length_; }
 
-    size_t SMHsNumber() const { return gene_alignment_ptr_->SHMsNumber(); }
+    size_t SHMsNumber() const { return gene_alignment_ptr_->SHMsNumber(); }
 };

@@ -16,6 +16,8 @@
 #include "vdj_alignments/aligners/right_v_tail_aligner.hpp"
 #include "vdj_alignments/aligners/left_j_tail_aligner.hpp"
 
+#include "vdj_alignments/vdj_hits_calculators/custom_vdj_hits_calculator.hpp"
+
 #include "recombination_calculator/hc_model_based_recombination_calculator.hpp"
 
 void create_console_logger() {

@@ -26,6 +26,8 @@ public:
             vd_insertion_(vd_insertion),
             dj_insertion_(dj_insertion) { }
 
+    ReadPtr Read() const { return read_ptr_; }
+
     const CleavedIgGeneAlignment& V() const { return v_gene_; }
 
     const CleavedIgGeneAlignment& D() const { return d_gene_; }
@@ -36,5 +38,5 @@ public:
 
     NongenomicInsertion DJInsertion() const { return dj_insertion_; }
 
-    size_t SHMsNumber() const { return v_gene_.SMHsNumber() + d_gene_.SMHsNumber() + j_gene_.SMHsNumber(); }
+    size_t SHMsNumber() const { return v_gene_.SHMsNumber() + d_gene_.SHMsNumber() + j_gene_.SHMsNumber(); }
 };

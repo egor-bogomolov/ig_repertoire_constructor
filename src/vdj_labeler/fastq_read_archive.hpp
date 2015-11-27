@@ -42,5 +42,4 @@ public:
     ReadPtr operator[](size_t index) const;
 
     ReadPtr GetReadByName(std::string read_name) const;
-
 };
