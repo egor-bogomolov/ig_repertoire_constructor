@@ -2,9 +2,10 @@
 
 #include "cleaved_gene.hpp"
 #include "nongenomic_insertion.hpp"
+#include "../fastq_read_archive.hpp"
 
 class HCRecombination {
-    // here should be reference to read
+    ReadPtr read_ptr_;
     const CleavedIgGeneAlignment& v_gene_;
     const CleavedIgGeneAlignment& d_gene_;
     const CleavedIgGeneAlignment& j_gene_;
@@ -12,11 +13,13 @@ class HCRecombination {
     NongenomicInsertion dj_insertion_;
 
 public:
-    HCRecombination(const CleavedIgGeneAlignment& v_gene,
+    HCRecombination(ReadPtr read_ptr,
+                    const CleavedIgGeneAlignment& v_gene,
                     const CleavedIgGeneAlignment& d_gene,
                     const CleavedIgGeneAlignment& j_gene,
                     NongenomicInsertion vd_insertion,
                     NongenomicInsertion dj_insertion) :
+            read_ptr_(read_ptr),
             v_gene_(v_gene),
             d_gene_(d_gene),
             j_gene_(j_gene),
@@ -32,4 +35,6 @@ public:
     NongenomicInsertion VDInsertion() const { return vd_insertion_; }
 
     NongenomicInsertion DJInsertion() const { return dj_insertion_; }
+
+    size_t SHMsNumber() const { return v_gene_.SMHsNumber() + d_gene_.SMHsNumber() + j_gene_.SMHsNumber(); }
 };

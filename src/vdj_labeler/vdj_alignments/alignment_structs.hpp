@@ -37,14 +37,27 @@ std::ostream& operator<<(std::ostream& out, const IgGeneAlignmentPositions& obj)
 
 //-----------------------------------------------------------
 
-struct IgGeneAlignment {
-    IgGeneAlignmentPositions positions;
-    seqan::Align<Dna5String> alignment;
+class IgGeneAlignment {
+    IgGeneAlignmentPositions positions_;
+    seqan::Align<Dna5String> alignment_;
+    size_t num_shms_;
 
+    void ComputeSHMsNumber();
+
+public:
     IgGeneAlignment(IgGeneAlignmentPositions new_positions,
                     seqan::Align<Dna5String> new_alignment) :
-            positions(new_positions),
-            alignment(new_alignment) { }
+            positions_(new_positions),
+            alignment_(new_alignment),
+            num_shms_(size_t(-1)) { }
+
+    size_t SHMsNumber();
+
+    IgGeneAlignmentPositions Positions() const { return positions_; }
+
+    typedef seqan::Align<Dna5String> DnaAlignment;
+
+    const DnaAlignment& Alignment() const { return alignment_; }
 };
 
 std::ostream& operator<<(std::ostream &out, const IgGeneAlignment& ig_gene_alignment);
