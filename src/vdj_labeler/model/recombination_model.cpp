@@ -6,48 +6,52 @@
 #include <string>
 #include <algorithm>
 #include <vector>
+#include <utility>
 
 #include <boost/tokenizer.hpp>
+#include <seqan/sequence.h>
 
 using boost::tokenizer;
 using boost::escaped_list_separator;
 using Tokenizer = tokenizer<escaped_list_separator<char>>;
 
-IgGeneProbabilityModel::IgGeneProbabilityModel(IgGeneProbabilityMap& ig_gene_probabilities) :
-        ig_gene_probabilities_(ig_gene_probabilities) { }
-
-
-double IgGeneProbabilityModel::GetProbabilityByGeneName(const string& index_string) const {
-    assert(ig_gene_probabilities_.find(index_string) != ig_gene_probabilities_.end());
-    return ig_gene_probabilities_.at(index_string);
-}
+IgGeneProbabilityModel::IgGeneProbabilityModel(const IgGeneProbabilityVector& ig_gene_probabilities,
+                                               const IgGeneDatabasePtrConst& ig_gene_database) :
+        ig_gene_probabilities_(ig_gene_probabilities),
+        ig_gene_database_(ig_gene_database) { }
 
 size_t IgGeneProbabilityModel::size() const { return ig_gene_probabilities_.size(); }
 
-IgGeneProbabilityModel::IgGeneProbabilityModel(std::ifstream& in) {
+IgGeneProbabilityModel::IgGeneProbabilityModel(std::ifstream& in,
+                                               const IgGeneDatabasePtrConst& ig_gene_database) :
+        ig_gene_database_(ig_gene_database) {
     assert(in.is_open());
     string line;
     vector<string> parsed_vector;
+    ig_gene_probabilities_.resize(ig_gene_database_ -> size());
     while (getline(in, line)) {
         if (line.empty())
             break;
         Tokenizer tokenizer(line);
         parsed_vector.assign(tokenizer.begin(), tokenizer.end());
         assert(parsed_vector.size() == 2);
-        ig_gene_probabilities_[parsed_vector.front()] = std::stod(parsed_vector.back());
+        size_t index_of_current_gene = ig_gene_database -> GetIndexByName(parsed_vector.front());
+        ig_gene_probabilities_[index_of_current_gene] = std::stod(parsed_vector.back());
     }
 }
 
+IgGeneProbabilityModel::IgGeneProbabilityModel(std::ifstream& in, const IgGeneDatabase& database) :
+    IgGeneProbabilityModel(in, make_shared<const IgGeneDatabase>(database)) { }
+
 std::ostream& operator<<(std::ostream& out, const IgGeneProbabilityModel& model) {
-    for (auto& gene : model.GetGeneProbabilities())
-        out << "Gene_id: " << gene.first << ", " << "Gene probability: " << gene.second << "\n";
+    for (size_t i = 0; i < model.size(); ++i)
+        out << "Gene_id: " << model.GetIgGeneDatabase() -> GetByIndex(i) -> name()
+            << ", " << "Gene probability: " << model.GetIgGeneProbabilities().at(i) << "\n";
     return out;
 }
 
 
 /************************************************************************************************/
-
-const size_t NongenomicInsertionModel::alphabet_size_ = 4;
 
 NongenomicInsertionModel::NongenomicInsertionModel(
             vector<double> insertion_probabilities,
@@ -79,47 +83,61 @@ NongenomicInsertionModel::NongenomicInsertionModel(std::ifstream& in) {
     }
 }
 
-double NongenomicInsertionModel::GetInsertionProbabilityByLength(const unsigned int ins_length) const {
+double NongenomicInsertionModel::GetInsertionProbabilityByLength(
+        const unsigned int ins_length) const {
     assert(ins_length < insertion_probabilities_.size());
     return insertion_probabilities_[ins_length];
 }
 
 double NongenomicInsertionModel::GetTransitionProbability(char in, char out) const {
-    string alphabet = "ACGT";
-    size_t in_pos = alphabet.find(in);
-    size_t out_pos = alphabet.find(out);
-    assert(in_pos != string::npos);
-    assert(out_pos != string::npos);
+    using Alphabet = seqan::Dna5;
+    size_t in_pos = static_cast<size_t>(seqan::ordValue(Alphabet(in)));
+    size_t out_pos = static_cast<size_t>(seqan::ordValue(Alphabet(out)));
+    assert(in_pos < 4);
+    assert(out_pos < 4);
     return transition_matrix_[in_pos][out_pos];
 }
 
+
 std::ostream& operator<<(std::ostream& out, const NongenomicInsertionModel& model) {
     out << "Length, Probability" << "\n";
-    for (auto it = model.GetInsertionProbabilities().begin();
-            it != model.GetInsertionProbabilities().end(); ++it)
-        out << it - model.GetInsertionProbabilities().begin() << ", " << *it << "\n";
+    for (auto it = model.GetInsertionProbabilities().cbegin();
+            it != model.GetInsertionProbabilities().cend(); ++it)
+        out << it - model.GetInsertionProbabilities().cbegin() << ", " << *it << "\n";
     out << "\n";
 
     out << "Markov chain transition matrix" << "\n";
-    out << "\tA\tC\tG\tT" << "\n";
-    string alphabet = "ACGT";
-    for (auto it1 = model.GetTransitionMatrix().begin();
-            it1 != model.GetTransitionMatrix().end(); ++it1) {
-        out << alphabet[it1 - model.GetTransitionMatrix().begin()] << ": ";
-        for (auto it2 = it1->begin(); it2 != it1->end(); ++it2)
-            out << *it2 << " \n"[it2 == it1->end() - 1];
+    for (auto it1 = model.GetTransitionMatrix().cbegin();
+            it1 != model.GetTransitionMatrix().cend(); ++it1) {
+        for (auto it2 = it1->cbegin(); it2 != it1->cend(); ++it2)
+            out << *it2 << " ";
+        out << "\n";
     }
     return out;
 }
 
+double NongenomicInsertionModel::GetTransitionProbability(
+        const std::pair<char, char>& transition) const {
+    return GetTransitionProbability(transition.first, transition.second);
+}
+
 /**************************************************************************************************/
 
-PalindromeDeletionModel::PalindromeDeletionModel(DeletionTableMap deletion_table) :
-    deletion_table_(deletion_table) { }
+PalindromeDeletionModel::PalindromeDeletionModel(const DeletionTableVector& deletion_table,
+                                                 const vector<int>& deletion_length,
+                                                 const IgGeneDatabasePtrConst ig_gene_database) :
+        deletion_table_(deletion_table),
+        deletion_length_(deletion_length),
+        ig_gene_database_(ig_gene_database) { }
 
 
-PalindromeDeletionModel::PalindromeDeletionModel(std::ifstream& in) {
+PalindromeDeletionModel::PalindromeDeletionModel(std::ifstream& in,
+                                                 const IgGeneDatabasePtrConst& ig_gene_database) :
+        ig_gene_database_(ig_gene_database) {
+    INFO("OK");
     assert(in.is_open());
+    deletion_table_.resize(ig_gene_database -> size());
+
     string line;
     vector<string> parsed_vector;
     getline(in, line);
@@ -136,6 +154,9 @@ PalindromeDeletionModel::PalindromeDeletionModel(std::ifstream& in) {
         *it = std::stoi(*tokenizer_it);
     }
 
+    for (auto it = deletion_table_.begin(); it != deletion_table_.end(); ++it)
+        it -> resize(palidrome_len_diversity);
+
     while (getline(in, line)) {
         if (line.empty())
             break;
@@ -143,66 +164,37 @@ PalindromeDeletionModel::PalindromeDeletionModel(std::ifstream& in) {
         parsed_vector.assign(tokenizer.begin(), tokenizer.end());
         assert(parsed_vector.size() == palidrome_len_diversity + 1);
         auto palidrome_len_it = palindrome_lengths.begin();
+        size_t index_of_current_gene = ig_gene_database -> GetIndexByName(parsed_vector.front());
+        INFO(index_of_current_gene);
         for (auto parsed_it = parsed_vector.begin() + 1;
                 parsed_it != parsed_vector.end();
                 ++parsed_it, ++palidrome_len_it) {
-            deletion_table_[parsed_vector.front()][*palidrome_len_it] = std::stod(*parsed_it);
+            deletion_table_[index_of_current_gene][*palidrome_len_it] = std::stod(*parsed_it);
         }
     }
 }
+
+PalindromeDeletionModel::PalindromeDeletionModel(std::ifstream& in,
+                                                 const IgGeneDatabase& ig_gene_database) :
+        PalindromeDeletionModel(in, make_shared<const IgGeneDatabase>(ig_gene_database)) { }
 
 std::ostream& operator<<(std::ostream& out, const PalindromeDeletionModel& model) {
     if (model.GetDeletionTable().empty())
         return out;
     out << "Gene id, Length of palindrome\n";
 
-    auto& gene = (*(model.GetDeletionTable().begin())).second;
-    for (auto& key_value : gene)
-        out << key_value.first << " ";
+    for (int length : model.GetDeletionLength())
+       out << length << " ";
     out << "\n";
 
-    for (auto& gene : model.GetDeletionTable()) {
-        out << gene.first << ": ";
-        for (auto& probability : gene.second)
-            out << probability.second << " ";
+    for (size_t i = 0; i < model.size(); ++i) {
+        out << "Gene_id: " << model.GetIgGeneDatabase() -> GetByIndex(i) -> name();
+        for (auto it = model.GetDeletionTable().at(i).cbegin();
+                it != model.GetDeletionTable().at(i).cend();
+                ++it)
+            out << *it << " ";
         out << "\n";
     }
     return out;
 }
 /**************************************************************************************************/
-
-HCProbabilityRecombinationModel::HCProbabilityRecombinationModel(std::ifstream& in) :
-        V_gene_probability_model_(in),
-        D_gene_probability_model_(in),
-        J_gene_probability_model_(in),
-        VD_nongenomic_insertion_model_(in),
-        DJ_nongenomic_insertion_model_(in),
-        V_palindrome_deletion_model_(in),
-        J_palindrome_deletion_model_(in),
-        DLeft_palindrome_deletion_model_(in),
-        DRight_palindrome_deletion_model_(in) {
-}
-
-std::ostream& operator<<(std::ostream& out, const HCProbabilityRecombinationModel& model) {
-    out << "V gene probabilities:\n";
-    out << model.GetVGeneProbabilityModel();
-    out << "\nD gene probabilities:\n";
-    out << model.GetDGeneProbabilityModel();
-    out << "\nJ gene probabilities:\n";
-    out << model.GetJGeneProbabilityModel();
-
-    out << "\nVD nongenomic insertions model:\n";
-    out << model.GetVDNongenomicInsertionModel();
-    out << "\nDJ nongenomic insertions model:\n";
-    out << model.GetDJNongenomicInsertionModel();
-
-    out << "\nV palindrome deletion model:\n";
-    out << model.GetVPalindromeDeletionModel();
-    out << "\nJ palindrome deletion model:\n";
-    out << model.GetJPalindromeDeletionModel();
-    out << "\nD left palindrome deletion model:\n";
-    out << model.GetDLeftPalindromeDeletionModel();
-    out << "\nD right palindrome deletion model:\n";
-    out << model.GetDRightPalindromeDeletionModel();
-    return out;
-}

@@ -1,24 +1,31 @@
 #pragma once
 
 #include "standard.hpp"
+#include "../vdj_alignments/gene_database.hpp"
 
 #include <map>
 #include <string>
 #include <fstream>
 #include <vector>
+#include <utility>
+#include <memory>
 
 using std::string;
 using std::map;
 using std::vector;
+using std::shared_ptr;
+
+using IgGeneDatabasePtrConst = shared_ptr<const IgGeneDatabase>;
 
 class IgGeneProbabilityModel {
-    using IgGeneProbabilityMap = map<string, double>;
-    IgGeneProbabilityMap ig_gene_probabilities_;
+    using IgGeneProbabilityVector = vector<double>;
+    IgGeneProbabilityVector ig_gene_probabilities_;
+    const IgGeneDatabasePtrConst ig_gene_database_;
 
  public:
     IgGeneProbabilityModel() = delete;
 
-    explicit IgGeneProbabilityModel(IgGeneProbabilityMap&);
+    IgGeneProbabilityModel(const IgGeneProbabilityVector&, const IgGeneDatabasePtrConst&);
 
     IgGeneProbabilityModel(const IgGeneProbabilityModel&) = default;
 
@@ -30,32 +37,36 @@ class IgGeneProbabilityModel {
 
     virtual ~IgGeneProbabilityModel() = default;
 
-    const IgGeneProbabilityMap& GetGeneProbabilities() const {
+    const IgGeneProbabilityVector& GetIgGeneProbabilities() const {
         return ig_gene_probabilities_;
     }
 
-    void SetGeneProbabilities(const IgGeneProbabilityMap& ig_gene_probabilities) {
+    const IgGeneDatabasePtrConst GetIgGeneDatabase() const {
+        return ig_gene_database_;
+    }
+
+    void SetGeneProbabilities(const IgGeneProbabilityVector& ig_gene_probabilities) {
         ig_gene_probabilities_ = ig_gene_probabilities;
     }
 
-    using citerator = IgGeneProbabilityMap::const_iterator;
+    using citerator = IgGeneProbabilityVector::const_iterator;
 
     citerator cbegin() const { return ig_gene_probabilities_.cbegin(); }
     citerator cend() const { return ig_gene_probabilities_.cend(); }
 
-    double GetProbabilityByGeneName(const string&) const;
-
     size_t size() const;
 
-    explicit IgGeneProbabilityModel(std::ifstream&);
+    IgGeneProbabilityModel(std::ifstream&, const IgGeneDatabasePtrConst&);
+
+    IgGeneProbabilityModel(std::ifstream&, const IgGeneDatabase&);
 };
 
 std::ostream& operator<<(std::ostream&, const IgGeneProbabilityModel&);
 
+
 class NongenomicInsertionModel {
-    static const size_t alphabet_size_;
     vector<double> insertion_probabilities_;
-    using NongenomicInsertionMatrix=vector<vector<double>>;
+    using NongenomicInsertionMatrix = vector<vector<double>>;
     NongenomicInsertionMatrix transition_matrix_;
 
  public:
@@ -90,19 +101,25 @@ class NongenomicInsertionModel {
     explicit NongenomicInsertionModel(std::ifstream&);
 
     double GetTransitionProbability(char, char) const;
+
+    double GetTransitionProbability(const std::pair<char, char>&) const;
 };
 
 std::ostream& operator<<(std::ostream&, const NongenomicInsertionModel&);
 
 
 class PalindromeDeletionModel {
-    using DeletionTableMap = map<string, map<int, double>>;
-    DeletionTableMap deletion_table_;
+    using DeletionTableVector = vector<vector<double>>;
+    DeletionTableVector deletion_table_;
+    vector<int> deletion_length_;
+    const IgGeneDatabasePtrConst ig_gene_database_;
 
  public:
     PalindromeDeletionModel() = delete;
 
-    explicit PalindromeDeletionModel(DeletionTableMap deletion_table);
+    PalindromeDeletionModel(const DeletionTableVector&,
+                            const vector<int>&,
+                            const IgGeneDatabasePtrConst);
 
     PalindromeDeletionModel(const PalindromeDeletionModel&) = default;
 
@@ -114,18 +131,28 @@ class PalindromeDeletionModel {
 
     virtual ~PalindromeDeletionModel() = default;
 
-    const DeletionTableMap& GetDeletionTable() const { return deletion_table_; }
+    const DeletionTableVector& GetDeletionTable() const { return deletion_table_; }
 
-    void SetDeletionTable(const DeletionTableMap& deletion_table) {
+    void SetDeletionTable(const DeletionTableVector& deletion_table) {
         deletion_table_ = deletion_table;
     }
 
-    using citerator = DeletionTableMap::const_iterator;
+    const IgGeneDatabasePtrConst GetIgGeneDatabase() const {
+        return ig_gene_database_;
+    }
+
+    const vector<int>& GetDeletionLength() const { return deletion_length_; }
+
+    using citerator = DeletionTableVector::const_iterator;
 
     citerator cbegin() const { return deletion_table_.cbegin(); }
     citerator cend() const { return deletion_table_.cend(); }
 
-    explicit PalindromeDeletionModel(std::ifstream&);
+    size_t size() const { return deletion_table_.size(); }
+
+    PalindromeDeletionModel(std::ifstream&, const IgGeneDatabasePtrConst&);
+
+    PalindromeDeletionModel(std::ifstream&, const IgGeneDatabase&);
 };
 
 std::ostream& operator<<(std::ostream&, const PalindromeDeletionModel&);
@@ -134,77 +161,4 @@ class HCProbabilityRecombinationModel {
     IgGeneProbabilityModel V_gene_probability_model_;
     IgGeneProbabilityModel D_gene_probability_model_;
     IgGeneProbabilityModel J_gene_probability_model_;
-
-    NongenomicInsertionModel VD_nongenomic_insertion_model_;
-    NongenomicInsertionModel DJ_nongenomic_insertion_model_;
-
-    PalindromeDeletionModel V_palindrome_deletion_model_;
-    PalindromeDeletionModel J_palindrome_deletion_model_;
-    PalindromeDeletionModel DLeft_palindrome_deletion_model_;
-    PalindromeDeletionModel DRight_palindrome_deletion_model_;
-
- public:
-    HCProbabilityRecombinationModel() = delete;
-
-    HCProbabilityRecombinationModel(const HCProbabilityRecombinationModel&) = default;
-
-    HCProbabilityRecombinationModel(HCProbabilityRecombinationModel&&) = default;
-
-    HCProbabilityRecombinationModel& operator=(const HCProbabilityRecombinationModel&) = default;
-
-    HCProbabilityRecombinationModel& operator=(HCProbabilityRecombinationModel&&) = default;
-
-    virtual ~HCProbabilityRecombinationModel() = default;
-
-    const IgGeneProbabilityModel& GetVGeneProbabilityModel() const {
-        return V_gene_probability_model_;
-    }
-
-    const IgGeneProbabilityModel& GetDGeneProbabilityModel() const {
-        return D_gene_probability_model_;
-    }
-
-    const IgGeneProbabilityModel& GetJGeneProbabilityModel() const {
-        return J_gene_probability_model_;
-    }
-
-    const NongenomicInsertionModel& GetVDNongenomicInsertionModel() const {
-        return VD_nongenomic_insertion_model_;
-    } 
-
-    const NongenomicInsertionModel& GetDJNongenomicInsertionModel() const {
-        return DJ_nongenomic_insertion_model_;
-    } 
-
-    const PalindromeDeletionModel& GetVPalindromeDeletionModel() const {
-        return V_palindrome_deletion_model_;
-    } 
-
-    const PalindromeDeletionModel& GetJPalindromeDeletionModel() const {
-        return J_palindrome_deletion_model_;
-    } 
-
-    const PalindromeDeletionModel& GetDLeftPalindromeDeletionModel() const {
-        return DLeft_palindrome_deletion_model_;
-    } 
-
-    const PalindromeDeletionModel& GetDRightPalindromeDeletionModel() const {
-        return DRight_palindrome_deletion_model_;
-    } 
-
-    void SetVGeneProbabilityModel(const IgGeneProbabilityModel V_gene_probability_model) {
-        V_gene_probability_model_ = V_gene_probability_model;
-    }
-
-    void SetDGeneProbabilityModel(const IgGeneProbabilityModel D_gene_probability_model) {
-        D_gene_probability_model_ = D_gene_probability_model;
-    }
-
-    void SetJGeneProbabilityModel(const IgGeneProbabilityModel J_gene_probability_model) {
-        J_gene_probability_model_ = J_gene_probability_model;
-    }
-
-    explicit HCProbabilityRecombinationModel(std::ifstream&);
 };
-
-std::ostream& operator<<(std::ostream&, const HCProbabilityRecombinationModel&);
