@@ -8,20 +8,26 @@ using seqan::length;
 using seqan::SeqFileIn;
 using seqan::SeqFileOut;
 
-enum IgGeneType {variable_gene, diversity_gene, join_gene};
+enum IgGeneType {unknown_gene, variable_gene, diversity_gene, join_gene};
 
 std::string IgGeneTypeToString(IgGeneType gene_type);
 
 // ----------------------------------------------------------------------------
 
 class IgGene {
+    IgGeneType gene_type_;
     CharString gene_name_;
     Dna5String gene_seq_;
 
 public:
-    IgGene() : gene_name_(), gene_seq_() { }
+    IgGene() : gene_type_(IgGeneType::unknown_gene),
+               gene_name_(),
+               gene_seq_() { }
 
-    IgGene(CharString gene_name, Dna5String gene_seq) :
+    IgGene(IgGeneType gene_type,
+           CharString gene_name,
+           Dna5String gene_seq) :
+            gene_type_(gene_type),
             gene_name_(gene_name),
             gene_seq_(gene_seq) { }
 
@@ -30,6 +36,8 @@ public:
     Dna5String seq() const { return gene_seq_; }
 
     size_t length() const { return static_cast<size_t>(seqan::length(gene_seq_)); }
+
+    IgGeneType GeneType() const { return gene_type_; }
 };
 
 typedef std::shared_ptr<IgGene> IgGenePtr;

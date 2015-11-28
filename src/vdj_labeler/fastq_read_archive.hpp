@@ -27,6 +27,7 @@ typedef std::shared_ptr<Read> ReadPtr;
 class FastqReadArchive {
     std::vector<ReadPtr> reads_;
     std::map<std::string, ReadPtr> name_read_map_;
+    std::map<ReadPtr, size_t> read_index_map_;
 
 public:
     FastqReadArchive(std::string fastq_file_fname);
@@ -43,4 +44,5 @@ public:
 
     ReadPtr GetReadByName(std::string read_name) const;
 
+    size_t GetIndexByRead(ReadPtr read_ptr) const;
 };

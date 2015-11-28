@@ -15,6 +15,11 @@
 
 #include "vdj_alignments/aligners/right_v_tail_aligner.hpp"
 #include "vdj_alignments/aligners/left_j_tail_aligner.hpp"
+#include "vdj_alignments/aligners/simple_d_aligner.hpp"
+
+#include "vdj_alignments/vdj_hits_calculators/custom_vdj_hits_calculator.hpp"
+#include "vdj_alignments/vdj_hits_calculators/info_based_vj_hits_calculator.hpp"
+#include "vdj_alignments/vdj_hits_calculators/info_based_d_hits_calculator.hpp"
 
 #include "recombination_calculator/hc_model_based_recombination_calculator.hpp"
 
@@ -56,26 +61,16 @@ int main(int, char**) {
     INFO(vj_alignment_info.size() << " alignment lines were extracted from " << vj_alignment_fname);
     INFO(vj_alignment_info);
 
-    INFO("Alignment of right tails of V starts");
-    RightVTailAligner raligner;
-    for(size_t i = 0; i < vj_alignment_info.size(); i++) {
-        auto v_alignment = raligner.ComputeAlignment(vj_alignment_info.GetVAlignmentByIndex(i));
-        std::cout << *v_alignment << std::endl;
-        std::cout << "---------" << std::endl;
-    }
-    INFO("Alignment of right tails of V ends");
-
-    INFO("Alignment of left tails of J starts");
-    LeftJTailAligner laligner;
-    for(size_t i = 0; i < vj_alignment_info.size(); i++) {
-        auto j_alignment = laligner.ComputeAlignment(vj_alignment_info.GetJAlignmentByIndex(i));
-        std::cout << *j_alignment << std::endl;
-        std::cout << "---------" << std::endl;
-    }
-    INFO("Alignment of left tails of J ends");
-
-    INFO("Alignment of D segment starts");
-    INFO("Alignment of D segment ends");
+    INFO("Best VDJ hits alignment calculation starts");
+    RightVTailAligner v_aligner;
+    InfoBasedVJHitsCalculator v_hits_calc(IgGeneType::variable_gene, reads_archive, vj_alignment_info, v_aligner);
+    SimpleDAligner d_aligner;
+    InfoBasedDHitsCalculator d_hits_calc(reads_archive, vj_alignment_info, hc_db.DiversityGenes(), d_aligner);
+    LeftJTailAligner j_aligner;
+    InfoBasedVJHitsCalculator j_hits_calc(IgGeneType::join_gene, reads_archive, vj_alignment_info, j_aligner);
+    CustomVDJHitsCalculator vdj_hits_calc(reads_archive, v_hits_calc, d_hits_calc, j_hits_calc);
+    vdj_hits_calc.ComputeHits();
+    INFO("Best VDJ hits alignment calculation ends");
 
     INFO("VDJ labeler ends");
     unsigned ms = (unsigned)pc.time_ms();
