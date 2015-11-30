@@ -18,18 +18,22 @@ class IgGene {
     IgGeneType gene_type_;
     CharString gene_name_;
     Dna5String gene_seq_;
+    size_t id_;
 
 public:
     IgGene() : gene_type_(IgGeneType::unknown_gene),
                gene_name_(),
-               gene_seq_() { }
+               gene_seq_(),
+               id_(-1) { }
 
     IgGene(IgGeneType gene_type,
            CharString gene_name,
-           Dna5String gene_seq) :
+           Dna5String gene_seq,
+           size_t id) :
             gene_type_(gene_type),
             gene_name_(gene_name),
-            gene_seq_(gene_seq) { }
+            gene_seq_(gene_seq),
+            id_(id) { }
 
     CharString name() const { return gene_name_; }
 
@@ -38,6 +42,8 @@ public:
     size_t length() const { return static_cast<size_t>(seqan::length(gene_seq_)); }
 
     IgGeneType GeneType() const { return gene_type_; }
+
+    size_t id() const { return id_; }
 };
 
 typedef std::shared_ptr<IgGene> IgGenePtr;
