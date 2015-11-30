@@ -67,6 +67,8 @@ public:
     typedef seqan::Align<Dna5String> DnaAlignment;
 
     const DnaAlignment& Alignment() const { return alignment_; }
+
+    IgGeneType GeneType() const { return positions_.ig_gene->GeneType(); }
 };
 
 std::ostream& operator<<(std::ostream &out, const IgGeneAlignment& ig_gene_alignment);

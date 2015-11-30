@@ -12,24 +12,29 @@ IgGeneAlignmentPtr IgGeneSegmentHits::operator[](size_t index) {
 }
 
 //-------------------------------------------------------------------------------
+void VDJHits::AddIgGeneAlignment(IgGeneAlignmentPtr alignment_ptr) {
+    IgGeneType gene_type = alignment_ptr->GeneType();
+    AddIgGeneAlignment(gene_type, alignment_ptr);
+}
+
 void VDJHits::AddIgGeneAlignment(IgGeneType gene_type, IgGeneAlignmentPtr alignment_ptr) {
-    if(gene_type == IgGeneType::diversity_gene)
-        v_gene_alignments_.AddHit(alignment_ptr);
+    if(gene_type == IgGeneType::variable_gene)
+        v_hits_.AddHit(alignment_ptr);
     else if(gene_type == IgGeneType::diversity_gene)
-        d_gene_alignments_.AddHit(alignment_ptr);
+        d_hits_.AddHit(alignment_ptr);
     else if(gene_type == IgGeneType::join_gene)
-        j_gene_alignments_.AddHit(alignment_ptr);
+        j_hits_.AddHit(alignment_ptr);
 }
 
 IgGeneAlignmentPtr VDJHits::GetAlignmentByIndex(IgGeneType gene_type, size_t index) {
     if(gene_type == IgGeneType::variable_gene) {
-        assert(index < v_gene_alignments_.size());
-        return v_gene_alignments_[index];
+        assert(index < v_hits_.size());
+        return v_hits_[index];
     }
     else if(gene_type == IgGeneType::diversity_gene) {
-        assert(index < d_gene_alignments_.size());
-        return d_gene_alignments_[index];
+        assert(index < d_hits_.size());
+        return d_hits_[index];
     }
-    assert(index < j_gene_alignments_.size());
-    return j_gene_alignments_[index];
+    assert(index < j_hits_.size());
+    return j_hits_[index];
 }

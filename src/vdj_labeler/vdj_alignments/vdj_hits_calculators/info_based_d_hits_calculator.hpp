@@ -11,7 +11,9 @@ class InfoBasedDHitsCalculator : public IgGeneHitsCalculator {
     GeneSegmentAligner& d_gene_aligner_;
 
     IgGeneAlignmentPositions ComputeDAlignmentPositions(IgGeneAlignmentPositions v_positions,
-                                                        IgGeneAlignmentPositions j_positions);
+                                                        IgGeneAlignmentPositions j_positions,
+                                                        IgGenePtr gene_ptr,
+                                                        ReadPtr read_ptr);
 
     bool DAlignmentIsGood(IgGeneAlignmentPtr d_alignment);
 
