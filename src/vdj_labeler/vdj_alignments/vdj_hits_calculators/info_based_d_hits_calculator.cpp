@@ -6,6 +6,8 @@ IgGeneAlignmentPositions InfoBasedDHitsCalculator::ComputeDAlignmentPositions(Ig
                                                                               IgGeneAlignmentPositions j_positions,
                                                                               IgGenePtr gene_ptr,
                                                                               ReadPtr read_ptr) {
+    //cout << "V alignment positions: " << v_positions << endl;
+    //cout << "J alignment positions: " << j_positions << endl;
     AlignmentPositions alignment_pos(make_pair(v_positions.alignment.query_pos.second,
                                                j_positions.alignment.query_pos.first),
                                     make_pair(0, length(gene_ptr->seq())));
@@ -13,8 +15,8 @@ IgGeneAlignmentPositions InfoBasedDHitsCalculator::ComputeDAlignmentPositions(Ig
 }
 
 bool InfoBasedDHitsCalculator::DAlignmentIsGood(IgGeneAlignmentPtr d_alignment) {
-    assert(false);
-    return false;
+    //assert(false);
+    return d_alignment != NULL;
 }
 
 IgGeneSegmentHitsPtr InfoBasedDHitsCalculator::ComputeHits(ReadPtr read_ptr) {
@@ -31,5 +33,6 @@ IgGeneSegmentHitsPtr InfoBasedDHitsCalculator::ComputeHits(ReadPtr read_ptr) {
         if(DAlignmentIsGood(d_alignment))
             d_hits_ptr->AddHit(d_alignment);
     }
+    assert(false);
     return d_hits_ptr;
 }

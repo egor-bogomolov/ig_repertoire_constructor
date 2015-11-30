@@ -14,12 +14,11 @@ using namespace seqan;
 IgGeneAlignmentPtr RightVTailAligner::ComputeAlignment(IgGeneAlignmentPositions alignment_positions) {
     Align<Dna5String> align;
     resize(rows(align), 2);
-    cout << length(alignment_positions.ig_gene->seq()) << " " << alignment_positions.alignment.query_pos.second << endl;
+    //cout << length(alignment_positions.ig_gene->seq()) << " " << alignment_positions.alignment.query_pos.second << endl;
     if(length(alignment_positions.ig_gene->seq()) == alignment_positions.alignment.subject_pos.second)
         return IgGeneAlignmentPtr(new IgGeneAlignment(alignment_positions, align));
-    size_t tail_length = length(alignment_positions.ig_gene->seq()) -
-            alignment_positions.alignment.subject_pos.second;
-    cout << "Tail length: " << tail_length << endl;
+    size_t tail_length = length(alignment_positions.ig_gene->seq()) - alignment_positions.alignment.subject_pos.second;
+    //cout << "Tail length: " << tail_length << endl;
     auto read_segment = prefix(
             suffix(alignment_positions.read->seq, alignment_positions.alignment.query_pos.second),
             tail_length + right_shift_);

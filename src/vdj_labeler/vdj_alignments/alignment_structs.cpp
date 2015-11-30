@@ -23,8 +23,19 @@ ostream& operator<<(ostream& out, const IgGeneAlignmentPositions& obj) {
 //-----------------------------------------------------------------------------
 
 void IgGeneAlignment::ComputeSHMsNumber() {
-    assert(false);
     num_shms_ = 0;
+    typedef seqan::Row<DnaAlignment>::Type DnaAlignmentRow;
+    DnaAlignmentRow &row1 = seqan::row(alignment_, 0);
+    DnaAlignmentRow &row2 = seqan::row(alignment_, 1);
+    assert(length(row1) == length(row2));
+    if(length(row1) == 0)
+        return;
+    std::cout << row1 << endl;
+    std::cout << row2 << endl;
+    size_t row_length = length(row1);
+    for(size_t i = 0; i < row_length; i++)
+        if(row1[i] != row2[i])
+            num_shms_++;
 }
 
 size_t IgGeneAlignment::SHMsNumber() {

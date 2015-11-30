@@ -1,5 +1,7 @@
 #include "custom_vdj_hits_calculator.hpp"
 
+using namespace std;
+
 void CustomVDJHitsCalculator::AddHits(VDJHitsPtr vdj_hits, IgGeneSegmentHitsPtr ig_gene_hits) {
     for(auto it = ig_gene_hits->cbegin(); it != ig_gene_hits->cend(); it++)
         vdj_hits->AddIgGeneAlignment(*it);
@@ -16,6 +18,21 @@ VDJHitsStoragePtr CustomVDJHitsCalculator::ComputeHits() {
         AddHits(vdj_hits_ptr, d_hits);
         AddHits(vdj_hits_ptr, j_hits);
         vdj_hits_storage->AddVDJHits(vdj_hits_ptr);
+        cout << "==== Read: " << (*it)->name << ". # V alignments: " << vdj_hits_ptr->VHitsNumber() <<
+                ", # D alignments: " << vdj_hits_ptr->DHitsNumber() << ", # J alignments: " <<
+                vdj_hits_ptr->JHitsNumber() << endl;
+        cout << "== V hits: " << endl;
+        for(auto it = v_hits->cbegin(); it != v_hits->cend(); it++) {
+            cout << "----" << endl;
+            cout << **it << endl;
+            cout << "# SHMs: " << (*it)->SHMsNumber() << endl;
+        }
+        cout << "== J hits" << endl;
+        for(auto it = j_hits->cbegin(); it != j_hits->cend(); it++) {
+            cout << "----" << endl;
+            cout << **it << endl;
+            cout << "# SHMs: " << (*it)->SHMsNumber() << endl;
+        }
     }
     return vdj_hits_storage;
 }

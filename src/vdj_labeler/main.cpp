@@ -58,8 +58,8 @@ int main(int, char**) {
 
     VJAlignmentInfo vj_alignment_info(hc_db.VariableGenes(), hc_db.JoinGenes(), reads_archive);
     vj_alignment_info.ExtractAlignment(vj_alignment_fname);
-    INFO(vj_alignment_info.size() << " alignment lines were extracted from " << vj_alignment_fname);
-    INFO(vj_alignment_info);
+    //INFO(vj_alignment_info.size() << " alignment lines were extracted from " << vj_alignment_fname);
+    //INFO(vj_alignment_info);
 
     INFO("Best VDJ hits alignment calculation starts");
     RightVTailAligner v_aligner;
