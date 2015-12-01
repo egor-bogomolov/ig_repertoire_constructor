@@ -30,22 +30,27 @@ void IgGeneAlignment::ComputeSHMsNumber() {
     assert(length(row1) == length(row2));
     if(length(row1) == 0)
         return;
-    std::cout << row1 << endl;
-    std::cout << row2 << endl;
     size_t row_length = length(row1);
     for(size_t i = 0; i < row_length; i++)
         if(row1[i] != row2[i])
             num_shms_++;
 }
 
-size_t IgGeneAlignment::SHMsNumber() {
-    if(num_shms_ == size_t(-1))
-        ComputeSHMsNumber();
-    return num_shms_;
+void IgGeneAlignment::ComputeNormalizedScore() {
+    auto alignment_row = seqan::row(alignment_, 0);
+    normalized_score_ = double(score_) / double(seqan::length(alignment_row));
+}
+
+void IgGeneAlignment::RefineAlignmentPositions(AlignmentPositions alignment_positions) {
+    positions_.alignment.query_pos = alignment_positions.query_pos;
+    positions_.alignment.subject_pos = alignment_positions.subject_pos;
 }
 
 ostream& operator<<(ostream &out, const IgGeneAlignment& ig_gene_alignment) {
     out << ig_gene_alignment.Positions() << endl;
-    out << ig_gene_alignment.Alignment();
+    out << ig_gene_alignment.ConstAlignment();
+    out << "# SHMs: " << ig_gene_alignment.SHMsNumber() << endl;
+    out << "Score: " << ig_gene_alignment.Score() << ", normalized score: " <<
+            ig_gene_alignment.NormalizedScore() << endl;
     return out;
 }

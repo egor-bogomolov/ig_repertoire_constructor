@@ -16,7 +16,7 @@ IgGeneAlignmentPtr RightVTailAligner::ComputeAlignment(IgGeneAlignmentPositions 
     resize(rows(align), 2);
     //cout << length(alignment_positions.ig_gene->seq()) << " " << alignment_positions.alignment.query_pos.second << endl;
     if(length(alignment_positions.ig_gene->seq()) == alignment_positions.alignment.subject_pos.second)
-        return IgGeneAlignmentPtr(new IgGeneAlignment(alignment_positions, align));
+        return IgGeneAlignmentPtr(new IgGeneAlignment(alignment_positions, align, -1));
     size_t tail_length = length(alignment_positions.ig_gene->seq()) - alignment_positions.alignment.subject_pos.second;
     //cout << "Tail length: " << tail_length << endl;
     auto read_segment = prefix(
@@ -27,6 +27,6 @@ IgGeneAlignmentPtr RightVTailAligner::ComputeAlignment(IgGeneAlignmentPositions 
                                        alignment_positions.alignment.subject_pos.second));
     Score<int, Simple> scoringScheme(2, -1, -2, -1);
     AlignConfig<> alignConfig;
-    globalAlignment(align, scoringScheme, alignConfig);
-    return IgGeneAlignmentPtr(new IgGeneAlignment(alignment_positions, align));
+    int score = globalAlignment(align, scoringScheme, alignConfig);
+    return IgGeneAlignmentPtr(new IgGeneAlignment(alignment_positions, align, score));
 }

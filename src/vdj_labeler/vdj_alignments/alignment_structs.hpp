@@ -49,26 +49,43 @@ std::ostream& operator<<(std::ostream& out, const IgGeneAlignmentPositions& obj)
 class IgGeneAlignment {
     IgGeneAlignmentPositions positions_;
     seqan::Align<Dna5String> alignment_;
+    int score_;
     size_t num_shms_;
+    double normalized_score_;
 
     void ComputeSHMsNumber();
 
+    void ComputeNormalizedScore();
+
 public:
     IgGeneAlignment(IgGeneAlignmentPositions new_positions,
-                    seqan::Align<Dna5String> new_alignment) :
+                    seqan::Align<Dna5String> new_alignment,
+                    int score) :
             positions_(new_positions),
             alignment_(new_alignment),
-            num_shms_(size_t(-1)) { }
-
-    size_t SHMsNumber();
+            score_(score),
+            num_shms_(size_t(-1)) {
+        ComputeNormalizedScore();
+        ComputeSHMsNumber();
+    }
 
     IgGeneAlignmentPositions Positions() const { return positions_; }
 
     typedef seqan::Align<Dna5String> DnaAlignment;
 
-    const DnaAlignment& Alignment() const { return alignment_; }
+    DnaAlignment& Alignment() { return alignment_; }
+
+    const DnaAlignment& ConstAlignment() const { return alignment_; }
 
     IgGeneType GeneType() const { return positions_.ig_gene->GeneType(); }
+
+    void RefineAlignmentPositions(AlignmentPositions alignment_positions);
+
+    size_t SHMsNumber() const { return num_shms_; }
+
+    int Score() const { return score_; }
+
+    double NormalizedScore() const { return normalized_score_; }
 };
 
 std::ostream& operator<<(std::ostream &out, const IgGeneAlignment& ig_gene_alignment);

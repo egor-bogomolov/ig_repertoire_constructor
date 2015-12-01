@@ -24,7 +24,7 @@ public:
     IgGene() : gene_type_(IgGeneType::unknown_gene),
                gene_name_(),
                gene_seq_(),
-               id_(-1) { }
+               id_(size_t(-1)) { }
 
     IgGene(IgGeneType gene_type,
            CharString gene_name,

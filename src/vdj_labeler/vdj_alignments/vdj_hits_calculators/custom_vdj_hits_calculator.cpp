@@ -23,15 +23,15 @@ VDJHitsStoragePtr CustomVDJHitsCalculator::ComputeHits() {
                 vdj_hits_ptr->JHitsNumber() << endl;
         cout << "== V hits: " << endl;
         for(auto it = v_hits->cbegin(); it != v_hits->cend(); it++) {
-            cout << "----" << endl;
-            cout << **it << endl;
-            cout << "# SHMs: " << (*it)->SHMsNumber() << endl;
+            cout << **it << endl << endl;
+        }
+        cout << "== D hits" << endl;
+        for(auto it = d_hits->cbegin(); it != d_hits->cend(); it++) {
+            cout << **it << endl << endl;
         }
         cout << "== J hits" << endl;
         for(auto it = j_hits->cbegin(); it != j_hits->cend(); it++) {
-            cout << "----" << endl;
-            cout << **it << endl;
-            cout << "# SHMs: " << (*it)->SHMsNumber() << endl;
+            cout << **it << endl << endl;
         }
     }
     return vdj_hits_storage;
