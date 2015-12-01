@@ -11,6 +11,10 @@
 using namespace std;
 using namespace seqan;
 
+void RightVTailAligner::RefineAlignmentPositions(IgGeneAlignmentPtr alignment_ptr) {
+    // todo: compute alignment positions
+}
+
 IgGeneAlignmentPtr RightVTailAligner::ComputeAlignment(IgGeneAlignmentPositions alignment_positions) {
     Align<Dna5String> align;
     resize(rows(align), 2);

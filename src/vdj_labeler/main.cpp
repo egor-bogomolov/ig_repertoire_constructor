@@ -22,6 +22,7 @@
 #include "vdj_alignments/vdj_hits_calculators/info_based_d_hits_calculator.hpp"
 #include "vdj_alignments/vdj_hits_calculators/alignment_estimators/threshold_alignment_estimator.hpp"
 
+#include "recombination_generation/base_hc_recombination_generator.hpp"
 #include "recombination_calculator/hc_model_based_recombination_calculator.hpp"
 
 void create_console_logger() {
@@ -74,8 +75,16 @@ int main(int, char**) {
     LeftJTailAligner j_aligner;
     InfoBasedVJHitsCalculator j_hits_calc(IgGeneType::join_gene, reads_archive, vj_alignment_info, j_aligner);
     CustomVDJHitsCalculator vdj_hits_calc(reads_archive, v_hits_calc, d_hits_calc, j_hits_calc);
-    vdj_hits_calc.ComputeHits();
+    auto hits_storage = vdj_hits_calc.ComputeHits();
     INFO("Best VDJ hits alignment calculation ends");
+
+    INFO("Generator of VDJ recombinations starts");
+    for(auto it = hits_storage->cbegin(); it != hits_storage->cend(); it++) {
+        cout << "Read " << (*it)->Read()->name << endl;
+        BaseHCRecombinationGenerator(*it).ComputeRecombinations();
+        cout << endl << endl;
+    }
+    INFO("Generator of VDJ recombinations ends");
 
     INFO("VDJ labeler ends");
     unsigned ms = (unsigned)pc.time_ms();

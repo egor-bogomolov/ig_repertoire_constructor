@@ -61,6 +61,8 @@ public:
 
     size_t JHitsNumber() const { return j_hits_.size(); }
 
+    ReadPtr Read() const { return read_ptr_; }
+
     IgGeneAlignmentPtr GetAlignmentByIndex(IgGeneType gene_type, size_t index);
 };
 

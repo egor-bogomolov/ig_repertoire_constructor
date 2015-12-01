@@ -7,6 +7,10 @@
 using namespace std;
 using namespace seqan;
 
+void LeftJTailAligner::RefineAlignmentPositions(IgGeneAlignmentPtr alignment_ptr) {
+    // todo: compute alignment positions
+}
+
 IgGeneAlignmentPtr LeftJTailAligner::ComputeAlignment(IgGeneAlignmentPositions alignment_positions) {
     Align<Dna5String> align;
     resize(rows(align), 2);
