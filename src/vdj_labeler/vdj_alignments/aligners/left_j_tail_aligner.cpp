@@ -22,7 +22,7 @@ IgGeneAlignmentPtr LeftJTailAligner::ComputeAlignment(IgGeneAlignmentPositions a
             tail_length - left_shift_ - 1), tail_length + left_shift_);
     assignSource(row(align, 0), read_segment);
     assignSource(row(align, 1), prefix(alignment_positions.ig_gene->seq(), tail_length));
-    int score = globalAlignment(align, Score<int, Simple>(0, -1, -1));
+    int score = globalAlignment(align, Score<int, Simple>(2, -1, -3, -2));
     return IgGeneAlignmentPtr(new IgGeneAlignment(alignment_positions,
                                                   align, score));
 }

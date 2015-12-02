@@ -1,16 +1,11 @@
 #pragma once
 
-template<class Recombination, class RecombinationIterator>
+#include "../vdj_alignments/vdj_hits.hpp"
+
+template<class Recombination, class RecombinationStoragePtr>
 class AbstractRecombinationGenerator {
-
 public:
-    virtual void ComputeRecombinations() = 0;
-
-    virtual RecombinationIterator begin() = 0;
-
-    virtual RecombinationIterator end() = 0;
-
-    //virtual std::size_t size() const = 0;
+    virtual RecombinationStoragePtr ComputeRecombinations(VDJHitsPtr vdj_hits) = 0;
 
     virtual ~AbstractRecombinationGenerator() { }
 };

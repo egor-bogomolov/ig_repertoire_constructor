@@ -34,8 +34,13 @@ add_executable(vdj_labeler
                 vdj_alignments/vdj_hits_calculators/custom_vdj_hits_calculator.cpp
                 vdj_alignments/vdj_hits_calculators/info_based_vj_hits_calculator.cpp
                 vdj_alignments/vdj_hits_calculators/info_based_d_hits_calculator.cpp
+                recombination_generation/recombination_storage.cpp
+                recombination_generation/recombination_event_storage.cpp
+                recombination_generation/custom_hc_recombination_generator.cpp
+                recombination_generation/gene_events_generators/v_recombination_event_generator.cpp
+                recombination_generation/gene_events_generators/d_recombination_event_generator.cpp
+                recombination_generation/gene_events_generators/j_recombination_event_generator.cpp
                 recombination_calculator/hc_model_based_recombination_calculator.cpp
-                recombination_generation/base_hc_recombination_generator.cpp
                 model/recombination_model.cpp
                 main.cpp)
 

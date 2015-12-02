@@ -29,8 +29,6 @@ IgGeneAlignmentPtr RightVTailAligner::ComputeAlignment(IgGeneAlignmentPositions 
     assignSource(row(align, 0), read_segment);
     assignSource(row(align, 1), suffix(alignment_positions.ig_gene->seq(),
                                        alignment_positions.alignment.subject_pos.second));
-    Score<int, Simple> scoringScheme(2, -1, -2, -1);
-    AlignConfig<> alignConfig;
-    int score = globalAlignment(align, scoringScheme, alignConfig);
+    int score = globalAlignment(align, Score<int, Simple>(2, -1, -3, -2));
     return IgGeneAlignmentPtr(new IgGeneAlignment(alignment_positions, align, score));
 }

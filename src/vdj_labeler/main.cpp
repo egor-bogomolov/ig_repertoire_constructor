@@ -22,7 +22,11 @@
 #include "vdj_alignments/vdj_hits_calculators/info_based_d_hits_calculator.hpp"
 #include "vdj_alignments/vdj_hits_calculators/alignment_estimators/threshold_alignment_estimator.hpp"
 
-#include "recombination_generation/base_hc_recombination_generator.hpp"
+#include "recombination_generation/custom_hc_recombination_generator.hpp"
+#include "recombination_generation/gene_events_generators/v_recombination_event_generator.hpp"
+#include "recombination_generation/gene_events_generators/d_recombination_event_generator.hpp"
+#include "recombination_generation/gene_events_generators/j_recombination_event_generator.hpp"
+
 #include "recombination_calculator/hc_model_based_recombination_calculator.hpp"
 
 void create_console_logger() {
@@ -78,10 +82,15 @@ int main(int, char**) {
     auto hits_storage = vdj_hits_calc.ComputeHits();
     INFO("Best VDJ hits alignment calculation ends");
 
+    // just a stub
+    VRecombinationEventGenerator v_generator;
+    DRecombinationEventGenerator d_generator;
+    JRecombinationEventGenerator j_generator;
+    CustomHeavyChainRecombinationGenerator recombination_generator(v_generator, d_generator, j_generator);
     INFO("Generator of VDJ recombinations starts");
     for(auto it = hits_storage->cbegin(); it != hits_storage->cend(); it++) {
         cout << "Read " << (*it)->Read()->name << endl;
-        BaseHCRecombinationGenerator(*it).ComputeRecombinations();
+        auto recombination_storage = recombination_generator.ComputeRecombinations(*it);
         cout << endl << endl;
     }
     INFO("Generator of VDJ recombinations ends");

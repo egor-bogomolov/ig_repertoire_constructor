@@ -41,6 +41,20 @@ void IgGeneAlignment::ComputeNormalizedScore() {
     normalized_score_ = double(score_) / double(seqan::length(alignment_row));
 }
 
+void IgGeneAlignment::ComputeGapsNumber() {
+    num_gaps_ = 0;
+    typedef seqan::Row<DnaAlignment>::Type DnaAlignmentRow;
+    DnaAlignmentRow &row1 = seqan::row(alignment_, 0);
+    DnaAlignmentRow &row2 = seqan::row(alignment_, 1);
+    assert(length(row1) == length(row2));
+    if(length(row1) == 0)
+        return;
+    size_t row_length = length(row1);
+    for(size_t i = 0; i < row_length; i++)
+        if(row1[i] == '-' or row2[i] == '-')
+            num_gaps_++;
+}
+
 void IgGeneAlignment::RefineAlignmentPositions(AlignmentPositions alignment_positions) {
     positions_.alignment.query_pos = alignment_positions.query_pos;
     positions_.alignment.subject_pos = alignment_positions.subject_pos;
@@ -49,7 +63,7 @@ void IgGeneAlignment::RefineAlignmentPositions(AlignmentPositions alignment_posi
 ostream& operator<<(ostream &out, const IgGeneAlignment& ig_gene_alignment) {
     out << ig_gene_alignment.Positions() << endl;
     out << ig_gene_alignment.ConstAlignment();
-    out << "# SHMs: " << ig_gene_alignment.SHMsNumber() << endl;
+    out << "# SHMs: " << ig_gene_alignment.SHMsNumber() << ", # gaps: " << ig_gene_alignment.GapsNumber() << endl;
     out << "Score: " << ig_gene_alignment.Score() << ", normalized score: " <<
             ig_gene_alignment.NormalizedScore() << endl;
     return out;

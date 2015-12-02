@@ -50,12 +50,15 @@ class IgGeneAlignment {
     IgGeneAlignmentPositions positions_;
     seqan::Align<Dna5String> alignment_;
     int score_;
-    size_t num_shms_;
     double normalized_score_;
+    size_t num_shms_;
+    size_t num_gaps_;
+
+    void ComputeNormalizedScore();
 
     void ComputeSHMsNumber();
 
-    void ComputeNormalizedScore();
+    void ComputeGapsNumber();
 
 public:
     IgGeneAlignment(IgGeneAlignmentPositions new_positions,
@@ -64,9 +67,12 @@ public:
             positions_(new_positions),
             alignment_(new_alignment),
             score_(score),
-            num_shms_(size_t(-1)) {
+            normalized_score_(-1),
+            num_shms_(size_t(-1)),
+            num_gaps_(size_t(-1)) {
         ComputeNormalizedScore();
         ComputeSHMsNumber();
+        ComputeGapsNumber();
     }
 
     IgGeneAlignmentPositions Positions() const { return positions_; }
@@ -86,6 +92,8 @@ public:
     int Score() const { return score_; }
 
     double NormalizedScore() const { return normalized_score_; }
+
+    size_t GapsNumber() const { return num_gaps_; }
 };
 
 std::ostream& operator<<(std::ostream &out, const IgGeneAlignment& ig_gene_alignment);
