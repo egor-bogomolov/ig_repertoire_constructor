@@ -26,6 +26,7 @@
 #include "recombination_generation/gene_events_generators/v_recombination_event_generator.hpp"
 #include "recombination_generation/gene_events_generators/d_recombination_event_generator.hpp"
 #include "recombination_generation/gene_events_generators/j_recombination_event_generator.hpp"
+#include "recombination_generation/insertion_events_generators/versatile_insertion_event_generator.hpp"
 
 #include "recombination_calculator/hc_model_based_recombination_calculator.hpp"
 
@@ -86,7 +87,12 @@ int main(int, char**) {
     VRecombinationEventGenerator v_generator;
     DRecombinationEventGenerator d_generator;
     JRecombinationEventGenerator j_generator;
-    CustomHeavyChainRecombinationGenerator recombination_generator(v_generator, d_generator, j_generator);
+    VersatileInsertionGenerator insertion_generator;
+    CustomHeavyChainRecombinationGenerator recombination_generator(v_generator,
+                                                                   d_generator,
+                                                                   j_generator,
+                                                                   insertion_generator,
+                                                                   insertion_generator);
     INFO("Generator of VDJ recombinations starts");
     for(auto it = hits_storage->cbegin(); it != hits_storage->cend(); it++) {
         cout << "Read " << (*it)->Read()->name << endl;

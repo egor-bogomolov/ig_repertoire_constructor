@@ -40,6 +40,7 @@ add_executable(vdj_labeler
                 recombination_generation/gene_events_generators/v_recombination_event_generator.cpp
                 recombination_generation/gene_events_generators/d_recombination_event_generator.cpp
                 recombination_generation/gene_events_generators/j_recombination_event_generator.cpp
+                recombination_generation/insertion_events_generators/versatile_insertion_event_generator.cpp
                 recombination_calculator/hc_model_based_recombination_calculator.cpp
                 model/recombination_model.cpp
                 main.cpp)

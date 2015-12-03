@@ -27,4 +27,4 @@ public:
     CleavedIgGeneAlignment GetByIndex(size_t index);
 };
 
-typedef std::shared_ptr<IgGeneRecombinationEventStorage > IgGeneRecombinationEventStoragePtr;
+typedef std::shared_ptr<IgGeneRecombinationEventStorage> IgGeneRecombinationEventStoragePtr;
