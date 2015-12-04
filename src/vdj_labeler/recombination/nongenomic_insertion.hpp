@@ -1,11 +1,18 @@
 #pragma once
 
+#include "../fastq_read_archive.hpp"
+
 class NongenomicInsertion {
     size_t start_position_;
     size_t end_position_;
 
 public:
-    NongenomicInsertion(size_t start_position, size_t end_position) :
+    NongenomicInsertion() :
+        start_position_(size_t(-1)),
+        end_position_(size_t(-1)) { }
+
+    NongenomicInsertion(size_t start_position,
+                        size_t end_position) :
             start_position_(start_position),
             end_position_(end_position) { }
 

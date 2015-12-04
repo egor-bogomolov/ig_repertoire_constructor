@@ -27,7 +27,7 @@ void IgGeneDatabase::AddGenesFromFile(std::string filename) {
     seqan::SeqFileIn seqFileIn_reads(filename.c_str());
     readRecords(read_headers, read_seqs, seqFileIn_reads);
     for(size_t i = 0; i < read_headers.size(); i++) {
-        IgGenePtr ig_gene_ptr(new IgGene(gene_type_, read_headers[i], read_seqs[i]));
+        IgGenePtr ig_gene_ptr(new IgGene(gene_type_, read_headers[i], read_seqs[i], i));
         ig_genes_.push_back(ig_gene_ptr);
         gene_name_map_[string(toCString(read_headers[i]))] = ig_gene_ptr;
         gene_index_map_[string(toCString(read_headers[i]))] = i;

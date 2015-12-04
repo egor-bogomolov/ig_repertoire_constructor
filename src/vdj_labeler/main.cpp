@@ -20,6 +20,13 @@
 #include "vdj_alignments/vdj_hits_calculators/custom_vdj_hits_calculator.hpp"
 #include "vdj_alignments/vdj_hits_calculators/info_based_vj_hits_calculator.hpp"
 #include "vdj_alignments/vdj_hits_calculators/info_based_d_hits_calculator.hpp"
+#include "vdj_alignments/vdj_hits_calculators/alignment_estimators/threshold_alignment_estimator.hpp"
+
+#include "recombination_generation/custom_hc_recombination_generator.hpp"
+#include "recombination_generation/gene_events_generators/v_recombination_event_generator.hpp"
+#include "recombination_generation/gene_events_generators/d_recombination_event_generator.hpp"
+#include "recombination_generation/gene_events_generators/j_recombination_event_generator.hpp"
+#include "recombination_generation/insertion_events_generators/versatile_insertion_event_generator.hpp"
 
 #include "recombination_calculator/hc_model_based_recombination_calculator.hpp"
 
@@ -58,19 +65,41 @@ int main(int, char**) {
 
     VJAlignmentInfo vj_alignment_info(hc_db.VariableGenes(), hc_db.JoinGenes(), reads_archive);
     vj_alignment_info.ExtractAlignment(vj_alignment_fname);
-    INFO(vj_alignment_info.size() << " alignment lines were extracted from " << vj_alignment_fname);
-    INFO(vj_alignment_info);
+    //INFO(vj_alignment_info.size() << " alignment lines were extracted from " << vj_alignment_fname);
+    //INFO(vj_alignment_info);
 
     INFO("Best VDJ hits alignment calculation starts");
     RightVTailAligner v_aligner;
     InfoBasedVJHitsCalculator v_hits_calc(IgGeneType::variable_gene, reads_archive, vj_alignment_info, v_aligner);
     SimpleDAligner d_aligner;
-    InfoBasedDHitsCalculator d_hits_calc(reads_archive, vj_alignment_info, hc_db.DiversityGenes(), d_aligner);
+    ThresholdAlignmentEstimator d_estimator(1.0);
+    InfoBasedDHitsCalculator d_hits_calc(reads_archive,
+                                         vj_alignment_info,
+                                         hc_db.DiversityGenes(),
+                                         d_aligner, d_estimator);
     LeftJTailAligner j_aligner;
     InfoBasedVJHitsCalculator j_hits_calc(IgGeneType::join_gene, reads_archive, vj_alignment_info, j_aligner);
     CustomVDJHitsCalculator vdj_hits_calc(reads_archive, v_hits_calc, d_hits_calc, j_hits_calc);
-    vdj_hits_calc.ComputeHits();
+    auto hits_storage = vdj_hits_calc.ComputeHits();
     INFO("Best VDJ hits alignment calculation ends");
+
+    // just a stub
+    VRecombinationEventGenerator v_generator;
+    DRecombinationEventGenerator d_generator;
+    JRecombinationEventGenerator j_generator;
+    VersatileInsertionGenerator insertion_generator;
+    CustomHeavyChainRecombinationGenerator recombination_generator(v_generator,
+                                                                   d_generator,
+                                                                   j_generator,
+                                                                   insertion_generator,
+                                                                   insertion_generator);
+    INFO("Generator of VDJ recombinations starts");
+    for(auto it = hits_storage->cbegin(); it != hits_storage->cend(); it++) {
+        cout << "Read " << (*it)->Read()->name << endl;
+        auto recombination_storage = recombination_generator.ComputeRecombinations(*it);
+        cout << endl << endl;
+    }
+    INFO("Generator of VDJ recombinations ends");
 
     INFO("VDJ labeler ends");
     unsigned ms = (unsigned)pc.time_ms();

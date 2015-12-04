@@ -11,6 +11,8 @@ class CustomVDJHitsCalculator : public VDJHitsCalculator {
     IgGeneHitsCalculator& d_hits_calculator_;
     IgGeneHitsCalculator& j_hits_calculator_;
 
+    void AddHits(VDJHitsPtr vdj_hits, IgGeneSegmentHitsPtr ig_gene_hits);
+
 public:
     CustomVDJHitsCalculator(const FastqReadArchive& read_archive,
                                IgGeneHitsCalculator& v_hits_calculator,
