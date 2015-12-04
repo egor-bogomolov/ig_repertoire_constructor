@@ -16,11 +16,12 @@ using std::vector;
 using std::shared_ptr;
 
 using IgGeneDatabasePtrConst = shared_ptr<const IgGeneDatabase>;
+using HC_GenesDatabase_PtrConst = shared_ptr<const HC_GenesDatabase>;
 
 class IgGeneProbabilityModel {
     using IgGeneProbabilityVector = vector<double>;
     IgGeneProbabilityVector ig_gene_probabilities_;
-    const IgGeneDatabasePtrConst ig_gene_database_;
+    IgGeneDatabasePtrConst ig_gene_database_;
 
  public:
     IgGeneProbabilityModel() = delete;
@@ -112,14 +113,14 @@ class PalindromeDeletionModel {
     using DeletionTableVector = vector<vector<double>>;
     DeletionTableVector deletion_table_;
     vector<int> deletion_length_;
-    const IgGeneDatabasePtrConst ig_gene_database_;
+    IgGeneDatabasePtrConst ig_gene_database_;
 
  public:
     PalindromeDeletionModel() = delete;
 
     PalindromeDeletionModel(const DeletionTableVector&,
                             const vector<int>&,
-                            const IgGeneDatabasePtrConst);
+                            const IgGeneDatabasePtrConst&);
 
     PalindromeDeletionModel(const PalindromeDeletionModel&) = default;
 
@@ -161,4 +162,80 @@ class HCProbabilityRecombinationModel {
     IgGeneProbabilityModel V_gene_probability_model_;
     IgGeneProbabilityModel D_gene_probability_model_;
     IgGeneProbabilityModel J_gene_probability_model_;
+    NongenomicInsertionModel VD_nongenomic_insertion_model_;
+    NongenomicInsertionModel DJ_nongenomic_insertion_model_;
+
+    PalindromeDeletionModel V_palindrome_deletion_model_;
+    PalindromeDeletionModel J_palindrome_deletion_model_;
+    PalindromeDeletionModel DLeft_palindrome_deletion_model_;
+    PalindromeDeletionModel DRight_palindrome_deletion_model_;
+
+    HC_GenesDatabase_PtrConst HC_database;
+
+ public:
+    HCProbabilityRecombinationModel() = delete;
+
+    HCProbabilityRecombinationModel(const HCProbabilityRecombinationModel&) = default;
+
+    HCProbabilityRecombinationModel(HCProbabilityRecombinationModel&&) = default;
+
+    HCProbabilityRecombinationModel& operator=(const HCProbabilityRecombinationModel&) = default;
+
+    HCProbabilityRecombinationModel& operator=(HCProbabilityRecombinationModel&&) = default;
+
+    virtual ~HCProbabilityRecombinationModel() = default;
+
+    const IgGeneProbabilityModel& GetVGeneProbabilityModel() const {
+        return V_gene_probability_model_;
+    }
+
+    const IgGeneProbabilityModel& GetDGeneProbabilityModel() const {
+        return D_gene_probability_model_;
+    }
+
+    const IgGeneProbabilityModel& GetJGeneProbabilityModel() const {
+        return J_gene_probability_model_;
+    }
+
+    const NongenomicInsertionModel& GetVDNongenomicInsertionModel() const {
+        return VD_nongenomic_insertion_model_;
+    } 
+
+    const NongenomicInsertionModel& GetDJNongenomicInsertionModel() const {
+        return DJ_nongenomic_insertion_model_;
+    } 
+
+    const PalindromeDeletionModel& GetVPalindromeDeletionModel() const {
+        return V_palindrome_deletion_model_;
+    } 
+
+    const PalindromeDeletionModel& GetJPalindromeDeletionModel() const {
+        return J_palindrome_deletion_model_;
+    } 
+
+    const PalindromeDeletionModel& GetDLeftPalindromeDeletionModel() const {
+        return DLeft_palindrome_deletion_model_;
+    } 
+
+    const PalindromeDeletionModel& GetDRightPalindromeDeletionModel() const {
+        return DRight_palindrome_deletion_model_;
+    } 
+
+    void SetVGeneProbabilityModel(const IgGeneProbabilityModel V_gene_probability_model) {
+        V_gene_probability_model_ = V_gene_probability_model;
+    }
+
+    void SetDGeneProbabilityModel(const IgGeneProbabilityModel D_gene_probability_model) {
+        D_gene_probability_model_ = D_gene_probability_model;
+    }
+
+    void SetJGeneProbabilityModel(const IgGeneProbabilityModel J_gene_probability_model) {
+        J_gene_probability_model_ = J_gene_probability_model;
+    }
+
+    HCProbabilityRecombinationModel(std::ifstream&, const HC_GenesDatabase_PtrConst&);
+
+    HCProbabilityRecombinationModel(std::ifstream&, const HC_GenesDatabase&);
 };
+
+std::ostream& operator<<(std::ostream&, const HCProbabilityRecombinationModel&);

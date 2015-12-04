@@ -125,7 +125,7 @@ double NongenomicInsertionModel::GetTransitionProbability(
 
 PalindromeDeletionModel::PalindromeDeletionModel(const DeletionTableVector& deletion_table,
                                                  const vector<int>& deletion_length,
-                                                 const IgGeneDatabasePtrConst ig_gene_database) :
+                                                 const IgGeneDatabasePtrConst& ig_gene_database) :
         deletion_table_(deletion_table),
         deletion_length_(deletion_length),
         ig_gene_database_(ig_gene_database) { }
@@ -134,7 +134,6 @@ PalindromeDeletionModel::PalindromeDeletionModel(const DeletionTableVector& dele
 PalindromeDeletionModel::PalindromeDeletionModel(std::ifstream& in,
                                                  const IgGeneDatabasePtrConst& ig_gene_database) :
         ig_gene_database_(ig_gene_database) {
-    INFO("OK");
     assert(in.is_open());
     deletion_table_.resize(ig_gene_database -> size());
 
@@ -143,13 +142,13 @@ PalindromeDeletionModel::PalindromeDeletionModel(std::ifstream& in,
     getline(in, line);
     Tokenizer tokenizer(line);
     size_t palidrome_len_diversity = std::distance(tokenizer.begin(), tokenizer.end()) - 1;
-    vector<int> palindrome_lengths(palidrome_len_diversity);
+    deletion_length_.resize(palidrome_len_diversity);
 
     auto tokenizer_it = tokenizer.begin();
     tokenizer_it++;
 
-    for (auto it = palindrome_lengths.begin();
-             it != palindrome_lengths.end();
+    for (auto it = deletion_length_.begin();
+             it != deletion_length_.end();
              ++it, ++tokenizer_it) {
         *it = std::stoi(*tokenizer_it);
     }
@@ -163,13 +162,12 @@ PalindromeDeletionModel::PalindromeDeletionModel(std::ifstream& in,
         Tokenizer tokenizer(line);
         parsed_vector.assign(tokenizer.begin(), tokenizer.end());
         assert(parsed_vector.size() == palidrome_len_diversity + 1);
-        auto palidrome_len_it = palindrome_lengths.begin();
+        auto palidrome_len_it = 0;
         size_t index_of_current_gene = ig_gene_database -> GetIndexByName(parsed_vector.front());
-        INFO(index_of_current_gene);
         for (auto parsed_it = parsed_vector.begin() + 1;
                 parsed_it != parsed_vector.end();
                 ++parsed_it, ++palidrome_len_it) {
-            deletion_table_[index_of_current_gene][*palidrome_len_it] = std::stod(*parsed_it);
+            deletion_table_[index_of_current_gene][palidrome_len_it] = std::stod(*parsed_it);
         }
     }
 }
@@ -181,20 +179,63 @@ PalindromeDeletionModel::PalindromeDeletionModel(std::ifstream& in,
 std::ostream& operator<<(std::ostream& out, const PalindromeDeletionModel& model) {
     if (model.GetDeletionTable().empty())
         return out;
-    out << "Gene id, Length of palindrome\n";
+    out << "Gene id, Length of palindrome: ";
 
     for (int length : model.GetDeletionLength())
        out << length << " ";
     out << "\n";
 
     for (size_t i = 0; i < model.size(); ++i) {
-        out << "Gene_id: " << model.GetIgGeneDatabase() -> GetByIndex(i) -> name();
-        for (auto it = model.GetDeletionTable().at(i).cbegin();
-                it != model.GetDeletionTable().at(i).cend();
+        out << model.GetIgGeneDatabase() -> GetByIndex(i) -> name() << " ";
+        for (auto it = model.GetDeletionTable().at(i).begin();
+                it != model.GetDeletionTable().at(i).end();
                 ++it)
             out << *it << " ";
         out << "\n";
     }
     return out;
 }
+
 /**************************************************************************************************/
+
+HCProbabilityRecombinationModel::HCProbabilityRecombinationModel(std::ifstream& in,
+                                                                 const HC_GenesDatabase_PtrConst& HC_db) :
+        V_gene_probability_model_(in, make_shared<const IgGeneDatabase>(HC_db -> VariableGenes())),
+        D_gene_probability_model_(in, make_shared<const IgGeneDatabase>(HC_db -> DiversityGenes())),
+        J_gene_probability_model_(in, make_shared<const IgGeneDatabase>(HC_db -> JoinGenes())),
+        VD_nongenomic_insertion_model_(in),
+        DJ_nongenomic_insertion_model_(in),
+        V_palindrome_deletion_model_(in, make_shared<const IgGeneDatabase>(HC_db -> VariableGenes())),
+        J_palindrome_deletion_model_(in, make_shared<const IgGeneDatabase>(HC_db -> JoinGenes())),
+        DLeft_palindrome_deletion_model_(in, make_shared<const IgGeneDatabase>(HC_db -> DiversityGenes())),
+        DRight_palindrome_deletion_model_(in, make_shared<const IgGeneDatabase>(HC_db -> DiversityGenes())),
+        HC_database(HC_db) {
+}
+
+HCProbabilityRecombinationModel::HCProbabilityRecombinationModel(std::ifstream& in,
+                                                                 const HC_GenesDatabase& HC_db) :
+        HCProbabilityRecombinationModel(in, make_shared<HC_GenesDatabase>(HC_db)) { }
+
+std::ostream& operator<<(std::ostream& out, const HCProbabilityRecombinationModel& model) {
+    out << "V gene probabilities:\n";
+    out << model.GetVGeneProbabilityModel();
+    out << "\nD gene probabilities:\n";
+    out << model.GetDGeneProbabilityModel();
+    out << "\nJ gene probabilities:\n";
+    out << model.GetJGeneProbabilityModel();
+
+    out << "\nVD nongenomic insertions model:\n";
+    out << model.GetVDNongenomicInsertionModel();
+    out << "\nDJ nongenomic insertions model:\n";
+    out << model.GetDJNongenomicInsertionModel();
+
+    out << "\nV palindrome deletion model:\n";
+    out << model.GetVPalindromeDeletionModel();
+    out << "\nJ palindrome deletion model:\n";
+    out << model.GetJPalindromeDeletionModel();
+    out << "\nD left palindrome deletion model:\n";
+    out << model.GetDLeftPalindromeDeletionModel();
+    out << "\nD right palindrome deletion model:\n";
+    out << model.GetDRightPalindromeDeletionModel();
+    return out;
+}
