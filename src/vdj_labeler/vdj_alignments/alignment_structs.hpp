@@ -85,6 +85,8 @@ public:
 
     IgGeneType GeneType() const { return positions_.ig_gene->GeneType(); }
 
+    size_t GeneId() const { return positions_.ig_gene->id(); }
+
     void RefineAlignmentPositions(AlignmentPositions alignment_positions);
 
     size_t SHMsNumber() const { return num_shms_; }
