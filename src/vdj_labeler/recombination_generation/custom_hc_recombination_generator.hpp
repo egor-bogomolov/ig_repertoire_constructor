@@ -17,6 +17,13 @@ class CustomHeavyChainRecombinationGenerator :
     InsertionEventGenerator& dj_insertion_generator_;
 
     HcRecombinationStoragePtr CreateRecombinations(HcRecombinationStoragePtr recombination_storage,
+                                                   CleavedIgGeneAlignment v_gene,
+                                                   CleavedIgGeneAlignment d_gene,
+                                                   CleavedIgGeneAlignment j_gene,
+                                                   InsertionEventStoragePtr vd_insertions,
+                                                   InsertionEventStoragePtr dj_insertions);
+
+    HcRecombinationStoragePtr CreateRecombinations(HcRecombinationStoragePtr recombination_storage,
                                                    IgGeneRecombinationEventStoragePtr v_events,
                                                    IgGeneRecombinationEventStoragePtr d_events,
                                                    IgGeneRecombinationEventStoragePtr j_events);
