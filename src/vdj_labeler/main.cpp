@@ -38,6 +38,55 @@ void create_console_logger() {
     attach_logger(lg);
 }
 
+void TestRecombinationCalculator(const FastqReadArchive& reads_archive, VDJHitsStoragePtr hits_storage) {
+    size_t read_index = 3;
+    ReadPtr read_3 = reads_archive[read_index];
+    VDJHitsPtr hits_3 = (*hits_storage)[read_index];
+    INFO("Read 3. #V: " << hits_3->VHitsNumber() <<
+         ", #D: " << hits_3->DHitsNumber() <<
+         ", #J: " << hits_3->JHitsNumber());
+
+    auto v_alignment = hits_3->GetAlignmentByIndex(IgGeneType::variable_gene, 0);
+    CleavedIgGeneAlignment v_event_0(v_alignment, 0, 0, 0);
+    CleavedIgGeneAlignment v_event_1(v_alignment, 0, -1, 0);
+    CleavedIgGeneAlignment v_event_2(v_alignment, 0, -2, 0);
+    CleavedIgGeneAlignment v_event_3(v_alignment, 0, -3, 1);
+
+    auto d_alignment = hits_3->GetAlignmentByIndex(IgGeneType::diversity_gene, 0);
+    CleavedIgGeneAlignment d_event_0(d_alignment, 1, 8, 0);
+
+    auto j_alignment = hits_3->GetAlignmentByIndex(IgGeneType::join_gene, 0);
+    CleavedIgGeneAlignment j_event_0(j_alignment, 0, 0, 1);
+    CleavedIgGeneAlignment j_event_1(j_alignment, 1, 0, 0);
+
+    NongenomicInsertion vd_insertion_0(425, 441);
+    NongenomicInsertion vd_insertion_1(426, 441);
+    NongenomicInsertion vd_insertion_2(427, 441);
+    NongenomicInsertion vd_insertion_3(428, 441);
+
+    NongenomicInsertion dj_insertion_0(453, 452);
+    NongenomicInsertion dj_insertion_1(453, 453);
+
+    RecombinationStorage<HCRecombination> recombination_storage(read_3);
+    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_0, d_event_0, j_event_0,
+                                                           vd_insertion_0, dj_insertion_0));
+    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_1, d_event_0, j_event_0,
+                                                           vd_insertion_1, dj_insertion_0));
+    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_2, d_event_0, j_event_0,
+                                                           vd_insertion_2, dj_insertion_0));
+    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_3, d_event_0, j_event_0,
+                                                           vd_insertion_3, dj_insertion_0));
+    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_0, d_event_0, j_event_1,
+                                                           vd_insertion_0, dj_insertion_1));
+    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_1, d_event_0, j_event_1,
+                                                           vd_insertion_1, dj_insertion_1));
+    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_2, d_event_0, j_event_1,
+                                                           vd_insertion_2, dj_insertion_1));
+    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_3, d_event_0, j_event_1,
+                                                           vd_insertion_3, dj_insertion_1));
+    INFO(recombination_storage.size() << " recombinaions were generated");
+}
+
 int main(int, char**) {
     perf_counter pc;
     segfault_handler sh;
@@ -82,9 +131,9 @@ int main(int, char**) {
     auto hits_storage = vdj_hits_calc.ComputeHits();
     INFO("Best VDJ hits alignment calculation ends");
 
-    /*
-    // just a stub
-    VRecombinationEventGenerator v_generator;
+    size_t max_cleavage = 6;
+    size_t max_palindrome = 7;
+    VRecombinationEventGenerator v_generator(max_cleavage, max_palindrome);
     DRecombinationEventGenerator d_generator;
     JRecombinationEventGenerator j_generator;
     VersatileInsertionGenerator insertion_generator;
@@ -100,55 +149,10 @@ int main(int, char**) {
         cout << endl << endl;
     }
     INFO("Generator of VDJ recombinations ends");
-     */
 
     // test recombinations for Andrey
     INFO("Test recombination for Andrey");
-    size_t read_index = 3;
-    ReadPtr read_3 = reads_archive[read_index];
-    VDJHitsPtr hits_3 = (*hits_storage)[read_index];
-    INFO("Read 3. #V: " << hits_3->VHitsNumber() << ", #D: " << hits_3->DHitsNumber() <<
-            ", #J: " << hits_3->JHitsNumber());
-
-    auto v_alignment = hits_3->GetAlignmentByIndex(IgGeneType::variable_gene, 0);
-    CleavedIgGeneAlignment v_event_0(v_alignment, 0, 0, 0);
-    CleavedIgGeneAlignment v_event_1(v_alignment, 0, -1, 0);
-    CleavedIgGeneAlignment v_event_2(v_alignment, 0, -2, 0);
-    CleavedIgGeneAlignment v_event_3(v_alignment, 0, -3, 1);
-
-    auto d_alignment = hits_3->GetAlignmentByIndex(IgGeneType::diversity_gene, 0);
-    CleavedIgGeneAlignment d_event_0(d_alignment, 1, 8, 0);
-
-    auto j_alignment = hits_3->GetAlignmentByIndex(IgGeneType::join_gene, 0);
-    CleavedIgGeneAlignment j_event_0(j_alignment, 0, 0, 1);
-    CleavedIgGeneAlignment j_event_1(j_alignment, 1, 0, 0);
-
-    NongenomicInsertion vd_insertion_0(425, 441);
-    NongenomicInsertion vd_insertion_1(426, 441);
-    NongenomicInsertion vd_insertion_2(427, 441);
-    NongenomicInsertion vd_insertion_3(428, 441);
-
-    NongenomicInsertion dj_insertion_0(453, 452);
-    NongenomicInsertion dj_insertion_1(453, 453);
-
-    RecombinationStorage<HCRecombination> recombination_storage(read_3);
-    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_0, d_event_0, j_event_0,
-                                                           vd_insertion_0, dj_insertion_0));
-    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_1, d_event_0, j_event_0,
-                                                           vd_insertion_1, dj_insertion_0));
-    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_2, d_event_0, j_event_0,
-                                                           vd_insertion_2, dj_insertion_0));
-    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_3, d_event_0, j_event_0,
-                                                           vd_insertion_3, dj_insertion_0));
-    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_0, d_event_0, j_event_1,
-                                                           vd_insertion_0, dj_insertion_1));
-    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_1, d_event_0, j_event_1,
-                                                           vd_insertion_1, dj_insertion_1));
-    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_2, d_event_0, j_event_1,
-                                                           vd_insertion_2, dj_insertion_1));
-    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_3, d_event_0, j_event_1,
-                                                           vd_insertion_3, dj_insertion_1));
-    INFO(recombination_storage.size() << " recombinaions were generated");
+    TestRecombinationCalculator(reads_archive, hits_storage);
 
     INFO("VDJ labeler ends");
     unsigned ms = (unsigned)pc.time_ms();
