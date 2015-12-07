@@ -8,8 +8,7 @@ class RecombinationStorage {
     std::vector<Recombination> recombinations_;
 
     bool CheckConsistency(Recombination recombination) {
-        //assert(false);
-        return true;
+        return recombination.Read()->id == read_ptr_->id;
     }
 
 public:
