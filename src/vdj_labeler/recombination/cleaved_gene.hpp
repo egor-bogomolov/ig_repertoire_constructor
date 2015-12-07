@@ -6,14 +6,17 @@ class CleavedIgGeneAlignment {
     const IgGeneAlignmentPtr &gene_alignment_ptr_;
     int left_cleavage_length_;
     int right_cleavage_length_;
+    size_t num_shms_;
 
 public:
     CleavedIgGeneAlignment(IgGeneAlignmentPtr gene_alignment_ptr,
                            int left_cleavage_length,
-                           int right_cleavage_length) :
+                           int right_cleavage_length,
+                           size_t num_shms = 0) :
             gene_alignment_ptr_(gene_alignment_ptr),
             left_cleavage_length_(left_cleavage_length),
-            right_cleavage_length_(right_cleavage_length) { }
+            right_cleavage_length_(right_cleavage_length),
+            num_shms_(num_shms) { }
 
     IgGeneAlignmentPtr GeneAlignment() const { return gene_alignment_ptr_; }
 
@@ -23,7 +26,7 @@ public:
 
     int RightCleavageLength() const { return right_cleavage_length_; }
 
-    size_t SHMsNumber() const { return gene_alignment_ptr_->SHMsNumber(); }
+    size_t SHMsNumber() const { return num_shms_ + gene_alignment_ptr_->SHMsNumber(); }
 
     size_t GeneId() const { return gene_alignment_ptr_->GeneId(); }
 };
