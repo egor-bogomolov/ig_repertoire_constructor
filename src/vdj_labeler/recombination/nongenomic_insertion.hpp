@@ -20,5 +20,9 @@ public:
 
     size_t EndPosition() const { return end_position_; }
 
-    size_t length() const { return end_position_ - start_position_ + 1; }
+    size_t length() const {
+        if(end_position_ < start_position_)
+            return 0;
+        return end_position_ - start_position_ + 1;
+    }
 };
