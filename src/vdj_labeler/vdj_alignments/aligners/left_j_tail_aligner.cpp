@@ -8,7 +8,23 @@ using namespace std;
 using namespace seqan;
 
 void LeftJTailAligner::RefineAlignmentPositions(IgGeneAlignmentPtr alignment_ptr) {
-    // todo: compute alignment positions
+    // todo: debug me!
+    auto row1 = row(alignment_ptr->Alignment(), 0);
+    auto row2 = row(alignment_ptr->Alignment(), 1);
+    size_t alignment_length = length(row1);
+    // alignment can contain gaps =>
+    // alignment length and number of read or gene nucleotides participating in alignment can be different
+    size_t read_alignment_length = toSourcePosition(row1, alignment_length - 1) + 1;
+    cout << "read_alignment_length: " << read_alignment_length << endl;
+    size_t end_read_pos = alignment_ptr->Positions().alignment.query_pos.first - 1;
+    size_t start_read_pos = end_read_pos - read_alignment_length + 1;
+    // refinement gene
+    size_t gene_alignment_length = toSourcePosition(row2, alignment_length - 1) + 1;
+    size_t end_gene_pos = alignment_ptr->Positions().alignment.subject_pos.first - 1;
+    size_t start_gene_pos = end_gene_pos - gene_alignment_length + 1;
+    alignment_ptr->RefineAlignmentPositions(AlignmentPositions(
+            make_pair(start_read_pos, end_read_pos),
+            make_pair(start_gene_pos, end_gene_pos)));
 }
 
 IgGeneAlignmentPtr LeftJTailAligner::ComputeAlignment(IgGeneAlignmentPositions alignment_positions) {
@@ -16,13 +32,15 @@ IgGeneAlignmentPtr LeftJTailAligner::ComputeAlignment(IgGeneAlignmentPositions a
     resize(rows(align), 2);
     if(alignment_positions.alignment.query_pos.first == 1)
         return IgGeneAlignmentPtr(new IgGeneAlignment(alignment_positions, align, -1));
-    size_t tail_length = alignment_positions.alignment.subject_pos.first - 1;
+    size_t tail_length = alignment_positions.alignment.subject_pos.first;
     //cout << "Tail length: " << tail_length << endl;
-    auto read_segment = prefix(suffix(alignment_positions.read->seq, alignment_positions.alignment.query_pos.first -
-            tail_length - left_shift_ - 1), tail_length + left_shift_);
+    auto read_segment = prefix(
+            suffix(alignment_positions.read->seq, alignment_positions.alignment.query_pos.first -
+            tail_length - left_shift_), tail_length + left_shift_);
     assignSource(row(align, 0), read_segment);
     assignSource(row(align, 1), prefix(alignment_positions.ig_gene->seq(), tail_length));
     int score = globalAlignment(align, Score<int, Simple>(2, -1, -3, -2));
-    return IgGeneAlignmentPtr(new IgGeneAlignment(alignment_positions,
-                                                  align, score));
+    IgGeneAlignmentPtr j_alignment(new IgGeneAlignment(alignment_positions, align, score));
+    RefineAlignmentPositions(j_alignment);
+    return j_alignment;
 }
