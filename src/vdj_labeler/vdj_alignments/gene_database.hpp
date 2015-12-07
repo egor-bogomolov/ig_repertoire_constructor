@@ -79,6 +79,8 @@ public:
     IgGenePtr GetByName(std::string gene_name) const;
 
     size_t GetIndexByName(std::string gene_name) const;
+
+    size_t GetIndexByName(CharString gene_name) const;
 };
 
 std::ostream& operator<<(std::ostream &out, const IgGeneDatabase &ig_gene_db);

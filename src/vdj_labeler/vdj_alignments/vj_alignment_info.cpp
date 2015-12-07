@@ -10,10 +10,10 @@ ReadPtr VJAlignmentInfo::GetReadName(const vector<string> &splits) {
 }
 
 void VJAlignmentInfo::AddVAlignment(const std::vector<std::string> &splits, ReadPtr read) {
-    size_t start_read_pos = string_to_number<size_t>(splits[VJFinderMagicConsts::first_v_match_pos_on_read]);
-    size_t end_read_pos = string_to_number<size_t>(splits[VJFinderMagicConsts::last_v_match_pos_on_read]);
-    size_t start_gene_pos = string_to_number<size_t>(splits[VJFinderMagicConsts::first_v_match_pos_on_gene]);
-    size_t end_gene_pos = string_to_number<size_t>(splits[VJFinderMagicConsts::last_v_match_pos_on_gene]);
+    size_t start_read_pos = string_to_number<size_t>(splits[VJFinderMagicConsts::first_v_match_pos_on_read])  - 1;
+    size_t end_read_pos = string_to_number<size_t>(splits[VJFinderMagicConsts::last_v_match_pos_on_read]) - 1;
+    size_t start_gene_pos = string_to_number<size_t>(splits[VJFinderMagicConsts::first_v_match_pos_on_gene]) - 1;
+    size_t end_gene_pos = string_to_number<size_t>(splits[VJFinderMagicConsts::last_v_match_pos_on_gene]) - 1;
     string v_gene_name = splits[VJFinderMagicConsts::v_gene_name_index];
     AlignmentPositions alignment_positions(pair<size_t, size_t>(start_read_pos, end_read_pos),
                                            pair<size_t, size_t>(start_gene_pos, end_gene_pos));
@@ -23,10 +23,10 @@ void VJAlignmentInfo::AddVAlignment(const std::vector<std::string> &splits, Read
 }
 
 void VJAlignmentInfo::AddJAlignment(const std::vector<std::string> &splits, ReadPtr read) {
-    size_t start_read_pos = string_to_number<size_t>(splits[VJFinderMagicConsts::first_j_match_pos_on_read]);
-    size_t end_read_pos = string_to_number<size_t>(splits[VJFinderMagicConsts::last_j_match_pos_on_read]);
-    size_t start_gene_pos = string_to_number<size_t>(splits[VJFinderMagicConsts::first_j_match_pos_on_gene]);
-    size_t end_gene_pos = string_to_number<size_t>(splits[VJFinderMagicConsts::last_j_match_pos_on_gene]);
+    size_t start_read_pos = string_to_number<size_t>(splits[VJFinderMagicConsts::first_j_match_pos_on_read]) - 1;
+    size_t end_read_pos = string_to_number<size_t>(splits[VJFinderMagicConsts::last_j_match_pos_on_read])  - 1;
+    size_t start_gene_pos = string_to_number<size_t>(splits[VJFinderMagicConsts::first_j_match_pos_on_gene]) - 1;
+    size_t end_gene_pos = string_to_number<size_t>(splits[VJFinderMagicConsts::last_j_match_pos_on_gene]) - 1;
     string j_gene_name = splits[VJFinderMagicConsts::j_gene_name_index];
     j_segments_.push_back(IgGeneAlignmentPositions(
             AlignmentPositions(pair<size_t, size_t>(start_read_pos, end_read_pos),

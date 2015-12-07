@@ -39,4 +39,6 @@ public:
     NongenomicInsertion DJInsertion() const { return dj_insertion_; }
 
     size_t SHMsNumber() const { return v_gene_.SHMsNumber() + d_gene_.SHMsNumber() + j_gene_.SHMsNumber(); }
+
+    bool Valid() const;
 };

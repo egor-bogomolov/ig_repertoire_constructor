@@ -82,6 +82,7 @@ int main(int, char**) {
     auto hits_storage = vdj_hits_calc.ComputeHits();
     INFO("Best VDJ hits alignment calculation ends");
 
+    /*
     // just a stub
     VRecombinationEventGenerator v_generator;
     DRecombinationEventGenerator d_generator;
@@ -99,6 +100,7 @@ int main(int, char**) {
         cout << endl << endl;
     }
     INFO("Generator of VDJ recombinations ends");
+     */
 
     INFO("VDJ labeler ends");
     unsigned ms = (unsigned)pc.time_ms();

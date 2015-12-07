@@ -5,6 +5,8 @@
 class RightVTailAligner : public GeneSegmentAligner {
     size_t right_shift_;
 
+    void RefineAlignmentPositionsForEmptyAlign(IgGeneAlignmentPtr alignment_ptr);
+
     void RefineAlignmentPositions(IgGeneAlignmentPtr alignment_ptr);
 
 public:

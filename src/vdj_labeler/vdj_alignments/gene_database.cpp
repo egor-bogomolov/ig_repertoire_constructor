@@ -49,6 +49,10 @@ size_t IgGeneDatabase::GetIndexByName(std::string gene_name) const {
     return gene_index_map_.at(gene_name);
 }
 
+size_t IgGeneDatabase::GetIndexByName(CharString gene_name) const {
+    return GetIndexByName(string(toCString(gene_name)));
+}
+
 std::ostream& operator<<(std::ostream &out, const IgGeneDatabase &ig_gene_db) {
     out << "Ig genes database. Gene type: " << IgGeneTypeToString(ig_gene_db.GeneType()) << ". # records: " <<
             ig_gene_db.size() << std::endl;
