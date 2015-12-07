@@ -3,7 +3,7 @@
 #include "../vdj_alignments/alignment_structs.hpp"
 
 class CleavedIgGeneAlignment {
-    const IgGeneAlignmentPtr &gene_alignment_ptr_;
+    IgGeneAlignmentPtr gene_alignment_ptr_;
     int left_cleavage_length_;
     int right_cleavage_length_;
     size_t num_shms_;
@@ -17,6 +17,13 @@ public:
             left_cleavage_length_(left_cleavage_length),
             right_cleavage_length_(right_cleavage_length),
             num_shms_(num_shms) { }
+
+    CleavedIgGeneAlignment(const CleavedIgGeneAlignment& cleaved_gene) {
+        gene_alignment_ptr_ = cleaved_gene.gene_alignment_ptr_;
+        left_cleavage_length_ = cleaved_gene.left_cleavage_length_;
+        right_cleavage_length_ = cleaved_gene.right_cleavage_length_;
+        num_shms_ = cleaved_gene.num_shms_;
+    }
 
     IgGeneAlignmentPtr GeneAlignment() const { return gene_alignment_ptr_; }
 
