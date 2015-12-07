@@ -53,12 +53,17 @@ class IgGeneAlignment {
     double normalized_score_;
     size_t num_shms_;
     size_t num_gaps_;
+    size_t alignment_length_;
+    size_t read_alignment_length_;
+    size_t gene_alignment_length_;
 
     void ComputeNormalizedScore();
 
     void ComputeSHMsNumber();
 
     void ComputeGapsNumber();
+
+    void ComputeAlignmentLength();
 
 public:
     IgGeneAlignment(IgGeneAlignmentPositions new_positions,
@@ -73,6 +78,7 @@ public:
         ComputeNormalizedScore();
         ComputeSHMsNumber();
         ComputeGapsNumber();
+        ComputeAlignmentLength();
     }
 
     IgGeneAlignmentPositions Positions() const { return positions_; }
@@ -96,6 +102,12 @@ public:
     double NormalizedScore() const { return normalized_score_; }
 
     size_t GapsNumber() const { return num_gaps_; }
+
+    size_t AlignmentLength() const { return alignment_length_; }
+
+    size_t ReadAlignmentLength() const { return read_alignment_length_; }
+
+    size_t GeneAlignmentLength() const { return gene_alignment_length_; }
 };
 
 std::ostream& operator<<(std::ostream &out, const IgGeneAlignment& ig_gene_alignment);
