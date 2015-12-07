@@ -17,6 +17,11 @@ public:
     vdj_hits_citerator cbegin() const { return vdj_hits_.cbegin(); }
 
     vdj_hits_citerator cend() const { return vdj_hits_.cend(); }
+
+    VDJHitsPtr operator[](size_t index) const {
+        assert(index < size());
+        return vdj_hits_[index];
+    }
 };
 
 typedef std::shared_ptr<VDJHitsStorage> VDJHitsStoragePtr;
