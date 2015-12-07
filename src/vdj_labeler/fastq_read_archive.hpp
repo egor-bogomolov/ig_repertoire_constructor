@@ -11,9 +11,10 @@ using seqan::SeqFileOut;
 struct Read {
     CharString name;
     Dna5String seq;
+    size_t id;
 
-    Read(CharString new_name, Dna5String new_seq) :
-            name(new_name), seq(new_seq) { }
+    Read(CharString new_name, Dna5String new_seq, size_t new_id) :
+            name(new_name), seq(new_seq), id(new_id) { }
 
     Read() : name(), seq() { }
 };

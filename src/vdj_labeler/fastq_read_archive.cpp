@@ -17,7 +17,7 @@ FastqReadArchive::FastqReadArchive(std::string fastq_file_fname) {
     seqan::SeqFileIn seqFileIn_reads(fastq_file_fname.c_str());
     readRecords(read_headers, read_seqs, seqFileIn_reads);
     for(size_t i = 0; i < read_seqs.size(); i++) {
-        ReadPtr read_ptr(new Read(read_headers[i], read_seqs[i]));
+        ReadPtr read_ptr(new Read(read_headers[i], read_seqs[i], i));
         reads_.push_back(read_ptr);
         name_read_map_[string(toCString(read_headers[i]))] = read_ptr;
         read_index_map_[read_ptr] = i;
