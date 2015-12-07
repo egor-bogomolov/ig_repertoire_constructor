@@ -8,8 +8,8 @@ class RecombinationStorage {
     std::vector<Recombination> recombinations_;
 
     bool CheckConsistency(Recombination recombination) {
-        assert(false);
-        return false;
+        //assert(false);
+        return true;
     }
 
 public:
