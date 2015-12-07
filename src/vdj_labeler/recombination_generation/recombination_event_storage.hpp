@@ -14,7 +14,7 @@ public:
     IgGeneRecombinationEventStorage(IgGeneType gene_type) :
             gene_type_(gene_type) { }
 
-    void AddNewEvent(CleavedIgGeneAlignment new_gene_event);
+    void AddEvent(CleavedIgGeneAlignment new_gene_event);
 
     typedef std::vector<CleavedIgGeneAlignment>::const_iterator gene_segment_event_iterator;
 
