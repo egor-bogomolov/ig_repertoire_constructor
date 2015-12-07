@@ -5,6 +5,8 @@
 class LeftJTailAligner : public GeneSegmentAligner {
     size_t left_shift_;
 
+    void RefineAlignmentPositionsForEmptyAlign(IgGeneAlignmentPtr alignment_ptr);
+
     void RefineAlignmentPositions(IgGeneAlignmentPtr alignment_ptr);
 
 public:

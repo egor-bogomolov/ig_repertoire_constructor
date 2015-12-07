@@ -7,6 +7,13 @@
 using namespace std;
 using namespace seqan;
 
+void LeftJTailAligner::RefineAlignmentPositionsForEmptyAlign(IgGeneAlignmentPtr alignment_ptr) {
+    size_t old_read_first = alignment_ptr->Positions().alignment.query_pos.first - 1;
+    alignment_ptr->RefineAlignmentPositions(AlignmentPositions(
+            make_pair(old_read_first, old_read_first),
+            make_pair(size_t(-1), size_t(-1))));
+}
+
 void LeftJTailAligner::RefineAlignmentPositions(IgGeneAlignmentPtr alignment_ptr) {
     // todo: debug me!
     auto row1 = row(alignment_ptr->Alignment(), 0);
