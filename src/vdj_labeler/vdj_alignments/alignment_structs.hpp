@@ -93,6 +93,8 @@ public:
 
     size_t GeneId() const { return positions_.ig_gene->id(); }
 
+    size_t GeneLength() const { return positions_.ig_gene->length(); }
+
     void RefineAlignmentPositions(AlignmentPositions alignment_positions);
 
     size_t SHMsNumber() const { return num_shms_; }
