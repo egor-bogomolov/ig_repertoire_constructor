@@ -35,6 +35,9 @@ add_executable(vdj_labeler
                 vdj_alignments/vdj_hits_calculators/info_based_vj_hits_calculator.cpp
                 vdj_alignments/vdj_hits_calculators/info_based_d_hits_calculator.cpp
                 recombination/recombination.cpp
+                recombination_generation/gene_events_generators/shms_calculators/left_event_shms_calculator.cpp
+                recombination_generation/gene_events_generators/shms_calculators/right_event_shms_calculator.cpp
+                recombination_generation/gene_events_generators/shms_calculators/versatile_shms_calculator.cpp
                 recombination_generation/recombination_event_storage.cpp
                 recombination_generation/custom_hc_recombination_generator.cpp
                 recombination_generation/gene_events_generators/v_recombination_event_generator.cpp

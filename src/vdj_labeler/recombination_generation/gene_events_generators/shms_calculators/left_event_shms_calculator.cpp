@@ -12,7 +12,7 @@ int LeftEventSHMsCalculator::ComputeNumberPalindromeSHMs(IgGeneAlignmentPtr gene
 
 int LeftEventSHMsCalculator::ComputeNumberSHMs(IgGeneAlignmentPtr gene_alignment,
                                                int left_cleavage_length,
-                                               int right_cleavage_length) {
+                                               int) {
     if(left_cleavage_length == 0)
         return 0;
     // if gene was cleaved, number of SHMs would 0 or negative

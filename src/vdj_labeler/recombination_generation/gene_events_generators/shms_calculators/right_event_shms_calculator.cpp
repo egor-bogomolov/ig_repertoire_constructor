@@ -11,7 +11,7 @@ int RightEventSHMsCalculator::ComputeNumberPalindromeSHMs(IgGeneAlignmentPtr gen
 }
 
 int RightEventSHMsCalculator::ComputeNumberSHMs(IgGeneAlignmentPtr gene_alignment,
-                                                int left_cleavage_length,
+                                                int,
                                                 int right_cleavage_length) {
     if(right_cleavage_length == 0)
         return 0;

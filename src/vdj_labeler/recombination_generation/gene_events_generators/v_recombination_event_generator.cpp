@@ -6,8 +6,7 @@ using namespace std;
 // positive cleavage_length means cleavage
 // negative cleavage_length means palindromic insertion
 size_t VRecombinationEventGenerator::ComputeSHMsNumber(IgGeneAlignmentPtr v_alignment, int cleavage_length) {
-    assert(false);
-    return 0;
+    return shms_calculator_.ComputeNumberSHMs(v_alignment, cleavage_length, 0);
 }
 
 CleavedIgGeneAlignment VRecombinationEventGenerator::GenerateCleavageEvent(IgGeneAlignmentPtr v_alignment,
