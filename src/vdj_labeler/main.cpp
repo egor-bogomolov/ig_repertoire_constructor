@@ -140,7 +140,7 @@ int main(int, char**) {
     RightEventSHMsCalculator right_shms_calculator;
     VersatileGeneSHMsCalculator shms_calculator(left_shms_calculator, right_shms_calculator);
     VRecombinationEventGenerator v_generator(shms_calculator, max_cleavage, max_palindrome);
-    DRecombinationEventGenerator d_generator;
+    DRecombinationEventGenerator d_generator(shms_calculator, max_cleavage, max_palindrome);
     JRecombinationEventGenerator j_generator(shms_calculator, max_cleavage, max_palindrome);
     VersatileInsertionGenerator insertion_generator;
     CustomHeavyChainRecombinationGenerator recombination_generator(v_generator,
