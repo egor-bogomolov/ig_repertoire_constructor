@@ -78,3 +78,15 @@ ostream& operator<<(ostream &out, const IgGeneAlignment& ig_gene_alignment) {
             ig_gene_alignment.NormalizedScore() << endl;
     return out;
 }
+
+//-----------------------------------------------------------------
+
+seqan::Dna getRevCompl(seqan::Dna const & nucleotide) {
+    if (nucleotide == 'A')
+        return 'T';
+    if (nucleotide == 'T')
+        return 'A';
+    if (nucleotide == 'C')
+        return 'G';
+    return 'C';
+}

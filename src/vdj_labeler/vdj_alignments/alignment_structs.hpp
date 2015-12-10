@@ -119,8 +119,16 @@ public:
     size_t ReadAlignmentLength() const { return read_alignment_length_; }
 
     size_t GeneAlignmentLength() const { return gene_alignment_length_; }
+
+    const Dna5String& GeneSeq() const { return positions_.ig_gene->seq(); }
+
+    const Dna5String& ReadSeq() const { return positions_.read->seq; }
 };
 
 std::ostream& operator<<(std::ostream &out, const IgGeneAlignment& ig_gene_alignment);
 
 typedef std::shared_ptr<IgGeneAlignment> IgGeneAlignmentPtr;
+
+//----------------------------------------------------
+
+seqan::Dna getRevCompl(seqan::Dna const & nucleotide);
