@@ -18,6 +18,7 @@ VDJHitsStoragePtr CustomVDJHitsCalculator::ComputeHits() {
         AddHits(vdj_hits_ptr, d_hits);
         AddHits(vdj_hits_ptr, j_hits);
         vdj_hits_storage->AddVDJHits(vdj_hits_ptr);
+        /*
         cout << "==== Read: " << (*it)->name << ". # V alignments: " << vdj_hits_ptr->VHitsNumber() <<
                 ", # D alignments: " << vdj_hits_ptr->DHitsNumber() << ", # J alignments: " <<
                 vdj_hits_ptr->JHitsNumber() << endl;
@@ -33,6 +34,7 @@ VDJHitsStoragePtr CustomVDJHitsCalculator::ComputeHits() {
         for(auto it = j_hits->cbegin(); it != j_hits->cend(); it++) {
             cout << **it << endl << endl;
         }
+        */
     }
     return vdj_hits_storage;
 }

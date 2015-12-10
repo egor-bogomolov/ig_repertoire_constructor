@@ -18,7 +18,8 @@ CleavedIgGeneAlignment VRecombinationEventGenerator::GenerateCleavageEvent(IgGen
 void VRecombinationEventGenerator::GenerateCleavageEvents(IgGeneAlignmentPtr v_alignment,
                                                           IgGeneRecombinationEventStoragePtr v_events) {
     size_t cleavage_length = min<size_t>(max_cleavage_, v_alignment->ReadAlignmentLength());
-    for(size_t clen = 1; clen < cleavage_length; clen++)
+    cout << "Max cleavage length in V: " << cleavage_length << endl;
+    for(size_t clen = 1; clen <= cleavage_length; clen++)
         v_events->AddEvent(GenerateCleavageEvent(v_alignment, clen));
 }
 
