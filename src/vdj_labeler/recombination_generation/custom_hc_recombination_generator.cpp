@@ -49,10 +49,10 @@ HcRecombinationStoragePtr CustomHeavyChainRecombinationGenerator::ComputeRecombi
             for(size_t ji = 0; ji < num_j_hits; ji++) {
                 auto j_alignment = vdj_hits->GetAlignmentByIndex(IgGeneType::join_gene, ji);
                 auto j_events = j_events_generator_.ComputeEvents(j_alignment);
-                cout << "V. " << *v_alignment << endl;
-                cout << "D. " << *d_alignment << endl;
-                cout << "J. " << *j_alignment << endl;
-                cout << "-----------------------------" << endl;
+                //cout << "V. " << *v_alignment << endl;
+                //cout << "D. " << *d_alignment << endl;
+                //cout << "J. " << *j_alignment << endl;
+                //cout << "-----------------------------" << endl;
                 recombination_storage = CreateRecombinations(recombination_storage, v_events, d_events, j_events);
             }
         }
