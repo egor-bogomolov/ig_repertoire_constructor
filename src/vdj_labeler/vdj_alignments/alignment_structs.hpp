@@ -40,6 +40,15 @@ struct IgGeneAlignmentPositions {
             alignment(new_alignment),
             ig_gene(new_ig_gene),
             read(new_read) { }
+
+    size_t GeneStartPos() const { return alignment.subject_pos.first; }
+
+    size_t GeneEndPos() const { return alignment.subject_pos.second; }
+
+    size_t ReadStartPos() const { return alignment.query_pos.first; }
+
+    size_t ReadEndPos() const { return alignment.query_pos.second; }
+
 };
 
 std::ostream& operator<<(std::ostream& out, const IgGeneAlignmentPositions& obj);

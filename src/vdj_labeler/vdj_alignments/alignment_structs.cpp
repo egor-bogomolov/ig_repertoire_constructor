@@ -59,8 +59,10 @@ void IgGeneAlignment::ComputeAlignmentLength() {
     auto row1 = seqan::row(alignment_, 0);
     auto row2 = seqan::row(alignment_, 1);
     alignment_length_ = length(row1);
-    read_alignment_length_ = seqan::toSourcePosition(row1, alignment_length_ - 1) + 1;
-    gene_alignment_length_ = seqan::toSourcePosition(row2, alignment_length_ - 1) + 1;
+    read_alignment_length_ = seqan::toSourcePosition(row1, alignment_length_ - 1) -
+            seqan::toSourcePosition(row1, 0) + 1;
+    gene_alignment_length_ = seqan::toSourcePosition(row2, alignment_length_ - 1) -
+            seqan::toSourcePosition(row2, 0) + 1;
 }
 
 void IgGeneAlignment::RefineAlignmentPositions(AlignmentPositions alignment_positions) {
