@@ -60,6 +60,9 @@ class IgGeneProbabilityModel {
     IgGeneProbabilityModel(std::ifstream&, const IgGeneDatabasePtrConst&);
 
     IgGeneProbabilityModel(std::ifstream&, const IgGeneDatabase&);
+
+    //double GetProbabilityByGenId(const IgGene&) const;
+    double GetProbabilityByGenId(const size_t&) const;
 };
 
 std::ostream& operator<<(std::ostream&, const IgGeneProbabilityModel&);
@@ -87,7 +90,7 @@ class NongenomicInsertionModel {
 
     const vector<double>& GetInsertionProbabilities() const { return insertion_probabilities_; }
 
-    double GetInsertionProbabilityByLength(const unsigned int) const;
+    double GetInsertionProbabilityByLength(const long unsigned int) const;
 
     const NongenomicInsertionMatrix& GetTransitionMatrix() const { return transition_matrix_; }
 
@@ -154,6 +157,8 @@ class PalindromeDeletionModel {
     PalindromeDeletionModel(std::ifstream&, const IgGeneDatabasePtrConst&);
 
     PalindromeDeletionModel(std::ifstream&, const IgGeneDatabase&);
+
+    double GetDeletionProbability(const size_t& gene_id, const int deletion_length) const;
 };
 
 std::ostream& operator<<(std::ostream&, const PalindromeDeletionModel&);
@@ -236,6 +241,10 @@ class HCProbabilityRecombinationModel {
     HCProbabilityRecombinationModel(std::ifstream&, const HC_GenesDatabase_PtrConst&);
 
     HCProbabilityRecombinationModel(std::ifstream&, const HC_GenesDatabase&);
+
+    //double GetProbabilityByGenId(const IgGene& ig_gene) const;
+    double GetProbabilityByGenId(enum IgGeneType ig_gene_type,
+            const size_t& id) const;
 };
 
 std::ostream& operator<<(std::ostream&, const HCProbabilityRecombinationModel&);

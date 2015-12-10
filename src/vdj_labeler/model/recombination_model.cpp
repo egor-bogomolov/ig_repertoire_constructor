@@ -50,6 +50,15 @@ std::ostream& operator<<(std::ostream& out, const IgGeneProbabilityModel& model)
     return out;
 }
 
+//double IgGeneProbabilityModel::GetProbabilityByGenId(const IgGene& ig_gene) const {
+//    return ig_gene_probabilities_[ig_gene_database_ -> 
+//        GetIndexByName(string(seqan::toCString(ig_gene.name())))];
+//}
+
+double IgGeneProbabilityModel::GetProbabilityByGenId(const size_t& id) const {
+    assert(ig_gene_probabilities_.size() > id);
+    return ig_gene_probabilities_[id];
+}
 
 /************************************************************************************************/
 
@@ -84,7 +93,7 @@ NongenomicInsertionModel::NongenomicInsertionModel(std::ifstream& in) {
 }
 
 double NongenomicInsertionModel::GetInsertionProbabilityByLength(
-        const unsigned int ins_length) const {
+        const long unsigned int ins_length) const {
     assert(ins_length < insertion_probabilities_.size());
     return insertion_probabilities_[ins_length];
 }
@@ -196,6 +205,12 @@ std::ostream& operator<<(std::ostream& out, const PalindromeDeletionModel& model
     return out;
 }
 
+double PalindromeDeletionModel::GetDeletionProbability(const size_t& gene_id, const int deletion_length) const {
+    auto it_deletion_length = std::find(deletion_length_.begin(), deletion_length_.end(), deletion_length);
+    assert(it_deletion_length != deletion_length_.end());
+    return deletion_table_[gene_id][it_deletion_length - deletion_length_.begin()];
+}
+
 /**************************************************************************************************/
 
 HCProbabilityRecombinationModel::HCProbabilityRecombinationModel(std::ifstream& in,
@@ -238,4 +253,28 @@ std::ostream& operator<<(std::ostream& out, const HCProbabilityRecombinationMode
     out << "\nD right palindrome deletion model:\n";
     out << model.GetDRightPalindromeDeletionModel();
     return out;
+}
+
+//double HCProbabilityRecombinationModel::GetProbabilityByGenId(const IgGene& ig_gene) const {
+//    assert(ig_gene.GeneType() != unknown_gene);
+//    std::shared_ptr<const IgGeneProbabilityModel> gene_type_probability_model;
+//    if (ig_gene.GeneType() == variable_gene)
+//        gene_type_probability_model = make_shared<const IgGeneProbabilityModel>(V_gene_probability_model_);
+//    else if (ig_gene.GeneType() == diversity_gene)
+//        gene_type_probability_model = make_shared<const IgGeneProbabilityModel>(D_gene_probability_model_);
+//    else
+//        gene_type_probability_model = make_shared<const IgGeneProbabilityModel>(J_gene_probability_model_);
+//
+//    return gene_type_probability_model -> GetProbabilityByGenId(ig_gene);
+//}
+
+double HCProbabilityRecombinationModel::GetProbabilityByGenId(enum IgGeneType ig_gene_type,
+        const size_t& id) const {
+    assert(ig_gene_type != unknown_gene);
+    if (ig_gene_type == variable_gene)
+        return V_gene_probability_model_.GetProbabilityByGenId(id);
+    if (ig_gene_type == diversity_gene)
+        return D_gene_probability_model_.GetProbabilityByGenId(id);
+    // ig_gene_type == join_gene
+    return J_gene_probability_model_.GetProbabilityByGenId(id);
 }

@@ -6,6 +6,6 @@
 template<class Recombination>
 class AbstractRecombinationCalculator {
 public:
-    virtual double ComputeAssemblyProbability(Recombination recombination) = 0;
+    virtual double ComputeAssemblyProbability(const Recombination& recombination) const = 0;
     virtual ~AbstractRecombinationCalculator() { }
 };

@@ -6,8 +6,8 @@ class HCModelBasedRecombinationCalculator : public AbstractRecombinationCalculat
     HCProbabilityRecombinationModel model_;
 
 public:
-    HCModelBasedRecombinationCalculator(HCProbabilityRecombinationModel model) :
+    HCModelBasedRecombinationCalculator(const HCProbabilityRecombinationModel& model) :
             model_(model) { }
 
-    double ComputeAssemblyProbability(HCRecombination recombination);
+    double ComputeAssemblyProbability(const HCRecombination& recombination) const;
 };
