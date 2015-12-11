@@ -21,7 +21,7 @@ void VRecombinationEventGenerator::GenerateCleavageEvents(IgGeneAlignmentPtr v_a
     if(v_alignment->IsEmpty())
         return;
     size_t cleavage_length = min<size_t>(max_cleavage_, v_alignment->ReadAlignmentLength());
-    cout << "Max cleavage length in V: " << cleavage_length << endl;
+    //cout << "Max cleavage length in V: " << cleavage_length << endl;
     for(size_t clen = 1; clen <= cleavage_length; clen++)
         v_events->AddEvent(GenerateCleavageEvent(v_alignment, clen));
 }

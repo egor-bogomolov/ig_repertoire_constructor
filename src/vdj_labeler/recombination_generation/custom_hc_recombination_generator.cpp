@@ -12,6 +12,8 @@ HcRecombinationStoragePtr CustomHeavyChainRecombinationGenerator::CreateRecombin
     for(auto vd_it = vd_insertions->cbegin(); vd_it != vd_insertions->cend(); vd_it++)
         for(auto dj_it = dj_insertions->cbegin(); dj_it != dj_insertions->cend(); dj_it++) {
             HCRecombination recombination(recombination_storage->Read(), v_gene, d_gene, j_gene, *vd_it, *dj_it);
+            cout << recombination << endl;
+            cout << "---------------------------" << endl;
             if(recombination.Valid())
                 recombination_storage->AddRecombination(recombination);
         }
@@ -23,6 +25,9 @@ HcRecombinationStoragePtr CustomHeavyChainRecombinationGenerator::CreateRecombin
         IgGeneRecombinationEventStoragePtr v_events,
         IgGeneRecombinationEventStoragePtr d_events,
         IgGeneRecombinationEventStoragePtr j_events) {
+    cout << v_events->size() << " V events were computed" << endl;
+    cout << d_events->size() << " D events were computed" << endl;
+    cout << j_events->size() << " J events were computed" << endl;
     for(auto vit = v_events->cbegin(); vit != v_events->cend(); vit++)
         for(auto dit = d_events->cbegin(); dit != d_events->cend(); dit++) {
             auto vd_insertions = vd_insertion_generator_.ComputeInsertionEvents(*vit, *dit);
@@ -40,6 +45,7 @@ HcRecombinationStoragePtr CustomHeavyChainRecombinationGenerator::ComputeRecombi
     size_t num_v_hits = vdj_hits->VHitsNumber();
     size_t num_d_hits = vdj_hits->DHitsNumber();
     size_t num_j_hits = vdj_hits->JHitsNumber();
+    cout << "Generation of recombinations for read " << *(vdj_hits->Read()) << endl;
     for(size_t vi = 0; vi < num_v_hits; vi++) {
         auto v_alignment = vdj_hits->GetAlignmentByIndex(IgGeneType::variable_gene, vi);
         auto v_events = v_events_generator_.ComputeEvents(v_alignment);
@@ -52,7 +58,7 @@ HcRecombinationStoragePtr CustomHeavyChainRecombinationGenerator::ComputeRecombi
                 //cout << "V. " << *v_alignment << endl;
                 //cout << "D. " << *d_alignment << endl;
                 //cout << "J. " << *j_alignment << endl;
-                //cout << "-----------------------------" << endl;
+                cout << "-----------------------------" << endl;
                 recombination_storage = CreateRecombinations(recombination_storage, v_events, d_events, j_events);
             }
         }
