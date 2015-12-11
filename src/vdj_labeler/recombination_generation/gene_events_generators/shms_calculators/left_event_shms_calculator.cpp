@@ -34,7 +34,7 @@ int LeftEventSHMsCalculator::ComputeNumberPalindromeSHMs(IgGeneAlignmentPtr gene
     for(size_t i = 0; i < palindrome_length; i++) {
         size_t gene_pos = i;
         size_t read_pos = gene_alignment->Positions().ReadStartPos() - 1 - i;
-        if(getRevCompl(gene_alignment->GeneSeq()[gene_pos]) == gene_alignment->ReadSeq()[read_pos])
+        if(getRevCompl(gene_alignment->GeneSeq()[gene_pos]) != gene_alignment->ReadSeq()[read_pos])
             num_shms++;
     }
     cout << "#SHMs: " << num_shms << endl;

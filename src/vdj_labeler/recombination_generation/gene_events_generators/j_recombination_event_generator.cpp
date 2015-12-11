@@ -14,6 +14,9 @@ CleavedIgGeneAlignment JRecombinationEventGenerator::GenerateCleavageEvent(IgGen
 
 void JRecombinationEventGenerator::GenerateCleavageEvents(IgGeneAlignmentPtr j_alignment,
                                                           IgGeneRecombinationEventStoragePtr j_events) {
+    // if alignment is empty, cleavage can not be observed
+    if(j_alignment->IsEmpty())
+        return;
     size_t max_cleavage_length = min<size_t>(max_cleavage_, j_alignment->ReadAlignmentLength());
     cout << "Max J cleavage: " << max_cleavage_length << endl;
     for(size_t clen = 1; clen <= max_cleavage_length; clen++)

@@ -12,6 +12,8 @@ using namespace std;
 using namespace seqan;
 
 void RightVTailAligner::RefineAlignmentPositionsForEmptyAlign(IgGeneAlignmentPtr alignment_ptr) {
+    if(alignment_ptr->IsEmpty())
+        return;
     size_t old_read_second = alignment_ptr->Positions().alignment.query_pos.second + 1;
     size_t old_gene_second = length(alignment_ptr->Positions().ig_gene->seq());
     alignment_ptr->RefineAlignmentPositions(AlignmentPositions(

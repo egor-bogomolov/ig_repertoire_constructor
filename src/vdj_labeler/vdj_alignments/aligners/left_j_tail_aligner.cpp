@@ -8,6 +8,8 @@ using namespace std;
 using namespace seqan;
 
 void LeftJTailAligner::RefineAlignmentPositionsForEmptyAlign(IgGeneAlignmentPtr alignment_ptr) {
+    if(alignment_ptr->IsEmpty())
+        return;
     size_t old_read_first = alignment_ptr->Positions().alignment.query_pos.first - 1;
     alignment_ptr->RefineAlignmentPositions(AlignmentPositions(
             make_pair(old_read_first, old_read_first),

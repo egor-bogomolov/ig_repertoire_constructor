@@ -25,4 +25,7 @@ public:
             return 0;
         return end_position_ - start_position_ + 1;
     }
+
+    bool Valid() const { return start_position_ <= end_position_ or
+                start_position_ - end_position_ <= 1; }
 };

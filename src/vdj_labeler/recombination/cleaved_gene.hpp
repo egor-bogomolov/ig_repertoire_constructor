@@ -36,4 +36,10 @@ public:
     size_t SHMsNumber() const { return num_shms_ + gene_alignment_ptr_->SHMsNumber(); }
 
     size_t GeneId() const { return gene_alignment_ptr_->GeneId(); }
+
+    size_t StartReadPosition() const { return size_t(int(gene_alignment_ptr_->Positions().ReadStartPos()) +
+                                                             left_cleavage_length_); }
+
+    size_t EndReadPosition() const { return size_t(int(gene_alignment_ptr_->Positions().ReadEndPos()) +
+                                                           right_cleavage_length_ * -1); }
 };

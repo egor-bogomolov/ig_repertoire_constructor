@@ -2,6 +2,9 @@
 
 InsertionEventStoragePtr VersatileInsertionGenerator::ComputeInsertionEvents(
         CleavedIgGeneAlignment left_gene_alignment, CleavedIgGeneAlignment right_gene_alignment) {
-    assert(false);
-    return InsertionEventStoragePtr(new InsertionEventStorage());
+    InsertionEventStoragePtr insertions(new InsertionEventStorage());
+    NongenomicInsertion insertion(left_gene_alignment.EndReadPosition() + 1,
+            right_gene_alignment.StartReadPosition() - 1);
+    insertions->AddInsertion(insertion);
+    return insertions;
 }

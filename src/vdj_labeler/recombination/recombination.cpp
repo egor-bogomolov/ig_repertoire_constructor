@@ -1,6 +1,5 @@
 #include "recombination.hpp"
 
 bool HCRecombination::Valid() const {
-    assert(false);
-    return false;
+    return vd_insertion_.Valid() and dj_insertion_.Valid();
 }
