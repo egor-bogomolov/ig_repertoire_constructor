@@ -24,7 +24,7 @@ int RightEventSHMsCalculator::ComputeNumberCleavedSHMs(IgGeneAlignmentPtr gene_a
     for(size_t i = start_alignment_cleavage_pos; i < seqan::length(row2); i++)
         if(row1[i] != row2[i])
             num_shms++;
-    cout << "End alignment position: " << start_alignment_cleavage_pos << ", # shms: " << num_shms << endl;
+    cout << "End alignment position: " << start_alignment_cleavage_pos << ", # shms: " << -1 * num_shms << endl;
     cout << "------------------------------" << endl;
     return -1 * num_shms;
 }
