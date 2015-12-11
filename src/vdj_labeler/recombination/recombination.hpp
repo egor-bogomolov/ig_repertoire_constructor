@@ -42,3 +42,5 @@ public:
 
     bool Valid() const;
 };
+
+std::ostream& operator<<(std::ostream& out, const HCRecombination& hc_recombination);

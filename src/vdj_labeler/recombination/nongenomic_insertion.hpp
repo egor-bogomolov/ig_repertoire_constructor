@@ -29,3 +29,5 @@ public:
     bool Valid() const { return start_position_ <= end_position_ or
                 start_position_ - end_position_ <= 1; }
 };
+
+std::ostream& operator<<(std::ostream& out, const NongenomicInsertion& insertion);

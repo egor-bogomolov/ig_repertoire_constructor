@@ -43,3 +43,5 @@ public:
     size_t EndReadPosition() const { return size_t(int(gene_alignment_ptr_->Positions().ReadEndPos()) +
                                                            right_cleavage_length_ * -1); }
 };
+
+std::ostream& operator<<(std::ostream &out, const CleavedIgGeneAlignment& cleaved_gene);
