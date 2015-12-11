@@ -5,13 +5,16 @@ using std::cout;
 using std::endl;
 
 int RightEventSHMsCalculator::ComputeNumberCleavedSHMs(IgGeneAlignmentPtr gene_alignment, size_t cleavage_length) {
-    //cout << "Computation of # SHMs in right cleavage" << endl;
-    //cout << *gene_alignment << endl;
-    size_t abs_start_cleavage_pos = gene_alignment->Positions().ReadEndPos() - cleavage_length + 1;
+    size_t alignment_cleavage = gene_alignment->GeneLength() - 1 - gene_alignment->Positions().GeneEndPos();
+    assert(cleavage_length >= alignment_cleavage);
+    cout << "Computation of # SHMs in right cleavage of length " << cleavage_length << endl;
+    cout << *gene_alignment << endl;
+    size_t rel_cleavage_length = cleavage_length - alignment_cleavage;
+    size_t abs_start_cleavage_pos = gene_alignment->Positions().ReadEndPos() - rel_cleavage_length + 1;
     size_t rel_start_cleavage_pos = abs_start_cleavage_pos - gene_alignment->Positions().ReadStartPos();
-    //cout << "Cleavage length: " << cleavage_length <<
-    //", abs start cleavage position: " << abs_start_cleavage_pos <<
-    //", rel start cleavage position: " << rel_start_cleavage_pos << endl;
+    cout << "Cleavage length: " << cleavage_length << ", rel cleavage length: " << rel_cleavage_length <<
+        ", abs start cleavage position: " << abs_start_cleavage_pos <<
+        ", rel start cleavage position: " << rel_start_cleavage_pos << endl;
     auto alignment = gene_alignment->Alignment();
     typedef seqan::Row<IgGeneAlignment::DnaAlignment>::Type DnaAlignmentRow;
     DnaAlignmentRow &row1 = seqan::row(alignment, 0);
@@ -21,8 +24,8 @@ int RightEventSHMsCalculator::ComputeNumberCleavedSHMs(IgGeneAlignmentPtr gene_a
     for(size_t i = start_alignment_cleavage_pos; i < seqan::length(row2); i++)
         if(row1[i] != row2[i])
             num_shms++;
-    //cout << "End alignment position: " << start_alignment_cleavage_pos << ", # shms: " << num_shms << endl;
-    //cout << "------------------------------" << endl;
+    cout << "End alignment position: " << start_alignment_cleavage_pos << ", # shms: " << num_shms << endl;
+    cout << "------------------------------" << endl;
     return -1 * num_shms;
 }
 

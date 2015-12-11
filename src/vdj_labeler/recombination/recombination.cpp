@@ -8,7 +8,8 @@ bool HCRecombination::Valid() const {
 }
 
 std::ostream& operator<<(std::ostream& out, const HCRecombination& hc_recombination) {
-    out << "HC recombination, # SHMs: " << hc_recombination.SHMsNumber() << std::endl;
+    out << "HC recombination, # SHMs: " << hc_recombination.SHMsNumber() << ", valid: " <<
+            hc_recombination.Valid() << std::endl;
     out << "V event: " << std::endl;
     out << hc_recombination.V() << std::endl;
     out << "D event: " << std::endl;

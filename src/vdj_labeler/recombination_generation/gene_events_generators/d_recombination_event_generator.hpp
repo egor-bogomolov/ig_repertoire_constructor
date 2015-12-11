@@ -8,7 +8,9 @@ class DRecombinationEventGenerator : public IgGeneRecombinationEventsGenerator {
     size_t max_cleavage_;
     size_t max_palindrome_;
 
-    int ComputeLeftEvent(IgGeneAlignmentPtr d_alignment);
+    int ComputeMinLeftBound(IgGeneAlignmentPtr d_alignment);
+
+    int ComputeMinRightBound(IgGeneAlignmentPtr d_alignment);
 
     size_t ComputeMaxRightConsistentCleavage(IgGeneAlignmentPtr d_alignment,
                                           int left_event_size);
