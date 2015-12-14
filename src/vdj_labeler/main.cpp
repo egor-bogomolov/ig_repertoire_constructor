@@ -90,13 +90,19 @@ void TestRecombinationCalculator(const FastqReadArchive& reads_archive, VDJHitsS
     INFO(recombination_storage.size() << " recombinaions were generated");
 }
 
-int main(int, char**) {
+int main(int argc, char** argv) {
+    if(argc != 3) {
+        INFO("Invalid input parameters");
+        INFO("vdj_labeler read.fastq vj_finder_output.csv");
+        return 1;
+    }
+
     perf_counter pc;
     segfault_handler sh;
     create_console_logger();
 
-    std::string fastq_reads_fname = "src/vdj_labeler/test/vdj_labeling.fastq";
-    std::string vj_alignment_fname = "src/vdj_labeler/test/vdj_labeling.csv";
+    std::string fastq_reads_fname(argv[1]); //"src/vdj_labeler/test/vdj_labeling.fastq";
+    std::string vj_alignment_fname(argv[2]); //"src/vdj_labeler/test/vdj_labeling.csv";
     std::string v_germline_genes_fname = "src/fast_ig_tools/germline/human/IGHV.fa";
     std::string d_germline_genes_fname = "src/fast_ig_tools/germline/human/IGHD.fa";
     std::string j_germline_genes_fname = "src/fast_ig_tools/germline/human/IGHJ.fa";

@@ -1,1 +1,1 @@
-./build/release/bin/vdj_labeler
+./build/release/bin/vdj_labeler src/vdj_labeler/test/vdj_labeling.fastq src/vdj_labeler/test/vdj_labeling.csv
