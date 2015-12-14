@@ -157,8 +157,8 @@ int main(int, char**) {
     INFO("Generator of VDJ recombinations ends");
 
     // test recombinations for Andrey
-    INFO("Test recombination for Andrey");
-    TestRecombinationCalculator(reads_archive, hits_storage);
+    //INFO("Test recombination for Andrey");
+    //TestRecombinationCalculator(reads_archive, hits_storage);
 
     INFO("VDJ labeler ends");
     unsigned ms = (unsigned)pc.time_ms();
