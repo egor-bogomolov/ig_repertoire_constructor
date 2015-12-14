@@ -42,7 +42,6 @@ void RightVTailAligner::RefineAlignmentPositions(IgGeneAlignmentPtr alignment_pt
 }
 
 IgGeneAlignmentPtr RightVTailAligner::ComputeAlignment(IgGeneAlignmentPositions alignment_positions) {
-    cout << alignment_positions << endl;
     Align<Dna5String> align;
     resize(rows(align), 2);
     if(length(alignment_positions.ig_gene->seq()) == alignment_positions.alignment.subject_pos.second)
