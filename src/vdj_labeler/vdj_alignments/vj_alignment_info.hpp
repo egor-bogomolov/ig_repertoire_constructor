@@ -25,6 +25,7 @@ class VJAlignmentInfo {
 
     std::vector<IgGeneAlignmentPositions> v_segments_;
     std::vector<IgGeneAlignmentPositions> j_segments_;
+    std::set<size_t> presented_reads_;
 
     ReadPtr GetReadName(const std::vector<std::string> &splits);
 
@@ -51,6 +52,10 @@ public:
     IgGeneAlignmentPositions GetVAlignmentByIndex(size_t index) const;
 
     IgGeneAlignmentPositions GetJAlignmentByIndex(size_t index) const;
+
+    bool ContainsRead(size_t read_index) const {
+        return presented_reads_.find(read_index) != presented_reads_.end();
+    }
 };
 
 std::ostream& operator<<(std::ostream& out, const VJAlignmentInfo& obj);

@@ -136,7 +136,7 @@ int main(int argc, char** argv) {
                                          d_aligner, d_estimator);
     LeftJTailAligner j_aligner;
     InfoBasedVJHitsCalculator j_hits_calc(IgGeneType::join_gene, reads_archive, vj_alignment_info, j_aligner);
-    CustomVDJHitsCalculator vdj_hits_calc(reads_archive, v_hits_calc, d_hits_calc, j_hits_calc);
+    CustomVDJHitsCalculator vdj_hits_calc(reads_archive, vj_alignment_info, v_hits_calc, d_hits_calc, j_hits_calc);
     auto hits_storage = vdj_hits_calc.ComputeHits();
     INFO("Best VDJ hits alignment calculation ends");
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <seqan/seq_io.h>
+#include <unordered_map>
 
 using seqan::Dna5String;
 using seqan::CharString;
@@ -27,8 +28,8 @@ typedef std::shared_ptr<Read> ReadPtr;
 
 class FastqReadArchive {
     std::vector<ReadPtr> reads_;
-    std::map<std::string, ReadPtr> name_read_map_;
-    std::map<ReadPtr, size_t> read_index_map_;
+    std::unordered_map<std::string, ReadPtr> name_read_map_;
+    std::unordered_map<ReadPtr, size_t> read_index_map_;
 
 public:
     FastqReadArchive(std::string fastq_file_fname);
