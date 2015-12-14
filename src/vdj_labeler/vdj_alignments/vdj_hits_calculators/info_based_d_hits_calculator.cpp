@@ -16,6 +16,7 @@ IgGeneAlignmentPositions InfoBasedDHitsCalculator::ComputeDAlignmentPositions(Ig
 
 IgGeneSegmentHitsPtr InfoBasedDHitsCalculator::ComputeHits(ReadPtr read_ptr) {
     size_t read_index = read_archive_.GetIndexByRead(read_ptr);
+    assert(read_index == read_ptr->id);
     IgGeneAlignmentPositions v_alignment_positions = vj_alignment_info_.GetVAlignmentByReadIndex(read_index);
     IgGeneAlignmentPositions j_alignment_positions = vj_alignment_info_.GetJAlignmentByReadIndex(read_index);
     IgGeneSegmentHitsPtr d_hits_ptr(new IgGeneSegmentHits(IgGeneType::diversity_gene, read_ptr));

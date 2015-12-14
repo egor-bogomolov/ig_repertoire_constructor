@@ -3,6 +3,7 @@
 
 IgGeneSegmentHitsPtr InfoBasedVJHitsCalculator::ComputeHits(ReadPtr read_ptr) {
     size_t read_index = read_archive_.GetIndexByRead(read_ptr);
+    assert(read_index == read_ptr->id);
     IgGeneAlignmentPositions aligment_positions;
     if(gene_type_ == IgGeneType::variable_gene)
         aligment_positions = vj_alignment_info_.GetVAlignmentByReadIndex(read_index);
