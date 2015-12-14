@@ -32,17 +32,18 @@ CleavedIgGeneAlignment JRecombinationEventGenerator::GeneratePalindromicEvent(Ig
 
 void JRecombinationEventGenerator::GeneratePalindromicEvents(IgGeneAlignmentPtr j_alignment,
                                                              IgGeneRecombinationEventStoragePtr j_events) {
-    for(size_t plen = 1; plen < max_palindrome_; plen++)
-        j_events->AddEvent(GeneratePalindromicEvent(j_alignment, plen));
+    //for(size_t plen = 1; plen < max_palindrome_; plen++)
+    for(int plen = int(max_palindrome_); plen > 0; plen--)
+        j_events->AddEvent(GeneratePalindromicEvent(j_alignment, size_t(plen)));
 }
 
 IgGeneRecombinationEventStoragePtr JRecombinationEventGenerator::ComputeEvents(IgGeneAlignmentPtr j_alignment) {
     IgGeneRecombinationEventStoragePtr j_events(new IgGeneRecombinationEventStorage(IgGeneType::join_gene));
-    // generation of cleavage events
-    GenerateCleavageEvents(j_alignment, j_events);
-    // generation of zero event
-    j_events->AddEvent(CleavedIgGeneAlignment(j_alignment, 0, 0, ComputeSHMsNumber(j_alignment, 0)));
     // generation of palindromic events
     GeneratePalindromicEvents(j_alignment, j_events);
+    // generation of zero event
+    j_events->AddEvent(CleavedIgGeneAlignment(j_alignment, 0, 0, ComputeSHMsNumber(j_alignment, 0)));
+    // generation of cleavage events
+    GenerateCleavageEvents(j_alignment, j_events);
     return j_events;
 }

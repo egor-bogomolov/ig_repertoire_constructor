@@ -35,9 +35,9 @@ public:
             gene_seq_(gene_seq),
             id_(id) { }
 
-    CharString name() const { return gene_name_; }
+    const CharString& name() const { return gene_name_; }
 
-    Dna5String seq() const { return gene_seq_; }
+    const Dna5String& seq() const { return gene_seq_; }
 
     size_t length() const { return static_cast<size_t>(seqan::length(gene_seq_)); }
 

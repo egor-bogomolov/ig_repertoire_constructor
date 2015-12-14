@@ -18,7 +18,6 @@ void VJAlignmentInfo::AddVAlignment(const std::vector<std::string> &splits, Read
     AlignmentPositions alignment_positions(pair<size_t, size_t>(start_read_pos, end_read_pos),
                                            pair<size_t, size_t>(start_gene_pos, end_gene_pos));
     IgGeneAlignmentPositions ig_alignment_positions(alignment_positions, v_gene_db_.GetByName(v_gene_name), read);
-    cout << ig_alignment_positions << endl;
     v_segments_.push_back(ig_alignment_positions);
 }
 
