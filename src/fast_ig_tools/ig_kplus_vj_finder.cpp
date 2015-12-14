@@ -789,7 +789,7 @@ int main(int argc, char **argv) {
                         const auto &first_jalign = jalign.path[0];
                         const auto &last_jalign = jalign.path[jalign.path.size() - 1];
 
-                        bformat bf("%s, %d, %d, %d, %d, %d, %d, %1.2f, %s, %d, %d, %d, %d, %d, %d, %1.2f, %s");
+                        bformat bf("%s %d %d %d %d %d %d %1.2f %s %d %d %d %d %d %d %1.2f %s");
                         bf % read_id
                            % (align.start+1)             % end_of_v
                            % (align.first_match_read_pos() + 1) % (align.first_match_needle_pos() + 1)
@@ -830,7 +830,7 @@ int main(int argc, char **argv) {
     seqan::SeqFileOut cropped_reads_seqFile(param.output_filename.c_str());
     seqan::SeqFileOut bad_reads_seqFile(param.bad_output_filename.c_str());
     std::ofstream add_info(param.add_info_filename.c_str());
-    add_info << bformat("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n")
+    add_info << bformat("%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s\n")
         % "id"
         % "Vstart" % "Vend"
         % "VfirstTrustfulMatchRead" % "VfirstTrustfulMatchGene"
