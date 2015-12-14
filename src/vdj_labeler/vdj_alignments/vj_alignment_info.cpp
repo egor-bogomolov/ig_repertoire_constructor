@@ -36,7 +36,7 @@ void VJAlignmentInfo::AddJAlignment(const std::vector<std::string> &splits, Read
 
 void VJAlignmentInfo::ParseLine(std::string line) {
     vector<std::string> splits;
-    split(splits, line, is_any_of(" ,"), token_compress_on);
+    split(splits, line, is_any_of(" "), token_compress_on);
     auto read = GetReadName(splits);
     presented_reads_.insert(read->id);
     AddVAlignment(splits, read);

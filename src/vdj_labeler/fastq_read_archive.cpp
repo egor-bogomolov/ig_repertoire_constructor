@@ -36,7 +36,10 @@ ReadPtr FastqReadArchive::operator[](size_t index) const {
 
 
 ReadPtr FastqReadArchive::GetReadByName(std::string read_name) const {
-    assert(name_read_map_.find(read_name) != name_read_map_.end());
+    if(name_read_map_.find(read_name) == name_read_map_.end()) {
+        std::cout << "Read " << read_name << " was not found" << endl;
+        assert(name_read_map_.find(read_name) != name_read_map_.end());
+    }
     return name_read_map_.at(read_name);
 }
 

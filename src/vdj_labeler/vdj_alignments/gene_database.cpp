@@ -40,7 +40,10 @@ IgGenePtr IgGeneDatabase::GetByIndex(size_t index) const {
 }
 
 IgGenePtr IgGeneDatabase::GetByName(std::string gene_name) const {
-    assert(gene_name_map_.find(gene_name) != gene_name_map_.end());
+    if(gene_name_map_.find(gene_name) == gene_name_map_.end()) {
+        std::cout << "Gene name " << gene_name << " was not found" << std::endl;
+        assert(gene_name_map_.find(gene_name) != gene_name_map_.end());
+    }
     return gene_name_map_.at(gene_name);
 }
 
