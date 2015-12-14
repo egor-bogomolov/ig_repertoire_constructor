@@ -2,6 +2,7 @@
 // Created by yana on 17.11.15.
 //
 
+#include "logger/logger.hpp"
 #include "right_v_tail_aligner.hpp"
 
 #include <seqan/sequence.h>
@@ -42,6 +43,7 @@ void RightVTailAligner::RefineAlignmentPositions(IgGeneAlignmentPtr alignment_pt
 }
 
 IgGeneAlignmentPtr RightVTailAligner::ComputeAlignment(IgGeneAlignmentPositions alignment_positions) {
+    INFO("Computation of V alignment for positions: " << alignment_positions);
     Align<Dna5String> align;
     resize(rows(align), 2);
     if(length(alignment_positions.ig_gene->seq()) == alignment_positions.alignment.subject_pos.second)

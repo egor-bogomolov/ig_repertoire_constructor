@@ -1,3 +1,4 @@
+#include "logger/logger.hpp"
 #include "simple_d_aligner.hpp"
 
 #include <seqan/sequence.h>
@@ -24,6 +25,7 @@ void SimpleDAligner::RefineAlignmentPositions(IgGeneAlignmentPtr d_gene_alignmen
 }
 
 IgGeneAlignmentPtr SimpleDAligner::ComputeAlignment(IgGeneAlignmentPositions alignment_positions) {
+    INFO("Computation of D alignment for positions: " << alignment_positions);
     Align<Dna5String> align;
     resize(rows(align), 2);
     //cout << length(alignment_positions.ig_gene->seq()) << " " << alignment_positions.alignment.query_pos.second << endl;

@@ -1,3 +1,4 @@
+#include "logger/logger.hpp"
 #include "left_j_tail_aligner.hpp"
 
 #include <seqan/sequence.h>
@@ -37,6 +38,7 @@ void LeftJTailAligner::RefineAlignmentPositions(IgGeneAlignmentPtr alignment_ptr
 }
 
 IgGeneAlignmentPtr LeftJTailAligner::ComputeAlignment(IgGeneAlignmentPositions alignment_positions) {
+    INFO("Computation of J alignment for positions: " << alignment_positions);
     Align<Dna5String> align;
     resize(rows(align), 2);
     if(alignment_positions.alignment.query_pos.first == 1)
