@@ -13,8 +13,8 @@ HcRecombinationStoragePtr CustomHeavyChainRecombinationGenerator::CreateRecombin
     for(auto vd_it = vd_insertions->cbegin(); vd_it != vd_insertions->cend(); vd_it++)
         for(auto dj_it = dj_insertions->cbegin(); dj_it != dj_insertions->cend(); dj_it++) {
             HCRecombination recombination(recombination_storage->Read(), v_gene, d_gene, j_gene, *vd_it, *dj_it);
-            INFO(recombination);
-            INFO("---------------------------");
+            //INFO(recombination);
+            //INFO("---------------------------");
             if(recombination.Valid())
                 recombination_storage->AddRecombination(recombination);
         }
@@ -57,7 +57,7 @@ HcRecombinationStoragePtr CustomHeavyChainRecombinationGenerator::ComputeRecombi
     vector<IgGeneRecombinationEventStoragePtr> v_storages;
     vector<IgGeneRecombinationEventStoragePtr> d_storages;
     vector<IgGeneRecombinationEventStoragePtr> j_storages;
-    INFO("Computation of event vector for V hits starts");
+    INFO("Computation of event vector for V hits starts...");
     size_t v_events_num = 0;
     for(size_t vi = 0; vi < num_v_hits; vi++) {
         auto v_alignment = vdj_hits->GetAlignmentByIndex(IgGeneType::variable_gene, vi);
@@ -66,7 +66,7 @@ HcRecombinationStoragePtr CustomHeavyChainRecombinationGenerator::ComputeRecombi
         v_storages.push_back(v_events);
     }
     INFO(v_events_num << " events were computed for " << num_v_hits << " V hits");
-    INFO("Computation of events vector for D hits starts");
+    INFO("Computation of events vector for D hits starts...");
     size_t d_events_num = 0;
     for(size_t di = 0; di < num_v_hits; di++) {
         auto d_alignment = vdj_hits->GetAlignmentByIndex(IgGeneType::diversity_gene, di);
@@ -76,7 +76,7 @@ HcRecombinationStoragePtr CustomHeavyChainRecombinationGenerator::ComputeRecombi
     }
     INFO(d_events_num << " events were computed for " << num_d_hits << " D hits");
     size_t j_events_num = 0;
-    INFO("Computation of events vector for J segments start");
+    INFO("Computation of events vector for J segments starts...");
     for(size_t ji = 0; ji < num_j_hits; ji++) {
         auto j_alignment = vdj_hits->GetAlignmentByIndex(IgGeneType::join_gene, ji);
         auto j_events = j_events_generator_.ComputeEvents(j_alignment);

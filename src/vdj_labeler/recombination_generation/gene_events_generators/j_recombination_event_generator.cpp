@@ -1,3 +1,4 @@
+#include "logger/logger.hpp"
 #include "j_recombination_event_generator.hpp"
 
 using namespace std;
@@ -18,7 +19,7 @@ void JRecombinationEventGenerator::GenerateCleavageEvents(IgGeneAlignmentPtr j_a
     if(j_alignment->IsEmpty())
         return;
     size_t max_cleavage_length = min<size_t>(max_cleavage_, j_alignment->ReadAlignmentLength());
-    //cout << "Max J cleavage: " << max_cleavage_length << endl;
+    INFO("Max J cleavage: " << max_cleavage_length);
     for(size_t clen = 1; clen <= max_cleavage_length; clen++)
         j_events->AddEvent(GenerateCleavageEvent(j_alignment, clen));
 }
@@ -39,11 +40,15 @@ void JRecombinationEventGenerator::GeneratePalindromicEvents(IgGeneAlignmentPtr 
 
 IgGeneRecombinationEventStoragePtr JRecombinationEventGenerator::ComputeEvents(IgGeneAlignmentPtr j_alignment) {
     IgGeneRecombinationEventStoragePtr j_events(new IgGeneRecombinationEventStorage(IgGeneType::join_gene));
+    INFO(*j_alignment);
     // generation of palindromic events
+    INFO("Generarion of palindromic events");
     GeneratePalindromicEvents(j_alignment, j_events);
     // generation of zero event
+    INFO("Generation of zero event");
     j_events->AddEvent(CleavedIgGeneAlignment(j_alignment, 0, 0, ComputeSHMsNumber(j_alignment, 0)));
     // generation of cleavage events
+    INFO("Generation of cleavage events");
     GenerateCleavageEvents(j_alignment, j_events);
     return j_events;
 }

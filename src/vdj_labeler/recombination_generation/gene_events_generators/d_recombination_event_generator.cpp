@@ -1,3 +1,4 @@
+#include "logger/logger.hpp"
 #include "d_recombination_event_generator.hpp"
 
 using namespace std;
@@ -9,25 +10,29 @@ int DRecombinationEventGenerator::ComputeMinLeftBound(IgGeneAlignmentPtr d_align
 }
 
 int DRecombinationEventGenerator::ComputeMinRightBound(IgGeneAlignmentPtr d_alignment) {
+    // if cleavage is occurred at the right end of D segment, min right bound is cleavage size from alignment
     if(d_alignment->Positions().GeneEndPos() != d_alignment->GeneLength() - 1)
         return int(d_alignment->GeneLength() - d_alignment->Positions().GeneEndPos() - 1);
+    // if gene segment is not cleaved, min left bound is max palindrome length
     return int(max_palindrome_) * -1;
 }
 
 size_t DRecombinationEventGenerator::ComputeMaxRightConsistentCleavage(IgGeneAlignmentPtr d_alignment,
                                                                     int left_event_size) {
+    size_t min_right_cleavage = d_alignment->GeneLength() - d_alignment->Positions().GeneEndPos() - 1;
     int left_positive_len = max<int>(0, left_event_size);
-    return size_t(min<int>(int(max_cleavage_), int(d_alignment->ReadAlignmentLength()) - left_positive_len));
+    return size_t(min<int>(int(max_cleavage_),
+                           int(d_alignment->ReadAlignmentLength())) + min_right_cleavage - left_positive_len);
 }
 
 void DRecombinationEventGenerator::GenerateRightConsistentEvents(IgGeneAlignmentPtr d_alignment, int left_event_size,
                                                                  IgGeneRecombinationEventStoragePtr d_events) {
-    int max_right_palindrome = ComputeMinRightBound(d_alignment);
-    int max_right_cleavage = int(ComputeMaxRightConsistentCleavage(d_alignment, left_event_size));
-    cout << "Left bounf of right events: " << max_right_palindrome << endl;
-    cout << "Right bound of right events: " << max_right_cleavage << endl;
-    for(int relen = max_right_palindrome; relen <= max_right_cleavage; relen++) {
-        cout << "Left event size: " << left_event_size << ", right event size: " << relen << endl;
+    int min_right_bound = ComputeMinRightBound(d_alignment);
+    int max_right_bound = int(ComputeMaxRightConsistentCleavage(d_alignment, left_event_size));
+    INFO("Left bounf of right events: " << min_right_bound);
+    INFO("Right bound of right events: " << max_right_bound);
+    for(int relen = min_right_bound; relen <= max_right_bound; relen++) {
+        INFO("== Right current event: " << relen << ".");
         d_events->AddEvent(CleavedIgGeneAlignment(d_alignment, left_event_size, relen,
                                                   shm_calculator_.ComputeNumberSHMs(d_alignment,
                                                                                     left_event_size, relen)));
@@ -38,17 +43,18 @@ IgGeneRecombinationEventStoragePtr DRecombinationEventGenerator::ComputeEvents(I
     IgGeneRecombinationEventStoragePtr d_events(new IgGeneRecombinationEventStorage(IgGeneType::diversity_gene));
     if(d_alignment->IsEmpty())
         return d_events;
-    int left_bound = ComputeMinLeftBound(d_alignment);
-    int max_left_cleavage = int(min<size_t>(d_alignment->ReadAlignmentLength(), max_cleavage_));
+    int min_left_bound = ComputeMinLeftBound(d_alignment);
+    int max_left_bound = int(min<size_t>(d_alignment->ReadAlignmentLength(), max_cleavage_));
     cout << *d_alignment << endl;
-    cout << "Left bounf of left events: " << left_bound << endl;
-    cout << "Right bound of left events: " << max_left_cleavage << endl;
+    INFO("Left bounf of left events: " << min_left_bound);
+    INFO("Right bound of left events: " << max_left_bound);
     //  we iterate from max allowed palindrome to max allowed cleavage and
     // consider that this event occurred at the start of D segment
-    for(int elen = left_bound; elen <= max_left_cleavage; elen++) {
-        cout << "============================" << endl;
+    for(int elen = min_left_bound; elen <= max_left_bound; elen++) {
+        INFO("==== Left current event: " << elen << "...");
+        //cout << "============================" << endl;
         GenerateRightConsistentEvents(d_alignment, elen, d_events);
-        cout << "============================" << endl;
+        //cout << "============================" << endl;
     }
     return d_events;
 }

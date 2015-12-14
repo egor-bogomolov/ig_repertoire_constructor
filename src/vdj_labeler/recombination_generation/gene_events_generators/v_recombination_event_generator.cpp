@@ -1,3 +1,4 @@
+#include "logger/logger.hpp"
 #include "v_recombination_event_generator.hpp"
 
 using namespace std;
@@ -21,7 +22,7 @@ void VRecombinationEventGenerator::GenerateCleavageEvents(IgGeneAlignmentPtr v_a
     if(v_alignment->IsEmpty())
         return;
     size_t cleavage_length = min<size_t>(max_cleavage_, v_alignment->ReadAlignmentLength());
-    //cout << "Max cleavage length in V: " << cleavage_length << endl;
+    INFO("Max cleavage length in V: " << cleavage_length);
     for(size_t clen = 1; clen <= cleavage_length; clen++)
         v_events->AddEvent(GenerateCleavageEvent(v_alignment, clen));
 }
@@ -35,17 +36,21 @@ CleavedIgGeneAlignment VRecombinationEventGenerator::GeneratePalindromicEvent(Ig
 
 void VRecombinationEventGenerator::GeneratePalindromicEvents(IgGeneAlignmentPtr v_alignment,
                                                              IgGeneRecombinationEventStoragePtr v_events) {
-    for(size_t plen = 1; plen < max_palindrome_; plen++)
+    for(size_t plen = 1; plen <= max_palindrome_; plen++)
         v_events->AddEvent(GeneratePalindromicEvent(v_alignment, plen));
 }
 
 IgGeneRecombinationEventStoragePtr VRecombinationEventGenerator::ComputeEvents(IgGeneAlignmentPtr v_alignment) {
     IgGeneRecombinationEventStoragePtr v_events(new IgGeneRecombinationEventStorage(IgGeneType::variable_gene));
+    INFO(*v_alignment);
     // generation of cleavage events
+    INFO("Generation of cleavage events");
     GenerateCleavageEvents(v_alignment, v_events);
     // generation of zero event
+    INFO("Generation of zero event");
     v_events->AddEvent(CleavedIgGeneAlignment(v_alignment, 0, 0, ComputeSHMsNumber(v_alignment, 0)));
     // generation of palindromic events
+    INFO("Generartion of palindromic events");
     GeneratePalindromicEvents(v_alignment, v_events);
     return v_events;
 }
