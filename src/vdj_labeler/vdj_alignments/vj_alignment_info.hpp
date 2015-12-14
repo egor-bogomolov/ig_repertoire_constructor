@@ -3,6 +3,7 @@
 #include "gene_database.hpp"
 #include "alignment_structs.hpp"
 #include "../fastq_read_archive.hpp"
+#include <unordered_map>
 
 struct VJFinderMagicConsts {
     static const int read_name_index = 0;
@@ -26,6 +27,7 @@ class VJAlignmentInfo {
     std::vector<IgGeneAlignmentPositions> v_segments_;
     std::vector<IgGeneAlignmentPositions> j_segments_;
     std::set<size_t> presented_reads_;
+    std::unordered_map<size_t, size_t> read_index_map_;
 
     ReadPtr GetReadName(const std::vector<std::string> &splits);
 
@@ -49,12 +51,13 @@ public:
         return v_segments_.size();
     }
 
-    IgGeneAlignmentPositions GetVAlignmentByIndex(size_t index) const;
+    IgGeneAlignmentPositions GetVAlignmentByReadIndex(size_t read_index) const;
 
-    IgGeneAlignmentPositions GetJAlignmentByIndex(size_t index) const;
+    IgGeneAlignmentPositions GetJAlignmentByReadIndex(size_t read_index) const;
 
     bool ContainsRead(size_t read_index) const {
-        return presented_reads_.find(read_index) != presented_reads_.end();
+        return read_index_map_.find(read_index) != read_index_map_.end();
+        //return presented_reads_.find(read_index) != presented_reads_.end();
     }
 };
 

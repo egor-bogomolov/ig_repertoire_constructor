@@ -41,6 +41,7 @@ void VJAlignmentInfo::ParseLine(std::string line) {
     presented_reads_.insert(read->id);
     AddVAlignment(splits, read);
     AddJAlignment(splits, read);
+    read_index_map_[read->id] = v_segments_.size() - 1;
 }
 
 void VJAlignmentInfo::ExtractAlignment(std::string filename) {
@@ -62,21 +63,23 @@ void VJAlignmentInfo::ExtractAlignment(std::string filename) {
     }
 }
 
-IgGeneAlignmentPositions VJAlignmentInfo::GetVAlignmentByIndex(size_t index) const {
-    assert(index < v_segments_.size());
-    return v_segments_[index];
+IgGeneAlignmentPositions VJAlignmentInfo::GetVAlignmentByReadIndex(size_t read_index) const {
+    assert(read_index_map_.find(read_index) != read_index_map_.end());
+    size_t inner_index = read_index_map_.at(read_index);
+    return v_segments_[inner_index];
 }
 
-IgGeneAlignmentPositions VJAlignmentInfo::GetJAlignmentByIndex(size_t index) const {
-    assert(index < j_segments_.size());
-    return j_segments_[index];
+IgGeneAlignmentPositions VJAlignmentInfo::GetJAlignmentByReadIndex(size_t read_index) const {
+    assert(read_index_map_.find(read_index) != read_index_map_.end());
+    size_t inner_index = read_index_map_.at(read_index);
+    return j_segments_[inner_index];
 }
 
 std::ostream& operator<<(std::ostream& out, const VJAlignmentInfo& obj) {
-    for(size_t i = 0; i < obj.size(); i++) {
-        out << "V. " << obj.GetVAlignmentByIndex(i) << endl;
-        out << "J. " << obj.GetJAlignmentByIndex(i) << endl;
-        out << "----" << endl;
-    }
+    //for(size_t i = 0; i < obj.size(); i++) {
+    //    out << "V. " << obj.GetVAlignmentByIndex(i) << endl;
+    //    out << "J. " << obj.GetJAlignmentByIndex(i) << endl;
+    //    out << "----" << endl;
+    //}
     return out;
 }
