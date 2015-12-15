@@ -41,7 +41,7 @@ IgGeneAlignmentPtr SimpleDAligner::ComputeAlignment(IgGeneAlignmentPositions ali
     assignSource(row(align, 0), read_segment);
     assignSource(row(align, 1), alignment_positions.ig_gene->seq());
     //cout << "Ig gene: " << alignment_positions << endl;
-    //cout << "Read segment (" << length(read_segment) << "): " << read_segment << endl;
+    INFO("Read segment (" << length(read_segment) << "): " << read_segment);
     int score = localAlignment(align, Score<int, Simple>(2, -1, -3, -2));
     //cout << "Score: " << score << endl;
     //cout << align << endl;
