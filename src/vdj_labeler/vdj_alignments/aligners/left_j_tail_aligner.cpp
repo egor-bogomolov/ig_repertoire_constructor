@@ -41,7 +41,7 @@ IgGeneAlignmentPtr LeftJTailAligner::ComputeAlignment(IgGeneAlignmentPositions a
     INFO("Computation of J alignment for positions: " << alignment_positions);
     Align<Dna5String> align;
     resize(rows(align), 2);
-    if(alignment_positions.alignment.query_pos.first == 0)
+    if(alignment_positions.alignment.subject_pos.first == 0)
         return IgGeneAlignmentPtr(new IgGeneAlignment(alignment_positions, align, -1));
     size_t tail_length = alignment_positions.alignment.subject_pos.first;
     auto read_segment = prefix(
