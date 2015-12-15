@@ -32,6 +32,7 @@ IgGeneAlignmentPtr SimpleDAligner::ComputeAlignment(IgGeneAlignmentPositions ali
     //if(length(alignment_positions.ig_gene->seq()) == alignment_positions.alignment.subject_pos.second)
     //    return IgGeneAlignmentPtr(new IgGeneAlignment(alignment_positions, align));
     if(alignment_positions.IsEmpty()) {
+        INFO("D alignment is empty");
         return IgGeneAlignmentPtr(new IgGeneAlignment(alignment_positions, align, -1));
     }
     auto read_segment = suffix(
