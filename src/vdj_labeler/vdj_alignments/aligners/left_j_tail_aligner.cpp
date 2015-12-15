@@ -47,8 +47,11 @@ IgGeneAlignmentPtr LeftJTailAligner::ComputeAlignment(IgGeneAlignmentPositions a
     auto read_segment = prefix(
             suffix(alignment_positions.read->seq, alignment_positions.alignment.query_pos.first -
             tail_length - left_shift_), tail_length + left_shift_);
+    INFO("Read segment (" << length(read_segment) << "): " << read_segment);
+    auto gene_segment = prefix(alignment_positions.ig_gene->seq(), tail_length);
+    INFO("Gene segment (" << length(gene_segment) << "): " << gene_segment);
     assignSource(row(align, 0), read_segment);
-    assignSource(row(align, 1), prefix(alignment_positions.ig_gene->seq(), tail_length));
+    assignSource(row(align, 1), gene_segment);
     int score = globalAlignment(align, Score<int, Simple>(2, -1, -3, -2));
     IgGeneAlignmentPtr j_alignment(new IgGeneAlignment(alignment_positions, align, score));
     RefineAlignmentPositions(j_alignment);
