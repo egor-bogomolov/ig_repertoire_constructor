@@ -36,7 +36,7 @@ IgGeneAlignmentPtr SimpleDAligner::ComputeAlignment(IgGeneAlignmentPositions ali
         return IgGeneAlignmentPtr(new IgGeneAlignment(alignment_positions, align, -1));
     }
     auto read_segment = suffix(
-            prefix(alignment_positions.read->seq, alignment_positions.alignment.query_pos.second - 1),
+            prefix(alignment_positions.read->seq, alignment_positions.alignment.query_pos.second),
             alignment_positions.alignment.query_pos.first);
     assignSource(row(align, 0), read_segment);
     assignSource(row(align, 1), alignment_positions.ig_gene->seq());
