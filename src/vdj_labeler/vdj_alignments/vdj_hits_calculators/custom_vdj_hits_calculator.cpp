@@ -13,8 +13,8 @@ VDJHitsStoragePtr CustomVDJHitsCalculator::ComputeHits() {
         if(!vj_alignment_info_.ContainsRead((*it)->id))
             continue;
         IgGeneSegmentHitsPtr v_hits = v_hits_calculator_.ComputeHits(*it);
-        IgGeneSegmentHitsPtr d_hits = d_hits_calculator_.ComputeHits(*it);
         IgGeneSegmentHitsPtr j_hits = j_hits_calculator_.ComputeHits(*it);
+        IgGeneSegmentHitsPtr d_hits = d_hits_calculator_.ComputeHits(*it);
         VDJHitsPtr vdj_hits_ptr(new VDJHits(*it));
         AddHits(vdj_hits_ptr, v_hits);
         AddHits(vdj_hits_ptr, j_hits);
