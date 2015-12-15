@@ -49,7 +49,7 @@ struct IgGeneAlignmentPositions {
 
     size_t ReadEndPos() const { return alignment.query_pos.second; }
 
-    bool IsEmpty() const { return ReadStartPos() > ReadEndPos(); }
+    bool IsEmpty() const { return ReadStartPos() <= ReadEndPos(); }
 
 };
 
