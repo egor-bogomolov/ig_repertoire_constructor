@@ -55,9 +55,9 @@ IgGeneAlignmentPtr RightVTailAligner::ComputeAlignment(IgGeneAlignmentPositions 
         RefineAlignmentPositionsForEmptyAlign(v_alignment);
         return v_alignment;
     }
-    auto read_segment = prefix(
-            suffix(alignment_positions.read->seq, alignment_positions.alignment.query_pos.second + 1),
-            tail_length + right_shift_);
+    auto read_segment = infixWithLength(alignment_positions.read->seq,
+                                        alignment_positions.ReadEndPos() + 1,
+                                        tail_length + right_shift_);
     INFO("Read segment (" << length(read_segment) << "): " << read_segment);
     auto gene_segment = suffix(alignment_positions.ig_gene->seq(),
                                alignment_positions.alignment.subject_pos.second + 1);

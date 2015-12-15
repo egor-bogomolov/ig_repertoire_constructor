@@ -35,12 +35,11 @@ IgGeneAlignmentPtr SimpleDAligner::ComputeAlignment(IgGeneAlignmentPositions ali
         INFO("D alignment is empty");
         return IgGeneAlignmentPtr(new IgGeneAlignment(alignment_positions, align, -1));
     }
-    auto read_segment = suffix(
-            prefix(alignment_positions.read->seq, alignment_positions.alignment.query_pos.second),
-            alignment_positions.alignment.query_pos.first);
+    auto read_segment = infixWithLength(alignment_positions.read->seq,
+                                        alignment_positions.ReadStartPos(),
+                                        alignment_positions.ReadAlignmentLength());
     assignSource(row(align, 0), read_segment);
     assignSource(row(align, 1), alignment_positions.ig_gene->seq());
-    //cout << "Ig gene: " << alignment_positions << endl;
     INFO("Read segment (" << length(read_segment) << "): " << read_segment);
     int score = localAlignment(align, Score<int, Simple>(2, -1, -3, -2));
     //cout << "Score: " << score << endl;
