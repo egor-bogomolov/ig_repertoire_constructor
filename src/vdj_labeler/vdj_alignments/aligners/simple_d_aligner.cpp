@@ -31,6 +31,9 @@ IgGeneAlignmentPtr SimpleDAligner::ComputeAlignment(IgGeneAlignmentPositions ali
     //cout << length(alignment_positions.ig_gene->seq()) << " " << alignment_positions.alignment.query_pos.second << endl;
     //if(length(alignment_positions.ig_gene->seq()) == alignment_positions.alignment.subject_pos.second)
     //    return IgGeneAlignmentPtr(new IgGeneAlignment(alignment_positions, align));
+    if(alignment_positions.IsEmpty()) {
+        return IgGeneAlignmentPtr(new IgGeneAlignment(alignment_positions, align, -1));
+    }
     auto read_segment = suffix(
             prefix(alignment_positions.read->seq, alignment_positions.alignment.query_pos.second - 1),
             alignment_positions.alignment.query_pos.first);

@@ -49,6 +49,8 @@ struct IgGeneAlignmentPositions {
 
     size_t ReadEndPos() const { return alignment.query_pos.second; }
 
+    bool IsEmpty() const { return ReadStartPos() > ReadEndPos(); }
+
 };
 
 std::ostream& operator<<(std::ostream& out, const IgGeneAlignmentPositions& obj);

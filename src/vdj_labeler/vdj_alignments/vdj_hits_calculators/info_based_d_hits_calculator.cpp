@@ -8,8 +8,8 @@ IgGeneAlignmentPositions InfoBasedDHitsCalculator::ComputeDAlignmentPositions(Ig
                                                                               ReadPtr read_ptr) {
     //cout << "V alignment positions: " << v_positions << endl;
     //cout << "J alignment positions: " << j_positions << endl;
-    AlignmentPositions alignment_pos(make_pair(v_positions.alignment.query_pos.second,
-                                               j_positions.alignment.query_pos.first),
+    AlignmentPositions alignment_pos(make_pair(v_positions.alignment.query_pos.second + 1,
+                                               j_positions.alignment.query_pos.first - 1),
                                     make_pair(0, length(gene_ptr->seq())));
     return IgGeneAlignmentPositions(alignment_pos, gene_ptr, read_ptr);
 }
