@@ -21,11 +21,12 @@ public:
     size_t EndPosition() const { return end_position_; }
 
     size_t length() const {
-        if(end_position_ < start_position_)
+        if(end_position_ + 1 == start_position_)
             return 0;
         return end_position_ - start_position_ + 1;
     }
 
+    // if start position = end position + 1: inserion has 0 length, genes bounds have consequtive positions
     bool Valid() const { return start_position_ <= end_position_ or
                 start_position_ - end_position_ <= 1; }
 };

@@ -64,7 +64,7 @@ IgGeneAlignmentPtr RightVTailAligner::ComputeAlignment(IgGeneAlignmentPositions 
     INFO("Gene segment (" << length(gene_segment) << "): " << gene_segment);
     assignSource(row(align, 0), read_segment);
     assignSource(row(align, 1), gene_segment);
-    int score = globalAlignment(align, Score<int, Simple>(2, -1, -3, -2));
+    int score = globalAlignment(align, Score<int, Simple>(2, -1, -10, -10));
     IgGeneAlignmentPtr v_alignment(new IgGeneAlignment(alignment_positions, align, score));
     RefineAlignmentPositions(v_alignment);
     return v_alignment;

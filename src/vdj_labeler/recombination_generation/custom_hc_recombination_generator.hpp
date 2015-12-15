@@ -16,6 +16,25 @@ class CustomHeavyChainRecombinationGenerator :
     InsertionEventGenerator& vd_insertion_generator_;
     InsertionEventGenerator& dj_insertion_generator_;
 
+    // inner structures
+    std::vector<IgGeneRecombinationEventStoragePtr> v_storages_;
+    std::vector<IgGeneRecombinationEventStoragePtr> d_storages_;
+    std::vector<IgGeneRecombinationEventStoragePtr> j_storages_;
+
+    void Clear();
+
+    void ComputeVEventStorages(VDJHitsPtr vdj_hits);
+
+    void ComputeDEventStorages(VDJHitsPtr vdj_hits);
+
+    void ComputeJEventStorages(VDJHitsPtr vdj_hits);
+
+    // if d alignment is empty, we will assign length from V end to J start to the first insertion
+    // and zero length to the second insertion
+    // todo: extract to separate class
+    std::pair<NongenomicInsertion, NongenomicInsertion>
+            RefineNongenomicInsertions(NongenomicInsertion vd_insertion, NongenomicInsertion dj_insertion);
+
     HcRecombinationStoragePtr CreateRecombinations(HcRecombinationStoragePtr recombination_storage,
                                                    CleavedIgGeneAlignment v_gene,
                                                    CleavedIgGeneAlignment d_gene,

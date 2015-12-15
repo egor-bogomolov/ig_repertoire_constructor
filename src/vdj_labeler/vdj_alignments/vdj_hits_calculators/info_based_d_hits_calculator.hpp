@@ -12,10 +12,15 @@ class InfoBasedDHitsCalculator : public IgGeneHitsCalculator {
     GeneSegmentAligner& d_gene_aligner_;
     AlignmentEstimator& estimator_;
 
-    IgGeneAlignmentPositions ComputeDAlignmentPositions(IgGeneAlignmentPositions v_positions,
-                                                        IgGeneAlignmentPositions j_positions,
+    AlignmentPositions ComputeDPositions(IgGeneAlignmentPositions v_positions,
+                                         IgGeneAlignmentPositions j_positions);
+
+    IgGeneAlignmentPositions CreateDAlignmentPositions(AlignmentPositions d_alignment_positions,
                                                         IgGenePtr gene_ptr,
                                                         ReadPtr read_ptr);
+
+    // possibly this methods should be replaced in a separate class
+    bool DAlignmentPositionsAreGood(AlignmentPositions d_alignment_positions);
 
 public:
     InfoBasedDHitsCalculator(const FastqReadArchive& read_archive,

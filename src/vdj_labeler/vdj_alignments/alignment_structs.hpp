@@ -6,6 +6,7 @@
 #include "../fastq_read_archive.hpp"
 
 // in our context, query is a reads, subject is a gene segment
+// both positions are inclusive
 struct AlignmentPositions {
     std::pair<size_t, size_t> query_pos;
     std::pair<size_t, size_t> subject_pos;
@@ -18,6 +19,10 @@ struct AlignmentPositions {
               std::pair<size_t, size_t> new_subject_pos) :
             query_pos(new_query_pos),
             subject_pos(new_subject_pos) { }
+
+    size_t QueryAlignmentLength() const { return query_pos.second - query_pos.first + 1; }
+
+    size_t SubjectAlignmentLength() const { return subject_pos.second - subject_pos.first + 1; }
 };
 
 std::ostream& operator<<(std::ostream &out, const AlignmentPositions& obj);
@@ -51,8 +56,9 @@ struct IgGeneAlignmentPositions {
 
     bool IsEmpty() const { return ReadStartPos() > ReadEndPos(); }
 
-    size_t ReadAlignmentLength() const { return ReadEndPos() - ReadStartPos() + 1; }
+    size_t ReadAlignmentLength() const { return alignment.QueryAlignmentLength(); }
 
+    size_t GeneAlignmentLength() const { return alignment.SubjectAlignmentLength(); }
 };
 
 std::ostream& operator<<(std::ostream& out, const IgGeneAlignmentPositions& obj);

@@ -18,7 +18,6 @@ void LeftJTailAligner::RefineAlignmentPositionsForEmptyAlign(IgGeneAlignmentPtr 
 }
 
 void LeftJTailAligner::RefineAlignmentPositions(IgGeneAlignmentPtr alignment_ptr) {
-    // todo: debug me!
     auto row1 = row(alignment_ptr->Alignment(), 0);
     auto row2 = row(alignment_ptr->Alignment(), 1);
     size_t alignment_length = length(row1);
@@ -52,7 +51,7 @@ IgGeneAlignmentPtr LeftJTailAligner::ComputeAlignment(IgGeneAlignmentPositions a
     INFO("Gene segment (" << length(gene_segment) << "): " << gene_segment);
     assignSource(row(align, 0), read_segment);
     assignSource(row(align, 1), gene_segment);
-    int score = globalAlignment(align, Score<int, Simple>(2, -1, -3, -2));
+    int score = globalAlignment(align, Score<int, Simple>(2, -1, -10, -10));
     IgGeneAlignmentPtr j_alignment(new IgGeneAlignment(alignment_positions, align, score));
     RefineAlignmentPositions(j_alignment);
     return j_alignment;
