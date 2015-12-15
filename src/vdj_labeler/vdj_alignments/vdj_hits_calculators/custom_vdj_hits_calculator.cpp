@@ -17,8 +17,8 @@ VDJHitsStoragePtr CustomVDJHitsCalculator::ComputeHits() {
         IgGeneSegmentHitsPtr j_hits = j_hits_calculator_.ComputeHits(*it);
         VDJHitsPtr vdj_hits_ptr(new VDJHits(*it));
         AddHits(vdj_hits_ptr, v_hits);
-        AddHits(vdj_hits_ptr, d_hits);
         AddHits(vdj_hits_ptr, j_hits);
+        AddHits(vdj_hits_ptr, d_hits);
         vdj_hits_storage->AddVDJHits(vdj_hits_ptr);
         /*
         cout << "==== Read: " << (*it)->name << ". # V alignments: " << vdj_hits_ptr->VHitsNumber() <<
