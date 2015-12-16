@@ -58,9 +58,11 @@ IgGeneSegmentHitsPtr InfoBasedDHitsCalculator::ComputeHits(ReadPtr read_ptr) {
         //if(estimator_.AlignmentIsGood(d_alignment))
         //    d_hits_ptr->AddHit(d_alignment);
     }
-    // just a stub: we select an alignment with the best score
+    // just a stub: we select the only alignment with the best score
     for(auto it = d_alignments.begin(); it != d_alignments.end(); it++)
-        if((*it)->Score() == max_score)
+        if((*it)->Score() == max_score) {
             d_hits_ptr->AddHit(*it);
+            break;
+        }
     return d_hits_ptr;
 }

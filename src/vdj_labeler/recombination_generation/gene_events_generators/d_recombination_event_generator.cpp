@@ -20,9 +20,13 @@ int DRecombinationEventGenerator::ComputeMinRightBound(IgGeneAlignmentPtr d_alig
 size_t DRecombinationEventGenerator::ComputeMaxRightConsistentCleavage(IgGeneAlignmentPtr d_alignment,
                                                                     int left_event_size) {
     size_t min_right_cleavage = d_alignment->GeneLength() - d_alignment->Positions().GeneEndPos() - 1;
-    int left_positive_len = max<int>(0, left_event_size);
+    size_t read_cleavage = 0;
+    if(left_event_size > 0) {
+        assert(left_event_size >= d_alignment->Positions().GeneStartPos());
+        read_cleavage = left_event_size - d_alignment->Positions().GeneStartPos();
+    }
     return size_t(min<int>(int(max_cleavage_),
-                           int(d_alignment->ReadAlignmentLength())) + min_right_cleavage - left_positive_len);
+                           int(d_alignment->ReadAlignmentLength())) - read_cleavage + min_right_cleavage);
 }
 
 void DRecombinationEventGenerator::GenerateRightConsistentEvents(IgGeneAlignmentPtr d_alignment, int left_event_size,
@@ -44,9 +48,10 @@ IgGeneRecombinationEventStoragePtr DRecombinationEventGenerator::ComputeEvents(I
     if(d_alignment->IsEmpty())
         return d_events;
     int min_left_bound = ComputeMinLeftBound(d_alignment);
-    int max_left_bound = int(min<size_t>(d_alignment->ReadAlignmentLength(), max_cleavage_));
+    int max_left_bound = int(min<size_t>(d_alignment->ReadAlignmentLength() + d_alignment->Positions().GeneStartPos(),
+                                         max_cleavage_));
     cout << *d_alignment << endl;
-    INFO("Left bounf of left events: " << min_left_bound);
+    INFO("Left bound of left events: " << min_left_bound);
     INFO("Right bound of left events: " << max_left_bound);
     //  we iterate from max allowed palindrome to max allowed cleavage and
     // consider that this event occurred at the start of D segment
