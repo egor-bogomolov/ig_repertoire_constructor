@@ -30,13 +30,11 @@ void RightVTailAligner::RefineAlignmentPositions(IgGeneAlignmentPtr alignment_pt
     // alignment can contain gaps =>
     // alignment length and number of read or gene nucleotides participating in alignment can be different
     // refinement of read positions
-    size_t read_alignment_length = toSourcePosition(row1, alignment_length - 1) + 1;
-    size_t start_read_pos = alignment_ptr->Positions().alignment.query_pos.second + 1;
-    size_t end_read_pos = start_read_pos + toSourcePosition(row1, read_alignment_length - 1);
+    size_t start_read_pos = alignment_ptr->Positions().ReadEndPos() + toSourcePosition(row1, 0) + 1;
+    size_t end_read_pos = alignment_ptr->Positions().ReadEndPos() + toSourcePosition(row1, alignment_length - 1) + 1;
     // refinement of gene positions
-    size_t gene_alignment_length = toSourcePosition(row2, alignment_length - 1) + 1;
-    size_t start_gene_pos = alignment_ptr->Positions().alignment.subject_pos.second + 1;
-    size_t end_gene_pos = start_gene_pos + toSourcePosition(row2, gene_alignment_length - 1);
+    size_t start_gene_pos = alignment_ptr->Positions().GeneEndPos() + toSourcePosition(row2, 0) + 1;
+    size_t end_gene_pos = alignment_ptr->Positions().GeneEndPos() + toSourcePosition(row2, alignment_length - 1) + 1;
     alignment_ptr->RefineAlignmentPositions(AlignmentPositions(
             make_pair(start_read_pos, end_read_pos),
             make_pair(start_gene_pos, end_gene_pos)));
@@ -65,6 +63,7 @@ IgGeneAlignmentPtr RightVTailAligner::ComputeAlignment(IgGeneAlignmentPositions 
     assignSource(row(align, 0), read_segment);
     assignSource(row(align, 1), gene_segment);
     int score = globalAlignment(align, Score<int, Simple>(2, -1, -10, -10));
+    TRACE(align);
     IgGeneAlignmentPtr v_alignment(new IgGeneAlignment(alignment_positions, align, score));
     RefineAlignmentPositions(v_alignment);
     return v_alignment;
