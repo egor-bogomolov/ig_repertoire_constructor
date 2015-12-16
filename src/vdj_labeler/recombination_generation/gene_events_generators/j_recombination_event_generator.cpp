@@ -18,9 +18,10 @@ void JRecombinationEventGenerator::GenerateCleavageEvents(IgGeneAlignmentPtr j_a
     // if alignment is empty, cleavage can not be observed
     if(j_alignment->IsEmpty())
         return;
+    size_t min_cleavage_length = j_alignment->Positions().GeneStartPos();
     size_t max_cleavage_length = min<size_t>(max_cleavage_, j_alignment->ReadAlignmentLength());
-    INFO("Max J cleavage: " << max_cleavage_length);
-    for(size_t clen = 1; clen <= max_cleavage_length; clen++)
+    INFO("Min J cleavage:" << min_cleavage_length << ", max J cleavage: " << max_cleavage_length);
+    for(size_t clen = min_cleavage_length; clen <= max_cleavage_length; clen++)
         j_events->AddEvent(GenerateCleavageEvent(j_alignment, clen));
 }
 
@@ -33,7 +34,8 @@ CleavedIgGeneAlignment JRecombinationEventGenerator::GeneratePalindromicEvent(Ig
 
 void JRecombinationEventGenerator::GeneratePalindromicEvents(IgGeneAlignmentPtr j_alignment,
                                                              IgGeneRecombinationEventStoragePtr j_events) {
-    //for(size_t plen = 1; plen < max_palindrome_; plen++)
+    if(j_alignment->Positions().GeneStartPos() != 0)
+        return;
     for(int plen = int(max_palindrome_); plen > 0; plen--)
         j_events->AddEvent(GeneratePalindromicEvent(j_alignment, size_t(plen)));
 }

@@ -21,9 +21,10 @@ void VRecombinationEventGenerator::GenerateCleavageEvents(IgGeneAlignmentPtr v_a
     // if alignment is empty cleavage can not be observed
     if(v_alignment->IsEmpty())
         return;
-    size_t cleavage_length = min<size_t>(max_cleavage_, v_alignment->ReadAlignmentLength());
-    INFO("Max cleavage length in V: " << cleavage_length);
-    for(size_t clen = 1; clen <= cleavage_length; clen++)
+    size_t min_cleavage = v_alignment->GeneLength() - v_alignment->Positions().GeneEndPos() - 1;
+    size_t max_cleavage = min<size_t>(max_cleavage_, v_alignment->ReadAlignmentLength());
+    INFO("Min cleavage: " <<  min_cleavage << ", max cleavage length in V: " << max_cleavage);
+    for(size_t clen = min_cleavage; clen <= max_cleavage; clen++)
         v_events->AddEvent(GenerateCleavageEvent(v_alignment, clen));
 }
 
@@ -36,6 +37,8 @@ CleavedIgGeneAlignment VRecombinationEventGenerator::GeneratePalindromicEvent(Ig
 
 void VRecombinationEventGenerator::GeneratePalindromicEvents(IgGeneAlignmentPtr v_alignment,
                                                              IgGeneRecombinationEventStoragePtr v_events) {
+    if(v_alignment->Positions().GeneEndPos() != v_alignment->GeneLength() - 1)
+        return;
     for(size_t plen = 1; plen <= max_palindrome_; plen++)
         v_events->AddEvent(GeneratePalindromicEvent(v_alignment, plen));
 }

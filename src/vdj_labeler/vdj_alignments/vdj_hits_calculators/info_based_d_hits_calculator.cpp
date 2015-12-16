@@ -34,8 +34,8 @@ IgGeneSegmentHitsPtr InfoBasedDHitsCalculator::ComputeHits(ReadPtr read_ptr) {
     AlignmentPositions d_positions = ComputeDPositions(v_alignment_positions, j_alignment_positions);
     IgGeneSegmentHitsPtr d_hits_ptr(new IgGeneSegmentHits(IgGeneType::diversity_gene, read_ptr));
     if(!DAlignmentPositionsAreGood(d_positions)) {
-        INFO("D positions are too short to generate alignment");
-        INFO(d_positions);
+        TRACE("D positions are too short to generate alignment");
+        TRACE(d_positions);
         // add single empty alignment and return hits storage
         seqan::Align<Dna5String> align;
         seqan::resize(seqan::rows(align), 2);
