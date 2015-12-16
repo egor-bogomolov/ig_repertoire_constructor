@@ -37,7 +37,7 @@ void LeftJTailAligner::RefineAlignmentPositions(IgGeneAlignmentPtr alignment_ptr
 }
 
 IgGeneAlignmentPtr LeftJTailAligner::ComputeAlignment(IgGeneAlignmentPositions alignment_positions) {
-    INFO("Computation of J alignment for positions: " << alignment_positions);
+    TRACE("Computation of J alignment for positions: " << alignment_positions);
     Align<Dna5String> align;
     resize(rows(align), 2);
     if(alignment_positions.alignment.subject_pos.first == 0)
@@ -46,9 +46,9 @@ IgGeneAlignmentPtr LeftJTailAligner::ComputeAlignment(IgGeneAlignmentPositions a
     auto read_segment = infixWithLength(alignment_positions.read->seq,
                                         alignment_positions.ReadStartPos() - tail_length - left_shift_,
                                         tail_length + left_shift_);
-    INFO("Read segment (" << length(read_segment) << "): " << read_segment);
+    TRACE("Read segment (" << length(read_segment) << "): " << read_segment);
     auto gene_segment = prefix(alignment_positions.ig_gene->seq(), tail_length);
-    INFO("Gene segment (" << length(gene_segment) << "): " << gene_segment);
+    TRACE("Gene segment (" << length(gene_segment) << "): " << gene_segment);
     assignSource(row(align, 0), read_segment);
     assignSource(row(align, 1), gene_segment);
     int score = globalAlignment(align, Score<int, Simple>(2, -1, -10, -10));

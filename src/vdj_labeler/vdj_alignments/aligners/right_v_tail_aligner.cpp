@@ -43,7 +43,7 @@ void RightVTailAligner::RefineAlignmentPositions(IgGeneAlignmentPtr alignment_pt
 }
 
 IgGeneAlignmentPtr RightVTailAligner::ComputeAlignment(IgGeneAlignmentPositions alignment_positions) {
-    INFO("Computation of V alignment for positions: " << alignment_positions);
+    TRACE("Computation of V alignment for positions: " << alignment_positions);
     Align<Dna5String> align;
     resize(rows(align), 2);
     if(length(alignment_positions.ig_gene->seq()) == alignment_positions.alignment.subject_pos.second)
@@ -58,10 +58,10 @@ IgGeneAlignmentPtr RightVTailAligner::ComputeAlignment(IgGeneAlignmentPositions 
     auto read_segment = infixWithLength(alignment_positions.read->seq,
                                         alignment_positions.ReadEndPos() + 1,
                                         tail_length + right_shift_);
-    INFO("Read segment (" << length(read_segment) << "): " << read_segment);
+    TRACE("Read segment (" << length(read_segment) << "): " << read_segment);
     auto gene_segment = suffix(alignment_positions.ig_gene->seq(),
                                alignment_positions.alignment.subject_pos.second + 1);
-    INFO("Gene segment (" << length(gene_segment) << "): " << gene_segment);
+    TRACE("Gene segment (" << length(gene_segment) << "): " << gene_segment);
     assignSource(row(align, 0), read_segment);
     assignSource(row(align, 1), gene_segment);
     int score = globalAlignment(align, Score<int, Simple>(2, -1, -10, -10));

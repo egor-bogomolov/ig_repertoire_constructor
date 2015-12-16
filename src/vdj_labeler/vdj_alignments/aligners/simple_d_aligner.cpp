@@ -25,14 +25,14 @@ void SimpleDAligner::RefineAlignmentPositions(IgGeneAlignmentPtr d_gene_alignmen
 }
 
 IgGeneAlignmentPtr SimpleDAligner::ComputeAlignment(IgGeneAlignmentPositions alignment_positions) {
-    INFO("Computation of D alignment for positions: " << alignment_positions);
+    TRACE("Computation of D alignment for positions: " << alignment_positions);
     Align<Dna5String> align;
     resize(rows(align), 2);
     //cout << length(alignment_positions.ig_gene->seq()) << " " << alignment_positions.alignment.query_pos.second << endl;
     //if(length(alignment_positions.ig_gene->seq()) == alignment_positions.alignment.subject_pos.second)
     //    return IgGeneAlignmentPtr(new IgGeneAlignment(alignment_positions, align));
     if(alignment_positions.IsEmpty()) {
-        INFO("D alignment is empty");
+        TRACE("D alignment is empty");
         return IgGeneAlignmentPtr(new IgGeneAlignment(alignment_positions, align, -1));
     }
     auto read_segment = infixWithLength(alignment_positions.read->seq,
@@ -40,7 +40,7 @@ IgGeneAlignmentPtr SimpleDAligner::ComputeAlignment(IgGeneAlignmentPositions ali
                                         alignment_positions.ReadAlignmentLength());
     assignSource(row(align, 0), read_segment);
     assignSource(row(align, 1), alignment_positions.ig_gene->seq());
-    INFO("Read segment (" << length(read_segment) << "): " << read_segment);
+    TRACE("Read segment (" << length(read_segment) << "): " << read_segment);
     int score = localAlignment(align, Score<int, Simple>(2, -1, -3, -2));
     //cout << "Score: " << score << endl;
     //cout << align << endl;
