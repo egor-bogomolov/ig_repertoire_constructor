@@ -22,7 +22,7 @@ size_t DRecombinationEventGenerator::ComputeMaxRightConsistentCleavage(IgGeneAli
     size_t min_right_cleavage = d_alignment->GeneLength() - d_alignment->Positions().GeneEndPos() - 1;
     size_t read_cleavage = 0;
     if(left_event_size > 0) {
-        assert(left_event_size >= d_alignment->Positions().GeneStartPos());
+        assert(size_t(left_event_size) >= d_alignment->Positions().GeneStartPos());
         read_cleavage = left_event_size - d_alignment->Positions().GeneStartPos();
     }
     return size_t(min<int>(int(max_cleavage_),
