@@ -10,7 +10,7 @@ int RightEventSHMsCalculator::ComputeNumberCleavedSHMs(IgGeneAlignmentPtr gene_a
     assert(cleavage_length >= alignment_cleavage);
     INFO("Computation of # SHMs in right cleavage of length " << cleavage_length);
     size_t rel_cleavage_length = cleavage_length - alignment_cleavage;
-    if(rel_cleavage_length = 0)
+    if(rel_cleavage_length == 0)
         return 0;
     size_t abs_start_cleavage_pos = gene_alignment->Positions().ReadEndPos() - rel_cleavage_length + 1;
     size_t rel_start_cleavage_pos = abs_start_cleavage_pos - gene_alignment->Positions().ReadStartPos();
