@@ -10,6 +10,8 @@ int RightEventSHMsCalculator::ComputeNumberCleavedSHMs(IgGeneAlignmentPtr gene_a
     assert(cleavage_length >= alignment_cleavage);
     INFO("Computation of # SHMs in right cleavage of length " << cleavage_length);
     size_t rel_cleavage_length = cleavage_length - alignment_cleavage;
+    if(rel_cleavage_length = 0)
+        return 0;
     size_t abs_start_cleavage_pos = gene_alignment->Positions().ReadEndPos() - rel_cleavage_length + 1;
     size_t rel_start_cleavage_pos = abs_start_cleavage_pos - gene_alignment->Positions().ReadStartPos();
     INFO("Cleavage length: " << cleavage_length << ", rel cleavage length: " << rel_cleavage_length <<
@@ -21,6 +23,8 @@ int RightEventSHMsCalculator::ComputeNumberCleavedSHMs(IgGeneAlignmentPtr gene_a
     DnaAlignmentRow &row2 = seqan::row(alignment, 1);
     size_t start_alignment_cleavage_pos = seqan::toViewPosition(row2, rel_start_cleavage_pos);
     int num_shms = 0;
+    INFO("Start alignment position: " << start_alignment_cleavage_pos <<
+                 ", gene alignment length: " << seqan::length(row2));
     for(size_t i = start_alignment_cleavage_pos; i < seqan::length(row2); i++)
         if(row1[i] != row2[i])
             num_shms++;
