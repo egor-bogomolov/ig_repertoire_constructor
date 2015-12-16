@@ -5,8 +5,8 @@ using std::cout;
 using std::endl;
 
 int LeftEventSHMsCalculator::ComputeNumberCleavedSHMs(IgGeneAlignmentPtr gene_alignment, size_t cleavage_length) {
+    TRACE("Computation of # SHMs in left cleavage of length " << cleavage_length);
     assert(cleavage_length >= gene_alignment->Positions().GeneStartPos());
-    INFO("Computation of # SHMs in left cleavage of length " << cleavage_length);
     size_t rel_cleavage_len = cleavage_length - gene_alignment->Positions().GeneStartPos();
     auto alignment = gene_alignment->Alignment();
     typedef seqan::Row<IgGeneAlignment::DnaAlignment>::Type DnaAlignmentRow;
@@ -15,22 +15,22 @@ int LeftEventSHMsCalculator::ComputeNumberCleavedSHMs(IgGeneAlignmentPtr gene_al
     int num_shms = 0;
     int cur_cleavage = 0;
     for(size_t i = 0; i < seqan::length(row1); i++) {
-        if(row1[i] != '-')
+        if(row2[i] != '-')
             cur_cleavage++;
         if(row1[i] != row2[i])
             num_shms++;
         if(cur_cleavage == rel_cleavage_len)
             break;
     }
-    INFO("Cleavage length: " << cleavage_length << ", rel cleavage len: " << rel_cleavage_len);
-    INFO("#SHMs: -" << num_shms);
+    TRACE("Cleavage length: " << cleavage_length << ", rel cleavage len: " << rel_cleavage_len);
+    TRACE("#SHMs: -" << num_shms);
     return -1 * num_shms;
 }
 
 int LeftEventSHMsCalculator::ComputeNumberPalindromeSHMs(IgGeneAlignmentPtr gene_alignment, size_t palindrome_length) {
+    TRACE("Computation of #SHMs in left palindrome of length " << palindrome_length);
     // if gene has alignment to read with gaps at the end, we can not compute
     assert(gene_alignment->Positions().GeneStartPos() == 0);
-    INFO("Computation of #SHMs in left palindrome of length " << palindrome_length);
     int num_shms = 0;
     for(size_t i = 0; i < palindrome_length; i++) {
         size_t gene_pos = i;
@@ -38,7 +38,7 @@ int LeftEventSHMsCalculator::ComputeNumberPalindromeSHMs(IgGeneAlignmentPtr gene
         if(getRevCompl(gene_alignment->GeneSeq()[gene_pos]) != gene_alignment->ReadSeq()[read_pos])
             num_shms++;
     }
-    INFO("#SHMs: +" << num_shms);
+    TRACE("#SHMs: +" << num_shms);
     return num_shms;
 }
 

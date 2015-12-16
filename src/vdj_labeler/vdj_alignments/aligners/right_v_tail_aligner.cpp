@@ -22,22 +22,29 @@ void RightVTailAligner::RefineAlignmentPositionsForEmptyAlign(IgGeneAlignmentPtr
             make_pair(old_gene_second, old_gene_second)));
 }
 
-void RightVTailAligner::RefineAlignmentPositions(IgGeneAlignmentPtr alignment_ptr) {
-    // todo: debug me!
-    auto row1 = row(alignment_ptr->Alignment(), 0);
-    auto row2 = row(alignment_ptr->Alignment(), 1);
-    size_t alignment_length = length(row1);
-    // alignment can contain gaps =>
-    // alignment length and number of read or gene nucleotides participating in alignment can be different
-    // refinement of read positions
-    size_t start_read_pos = alignment_ptr->Positions().ReadEndPos() + toSourcePosition(row1, 0) + 1;
-    size_t end_read_pos = alignment_ptr->Positions().ReadEndPos() + toSourcePosition(row1, alignment_length - 1) + 1;
-    // refinement of gene positions
-    size_t start_gene_pos = alignment_ptr->Positions().GeneEndPos() + toSourcePosition(row2, 0) + 1;
-    size_t end_gene_pos = alignment_ptr->Positions().GeneEndPos() + toSourcePosition(row2, alignment_length - 1) + 1;
-    alignment_ptr->RefineAlignmentPositions(AlignmentPositions(
-            make_pair(start_read_pos, end_read_pos),
-            make_pair(start_gene_pos, end_gene_pos)));
+IgGeneAlignmentPositions RightVTailAligner::RefineAlignmentPositions(IgGeneAlignmentPositions alignment_positions,
+                                                                     seqan::Align<Dna5String> &alignment) {
+    TRACE("Refinement of V alignment positions");
+    auto row1 = row(alignment, 0);
+    auto row2 = row(alignment, 1);
+    // computation of alignment start positions
+    size_t start_gene_pos = alignment_positions.ReadEndPos() + 1 + toSourcePosition(row1, 0);
+    size_t start_read_pos = alignment_positions.GeneEndPos() + 1 + toSourcePosition(row2, 0);
+    // computation of alignment end positions
+    // we will find the first position from the right that is not gap on gene
+    size_t end_read_pos = 0;
+    size_t end_gene_pos = 0;
+    for (int i = int(seqan::length(row2) - 1); i >= 0; i--)
+        if (row2[i] != '-') {
+            end_read_pos = alignment_positions.ReadEndPos() + 1 + toSourcePosition(row1, i);
+            end_gene_pos = alignment_positions.GeneEndPos() + 1 + toSourcePosition(row2, i);
+            break;
+        }
+    TRACE("Refined read positions: " << start_read_pos << " - " << end_read_pos);
+    TRACE("Refined gene positions: " << start_gene_pos << " - " << end_gene_pos);
+    return IgGeneAlignmentPositions(AlignmentPositions(make_pair(start_read_pos, end_read_pos),
+                                                       make_pair(start_gene_pos, end_gene_pos)),
+                                    alignment_positions.Gene(), alignment_positions.Read());
 }
 
 IgGeneAlignmentPtr RightVTailAligner::ComputeAlignment(IgGeneAlignmentPositions alignment_positions) {
@@ -64,7 +71,7 @@ IgGeneAlignmentPtr RightVTailAligner::ComputeAlignment(IgGeneAlignmentPositions 
     assignSource(row(align, 1), gene_segment);
     int score = globalAlignment(align, Score<int, Simple>(2, -1, -10, -10));
     TRACE(align);
-    IgGeneAlignmentPtr v_alignment(new IgGeneAlignment(alignment_positions, align, score));
-    RefineAlignmentPositions(v_alignment);
+    auto refined_positions = RefineAlignmentPositions(alignment_positions, align);
+    IgGeneAlignmentPtr v_alignment(new IgGeneAlignment(refined_positions, align, score));
     return v_alignment;
 }

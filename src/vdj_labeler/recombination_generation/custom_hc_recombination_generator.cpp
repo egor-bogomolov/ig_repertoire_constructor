@@ -78,8 +78,8 @@ HcRecombinationStoragePtr CustomHeavyChainRecombinationGenerator::CreateRecombin
             HCRecombination recombination(recombination_storage->Read(),
                                           v_gene, d_gene, j_gene,
                                           vd_insersion, dj_insersion);
-            INFO(recombination);
-            INFO("-------")
+            TRACE(recombination);
+            TRACE("-------")
             if(recombination.Valid())
                 recombination_storage->AddRecombination(recombination);
         }
@@ -91,18 +91,18 @@ HcRecombinationStoragePtr CustomHeavyChainRecombinationGenerator::CreateRecombin
         IgGeneRecombinationEventStoragePtr v_events,
         IgGeneRecombinationEventStoragePtr d_events,
         IgGeneRecombinationEventStoragePtr j_events) {
-    INFO(v_events->size() << " V events were computed");
-    INFO(d_events->size() << " D events were computed");
-    INFO(j_events->size() << " J events were computed");
+    TRACE(v_events->size() << " V events were computed");
+    TRACE(d_events->size() << " D events were computed");
+    TRACE(j_events->size() << " J events were computed");
     for(auto vit = v_events->cbegin(); vit != v_events->cend(); vit++) {
         size_t v_end_position = (*vit).EndReadPosition();
         auto d_range = d_events->GetIndexRangeFromLeftPosition(v_end_position + 1);
-        INFO("D range: " << d_range.first << " - " << d_range.second);
+        TRACE("D range: " << d_range.first << " - " << d_range.second);
         for(size_t di = d_range.first; di <= d_range.second; di++) {
             auto vd_insertions = vd_insertion_generator_.ComputeInsertionEvents(*vit, (*d_events)[di]);
             size_t d_end_position = (*d_events)[di].EndReadPosition();
             auto j_range = j_events->GetIndexRangeFromLeftPosition(d_end_position + 1);
-            INFO("J range: " << j_range.first << " - " << j_range.second);
+            TRACE("J range: " << j_range.first << " - " << j_range.second);
             for(size_t ji = j_range.first; ji <= j_range.second; ji++) {
                 auto dj_insertions = dj_insertion_generator_.ComputeInsertionEvents((*d_events)[di], (*j_events)[ji]);
                 recombination_storage = CreateRecombinations(recombination_storage,
@@ -117,7 +117,7 @@ HcRecombinationStoragePtr CustomHeavyChainRecombinationGenerator::CreateRecombin
 HcRecombinationStoragePtr CustomHeavyChainRecombinationGenerator::ComputeRecombinations(VDJHitsPtr vdj_hits) {
     Clear();
     HcRecombinationStoragePtr recombination_storage(new HcRecombinationStorage(vdj_hits->Read()));
-    INFO("Generation of recombinations for read " << vdj_hits->Read()->id);
+    INFO("Generation of recombinations for read " << vdj_hits->Read()->name);
     ComputeVEventStorages(vdj_hits);
     ComputeDEventStorages(vdj_hits);
     ComputeJEventStorages(vdj_hits);

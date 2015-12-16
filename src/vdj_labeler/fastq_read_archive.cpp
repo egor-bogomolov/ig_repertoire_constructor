@@ -5,7 +5,7 @@
 using namespace std;
 
 std::ostream& operator<<(std::ostream& out, const Read& read) {
-    out << "Name: " << read.name << ", seq: " << read.seq;
+    out << "Name: " << read.name << ". Seq (" << seqan::length(read.seq) << "): " << read.seq;
     return out;
 }
 

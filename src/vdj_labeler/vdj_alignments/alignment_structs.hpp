@@ -59,6 +59,10 @@ struct IgGeneAlignmentPositions {
     size_t ReadAlignmentLength() const { return alignment.QueryAlignmentLength(); }
 
     size_t GeneAlignmentLength() const { return alignment.SubjectAlignmentLength(); }
+
+    IgGenePtr Gene() const { return ig_gene; }
+
+    ReadPtr Read() const { return read; }
 };
 
 std::ostream& operator<<(std::ostream& out, const IgGeneAlignmentPositions& obj);
@@ -80,8 +84,6 @@ class IgGeneAlignment {
 
     void ComputeSHMsNumber();
 
-    void ComputeGapsNumber();
-
     void ComputeAlignmentLength();
 
 public:
@@ -96,7 +98,6 @@ public:
             num_gaps_(size_t(-1)) {
         ComputeNormalizedScore();
         ComputeSHMsNumber();
-        ComputeGapsNumber();
         ComputeAlignmentLength();
     }
 
@@ -133,6 +134,8 @@ public:
     const Dna5String& GeneSeq() const { return positions_.ig_gene->seq(); }
 
     const Dna5String& ReadSeq() const { return positions_.read->seq; }
+
+    size_t ReadLength() const { return seqan::length(positions_.Read()->seq); }
 
     bool IsEmpty() const { return AlignmentLength() == 0; }
 };

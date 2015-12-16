@@ -21,19 +21,24 @@ void LeftJTailAligner::RefineAlignmentPositions(IgGeneAlignmentPtr alignment_ptr
     auto row1 = row(alignment_ptr->Alignment(), 0);
     auto row2 = row(alignment_ptr->Alignment(), 1);
     size_t alignment_length = length(row1);
-    // alignment can contain gaps =>
-    // alignment length and number of read or gene nucleotides participating in alignment can be different
-    // refinement of read position
-    size_t read_alignment_length = toSourcePosition(row1, alignment_length - 1) + 1;
-    size_t end_read_pos = alignment_ptr->Positions().alignment.query_pos.first - 1;
-    size_t start_read_pos = end_read_pos - read_alignment_length + 1;
-    // refinement of gene position
-    size_t gene_alignment_length = toSourcePosition(row2, alignment_length - 1) + 1;
-    size_t end_gene_pos = alignment_ptr->Positions().alignment.subject_pos.first - 1;
-    size_t start_gene_pos = end_gene_pos - gene_alignment_length + 1;
+    // computation of alignment end positions
+    size_t end_read_pos = alignment_ptr->Positions().ReadStartPos() - 1;
+    size_t end_gene_pos = alignment_ptr->Positions().GeneStartPos() - 1;
+    // computation of alignment start positions
+    // we need to skip all gapped positions
+    size_t start_gene_pos = size_t(-1);
+    size_t start_read_pos = size_t(-1);
+    for(size_t i = 0; i < length(row1); i++)
+        if(row2[i] != '-') {
+            start_read_pos = end_read_pos - toSourcePosition(row1, alignment_length - 1) + toSourcePosition(row1, i);
+            start_gene_pos = end_gene_pos - toSourcePosition(row2, alignment_length - 1) + toSourcePosition(row2, i);
+            break;
+        }
     alignment_ptr->RefineAlignmentPositions(AlignmentPositions(
             make_pair(start_read_pos, end_read_pos),
             make_pair(start_gene_pos, end_gene_pos)));
+    TRACE("Refined read positions: " << start_read_pos << " - " << end_read_pos);
+    TRACE("Refined gene positions: " << start_gene_pos << " - " << end_gene_pos);
 }
 
 IgGeneAlignmentPtr LeftJTailAligner::ComputeAlignment(IgGeneAlignmentPositions alignment_positions) {
@@ -52,6 +57,7 @@ IgGeneAlignmentPtr LeftJTailAligner::ComputeAlignment(IgGeneAlignmentPositions a
     assignSource(row(align, 0), read_segment);
     assignSource(row(align, 1), gene_segment);
     int score = globalAlignment(align, Score<int, Simple>(2, -1, -10, -10));
+    TRACE(align);
     IgGeneAlignmentPtr j_alignment(new IgGeneAlignment(alignment_positions, align, score));
     RefineAlignmentPositions(j_alignment);
     return j_alignment;

@@ -12,10 +12,6 @@ void SimpleDAligner::RefineAlignmentPositions(IgGeneAlignmentPtr d_gene_alignmen
     auto row1 = row(d_gene_alignment->Alignment(), 0);
     auto row2 = row(d_gene_alignment->Alignment(), 1);
     size_t alignment_length = length(row1);
-    //cout << "Read. Start pos: " << toSourcePosition(row1, 0) << ", end pos: " <<
-    //        toSourcePosition(row1, alignment_length - 1) << endl;
-    //cout << "Gene. Start pos: " << toSourcePosition(row2, 0) << ", end pos: " <<
-    //        toSourcePosition(row2, alignment_length - 1) << endl;
     size_t start_read_pos = toSourcePosition(row1, 0) + d_gene_alignment->Positions().alignment.query_pos.first;
     size_t end_read_pos = toSourcePosition(row1, alignment_length - 1) +
             d_gene_alignment->Positions().alignment.query_pos.first;

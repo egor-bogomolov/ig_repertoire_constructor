@@ -21,27 +21,9 @@ ostream& operator<<(ostream& out, const IgGeneAlignmentPositions& obj) {
 }
 
 //-----------------------------------------------------------------------------
-
+// current SHMs calculator counts gaps at the start and end
 void IgGeneAlignment::ComputeSHMsNumber() {
     num_shms_ = 0;
-    typedef seqan::Row<DnaAlignment>::Type DnaAlignmentRow;
-    DnaAlignmentRow &row1 = seqan::row(alignment_, 0);
-    DnaAlignmentRow &row2 = seqan::row(alignment_, 1);
-    assert(length(row1) == length(row2));
-    if(length(row1) == 0)
-        return;
-    size_t row_length = length(row1);
-    for(size_t i = 0; i < row_length; i++)
-        if(row1[i] != row2[i])
-            num_shms_++;
-}
-
-void IgGeneAlignment::ComputeNormalizedScore() {
-    auto alignment_row = seqan::row(alignment_, 0);
-    normalized_score_ = double(score_) / double(seqan::length(alignment_row));
-}
-
-void IgGeneAlignment::ComputeGapsNumber() {
     num_gaps_ = 0;
     typedef seqan::Row<DnaAlignment>::Type DnaAlignmentRow;
     DnaAlignmentRow &row1 = seqan::row(alignment_, 0);
@@ -49,10 +31,17 @@ void IgGeneAlignment::ComputeGapsNumber() {
     assert(length(row1) == length(row2));
     if(length(row1) == 0)
         return;
-    size_t row_length = length(row1);
-    for(size_t i = 0; i < row_length; i++)
+    for(size_t i = 0; i < length(row1); i++) {
+        if(row1[i] != row2[i])
+            num_shms_++;
         if(row1[i] == '-' or row2[i] == '-')
             num_gaps_++;
+    }
+}
+
+void IgGeneAlignment::ComputeNormalizedScore() {
+    auto alignment_row = seqan::row(alignment_, 0);
+    normalized_score_ = double(score_) / double(seqan::length(alignment_row));
 }
 
 void IgGeneAlignment::ComputeAlignmentLength() {

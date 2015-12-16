@@ -33,10 +33,10 @@ void DRecombinationEventGenerator::GenerateRightConsistentEvents(IgGeneAlignment
                                                                  IgGeneRecombinationEventStoragePtr d_events) {
     int min_right_bound = ComputeMinRightBound(d_alignment);
     int max_right_bound = int(ComputeMaxRightConsistentCleavage(d_alignment, left_event_size));
-    INFO("Left bounf of right events: " << min_right_bound);
-    INFO("Right bound of right events: " << max_right_bound);
+    TRACE("Left bounf of right events: " << min_right_bound);
+    TRACE("Right bound of right events: " << max_right_bound);
     for(int relen = min_right_bound; relen <= max_right_bound; relen++) {
-        INFO("== Right current event: " << relen << ".");
+        TRACE("== Right current event: " << relen << ".");
         d_events->AddEvent(CleavedIgGeneAlignment(d_alignment, left_event_size, relen,
                                                   shm_calculator_.ComputeNumberSHMs(d_alignment,
                                                                                     left_event_size, relen)));
@@ -50,16 +50,14 @@ IgGeneRecombinationEventStoragePtr DRecombinationEventGenerator::ComputeEvents(I
     int min_left_bound = ComputeMinLeftBound(d_alignment);
     int max_left_bound = int(min<size_t>(d_alignment->ReadAlignmentLength() + d_alignment->Positions().GeneStartPos(),
                                          max_cleavage_));
-    cout << *d_alignment << endl;
-    INFO("Left bound of left events: " << min_left_bound);
-    INFO("Right bound of left events: " << max_left_bound);
+    TRACE(*d_alignment);
+    TRACE("Left bound of left events: " << min_left_bound);
+    TRACE("Right bound of left events: " << max_left_bound);
     //  we iterate from max allowed palindrome to max allowed cleavage and
     // consider that this event occurred at the start of D segment
     for(int elen = min_left_bound; elen <= max_left_bound; elen++) {
-        INFO("==== Left current event: " << elen << "...");
-        //cout << "============================" << endl;
+        TRACE("==== Left current event: " << elen << "...");
         GenerateRightConsistentEvents(d_alignment, elen, d_events);
-        //cout << "============================" << endl;
     }
     return d_events;
 }

@@ -33,10 +33,10 @@
 
 #include "recombination_calculator/hc_model_based_recombination_calculator.hpp"
 
-void create_console_logger() {
+void create_console_logger(logging::level default_level = logging::level::L_INFO) {
     using namespace logging;
-    string log_props_file = "";
-    logger *lg = create_logger(path::FileExists(log_props_file) ? log_props_file : "");
+    std::string log_props_file = "";
+    logger *lg = create_logger(log_props_file, default_level);
     lg->add_writer(std::make_shared<console_writer>());
     attach_logger(lg);
 }
@@ -90,22 +90,29 @@ void TestRecombinationCalculator(const FastqReadArchive& reads_archive, VDJHitsS
     INFO(recombination_storage.size() << " recombinaions were generated");
 }
 
+logging::level logger_string_to_level(std::string logger_level) {
+    if(logger_level == "TRACE")
+        return logging::level::L_TRACE;
+    return logging::level::L_INFO;
+}
+
 int main(int argc, char** argv) {
-    if(argc != 3) {
-        INFO("Invalid input parameters");
-        INFO("vdj_labeler read.fastq vj_finder_output.csv");
+    if(argc != 4) {
+        std::cout << "Invalid input parameters" << std::endl;
+        std::cout << "vdj_labeler read.fastq vj_finder_output.csv logger_level" << std::endl;
         return 1;
     }
 
-    perf_counter pc;
-    segfault_handler sh;
-    create_console_logger();
-
     std::string fastq_reads_fname(argv[1]); //"src/vdj_labeler/test/vdj_labeling.fastq";
     std::string vj_alignment_fname(argv[2]); //"src/vdj_labeler/test/vdj_labeling.csv";
+    std::string logger_level(argv[3]); // INFO or TRACE
     std::string v_germline_genes_fname = "src/fast_ig_tools/germline/human/IGHV.fa";
     std::string d_germline_genes_fname = "src/fast_ig_tools/germline/human/IGHD.fa";
     std::string j_germline_genes_fname = "src/fast_ig_tools/germline/human/IGHJ.fa";
+
+    perf_counter pc;
+    segfault_handler sh;
+    create_console_logger(logger_string_to_level(logger_level));
 
     INFO("VDJ labeler starts");
 
@@ -156,9 +163,7 @@ int main(int argc, char** argv) {
                                                                    insertion_generator);
     INFO("Generator of VDJ recombinations starts");
     for(auto it = hits_storage->cbegin(); it != hits_storage->cend(); it++) {
-        cout << "Read " << (*it)->Read()->name << endl;
         auto recombination_storage = recombination_generator.ComputeRecombinations(*it);
-        cout << endl << endl;
     }
     INFO("Generator of VDJ recombinations ends");
 

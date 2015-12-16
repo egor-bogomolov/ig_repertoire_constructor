@@ -7,7 +7,8 @@ class RightVTailAligner : public GeneSegmentAligner {
 
     void RefineAlignmentPositionsForEmptyAlign(IgGeneAlignmentPtr alignment_ptr);
 
-    void RefineAlignmentPositions(IgGeneAlignmentPtr alignment_ptr);
+    IgGeneAlignmentPositions RefineAlignmentPositions(IgGeneAlignmentPositions alignment_positions,
+                                                      seqan::Align<Dna5String> &alignment);
 
 public:
     RightVTailAligner(size_t right_shift = 0) :
