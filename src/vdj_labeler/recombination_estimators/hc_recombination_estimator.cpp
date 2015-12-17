@@ -3,6 +3,8 @@
 
 void HcRecombinationEstimator::Update(HcRecombinationStoragePtr recombination_storage) {
     num_recombinations_.push_back(recombination_storage->size());
+    if(recombination_storage->size() == 0)
+        return;
     size_t min_num_shms = size_t(-1);
     size_t min_shms_index = size_t(-1);
     for(size_t i = 0; i < recombination_storage->size(); i++)
