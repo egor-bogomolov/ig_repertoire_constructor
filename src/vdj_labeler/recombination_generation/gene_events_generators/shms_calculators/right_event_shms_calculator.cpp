@@ -23,7 +23,7 @@ int RightEventSHMsCalculator::ComputeNumberCleavedSHMs(IgGeneAlignmentPtr gene_a
             cur_cleavage++;
         if(row1[i] != row2[i])
             num_shms++;
-        if(cur_cleavage == rel_cleavage_length)
+        if(cur_cleavage == int(rel_cleavage_length))
             break;
     }
     TRACE("Cleavage length: " << cleavage_length << ", rel cleavage length: " << rel_cleavage_length);
@@ -50,6 +50,19 @@ int RightEventSHMsCalculator::ComputeNumberPalindromeSHMs(IgGeneAlignmentPtr gen
 int RightEventSHMsCalculator::ComputeNumberSHMs(IgGeneAlignmentPtr gene_alignment,
                                                 int,
                                                 int right_cleavage_length) {
+    if(right_cleavage_length == 0)
+        return 0;
+    // if gene was cleaved, number of SHMs would 0 or negative
+    // since some unaligned nucleotides were cleaved
+    if(right_cleavage_length > 0)
+        return ComputeNumberCleavedSHMs(gene_alignment, size_t(right_cleavage_length));
+    // if gene contains palindrome, number of SHMs would be 0 or positive
+    // since some nucleotides in palindrome are mutated
+    return ComputeNumberPalindromeSHMs(gene_alignment, size_t(right_cleavage_length * -1));
+}
+
+int RightEventSHMsCalculator::ComputeNumberSHMsForRightEvent(IgGeneAlignmentPtr gene_alignment,
+                                                             int right_cleavage_length) {
     if(right_cleavage_length == 0)
         return 0;
     // if gene was cleaved, number of SHMs would 0 or negative

@@ -29,6 +29,11 @@ public:
     size_t size() const { return recombinations_.size(); }
 
     ReadPtr Read() const { return read_ptr_; }
+
+    Recombination operator[](size_t index) {
+        assert(index < size());
+        return recombinations_[index];
+    }
 };
 
 typedef RecombinationStorage<HCRecombination> HcRecombinationStorage;

@@ -37,9 +37,12 @@ void DRecombinationEventGenerator::GenerateRightConsistentEvents(IgGeneAlignment
     TRACE("Right bound of right events: " << max_right_bound);
     for(int relen = min_right_bound; relen <= max_right_bound; relen++) {
         TRACE("== Right current event: " << relen << ".");
-        d_events->AddEvent(CleavedIgGeneAlignment(d_alignment, left_event_size, relen,
-                                                  shm_calculator_.ComputeNumberSHMs(d_alignment,
-                                                                                    left_event_size, relen)));
+        d_events->AddEvent(CleavedIgGeneAlignment(d_alignment,
+                                                  left_event_size,
+                                                  relen,
+                                                  shm_calculator_.ComputeNumberSHMsForLeftEvent(d_alignment,
+                                                                                                left_event_size),
+                                                  shm_calculator_.ComputeNumberSHMsForRightEvent(d_alignment, relen)));
     }
 }
 

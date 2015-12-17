@@ -31,6 +31,8 @@
 #include "recombination_generation/gene_events_generators/j_recombination_event_generator.hpp"
 #include "recombination_generation/insertion_events_generators/versatile_insertion_event_generator.hpp"
 
+#include "recombination_estimators/hc_recombination_estimator.hpp"
+
 #include "recombination_calculator/hc_model_based_recombination_calculator.hpp"
 
 void create_console_logger(logging::level default_level = logging::level::L_INFO) {
@@ -50,17 +52,17 @@ void TestRecombinationCalculator(const FastqReadArchive& reads_archive, VDJHitsS
          ", #J: " << hits_3->JHitsNumber());
 
     auto v_alignment = hits_3->GetAlignmentByIndex(IgGeneType::variable_gene, 0);
-    CleavedIgGeneAlignment v_event_0(v_alignment, 0, 0, 0);
-    CleavedIgGeneAlignment v_event_1(v_alignment, 0, -1, 0);
-    CleavedIgGeneAlignment v_event_2(v_alignment, 0, -2, 0);
-    CleavedIgGeneAlignment v_event_3(v_alignment, 0, -3, 1);
+    CleavedIgGeneAlignment v_event_0(v_alignment, 0, 0, 0, 0);
+    CleavedIgGeneAlignment v_event_1(v_alignment, 0, -1, 0, 0);
+    CleavedIgGeneAlignment v_event_2(v_alignment, 0, -2, 0, 0);
+    CleavedIgGeneAlignment v_event_3(v_alignment, 0, -3, 0, 1);
 
     auto d_alignment = hits_3->GetAlignmentByIndex(IgGeneType::diversity_gene, 0);
-    CleavedIgGeneAlignment d_event_0(d_alignment, 1, 8, 0);
+    CleavedIgGeneAlignment d_event_0(d_alignment, 1, 8, 0, 0);
 
     auto j_alignment = hits_3->GetAlignmentByIndex(IgGeneType::join_gene, 0);
-    CleavedIgGeneAlignment j_event_0(j_alignment, 0, 0, 1);
-    CleavedIgGeneAlignment j_event_1(j_alignment, 1, 0, 0);
+    CleavedIgGeneAlignment j_event_0(j_alignment, 0, 0, 1, 0);
+    CleavedIgGeneAlignment j_event_1(j_alignment, 1, 0, 0, 0);
 
     NongenomicInsertion vd_insertion_0(425, 441);
     NongenomicInsertion vd_insertion_1(426, 441);
@@ -161,11 +163,16 @@ int main(int argc, char** argv) {
                                                                    j_generator,
                                                                    insertion_generator,
                                                                    insertion_generator);
+    HcRecombinationEstimator recombination_estimator;
     INFO("Generator of VDJ recombinations starts");
     for(auto it = hits_storage->cbegin(); it != hits_storage->cend(); it++) {
         auto recombination_storage = recombination_generator.ComputeRecombinations(*it);
+        recombination_estimator.Update(recombination_storage);
     }
     INFO("Generator of VDJ recombinations ends");
+    recombination_estimator.OutputRecombinationNumber();
+    recombination_estimator.OutputSHMsDistribution();
+    recombination_estimator.OutputRecombinationEvents();
 
     // test recombinations for Andrey
     //INFO("Test recombination for Andrey");

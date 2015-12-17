@@ -8,8 +8,6 @@ class VRecombinationEventGenerator : public IgGeneRecombinationEventsGenerator {
     size_t max_cleavage_;
     size_t max_palindrome_;
 
-    size_t ComputeSHMsNumber(IgGeneAlignmentPtr v_alignment, int cleavage_length);
-
     CleavedIgGeneAlignment GenerateCleavageEvent(IgGeneAlignmentPtr v_alignment, size_t cleavage_length);
 
     void GenerateCleavageEvents(IgGeneAlignmentPtr v_alignment,

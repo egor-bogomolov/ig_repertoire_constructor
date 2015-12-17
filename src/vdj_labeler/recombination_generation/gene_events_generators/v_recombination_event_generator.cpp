@@ -3,17 +3,15 @@
 
 using namespace std;
 
-// universal calculator of number of somatic hypermutations for gene alignment with fixed cleavage length
-// positive cleavage_length means cleavage
-// negative cleavage_length means palindromic insertion
-size_t VRecombinationEventGenerator::ComputeSHMsNumber(IgGeneAlignmentPtr v_alignment, int cleavage_length) {
-    return shms_calculator_.ComputeNumberSHMs(v_alignment, 0, cleavage_length);
-}
-
 CleavedIgGeneAlignment VRecombinationEventGenerator::GenerateCleavageEvent(IgGeneAlignmentPtr v_alignment,
                                                                            size_t cleavage_length) {
-    return CleavedIgGeneAlignment(v_alignment, 0, int(cleavage_length),
-                                  ComputeSHMsNumber(v_alignment, int(cleavage_length)));
+    return CleavedIgGeneAlignment(v_alignment,
+                                  0, // left cleavage left
+                                  int(cleavage_length), // right cleavage length
+                                  0, // number of SHMs in left cleavage
+                                  // number of SHMs in right cleavage
+                                  shms_calculator_.ComputeNumberSHMsForRightEvent(v_alignment,
+                                                                                  int(cleavage_length)));
 }
 
 void VRecombinationEventGenerator::GenerateCleavageEvents(IgGeneAlignmentPtr v_alignment,
@@ -31,8 +29,12 @@ void VRecombinationEventGenerator::GenerateCleavageEvents(IgGeneAlignmentPtr v_a
 CleavedIgGeneAlignment VRecombinationEventGenerator::GeneratePalindromicEvent(IgGeneAlignmentPtr v_alignment,
                                                                               size_t palindrome_length) {
     int event_length = int(palindrome_length) * - 1;
-    return CleavedIgGeneAlignment(v_alignment, 0, event_length,
-                                  ComputeSHMsNumber(v_alignment, event_length));
+    return CleavedIgGeneAlignment(v_alignment,
+                                  0,
+                                  event_length,
+                                  0,
+                                  // number of SHMs in right cleavage
+                                  shms_calculator_.ComputeNumberSHMsForRightEvent(v_alignment, event_length));
 }
 
 void VRecombinationEventGenerator::GeneratePalindromicEvents(IgGeneAlignmentPtr v_alignment,
@@ -54,7 +56,7 @@ IgGeneRecombinationEventStoragePtr VRecombinationEventGenerator::ComputeEvents(I
     GenerateCleavageEvents(v_alignment, v_events);
     // generation of zero event
     TRACE("Generation of zero event");
-    v_events->AddEvent(CleavedIgGeneAlignment(v_alignment, 0, 0, ComputeSHMsNumber(v_alignment, 0)));
+    v_events->AddEvent(CleavedIgGeneAlignment(v_alignment, 0, 0, 0, 0));
     // generation of palindromic events
     TRACE("Generartion of palindromic events");
     GeneratePalindromicEvents(v_alignment, v_events);

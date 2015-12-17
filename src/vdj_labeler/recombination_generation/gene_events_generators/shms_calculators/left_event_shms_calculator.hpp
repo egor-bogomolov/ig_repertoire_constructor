@@ -9,4 +9,9 @@ public:
     int ComputeNumberSHMs(IgGeneAlignmentPtr gene_alignment,
                           int left_cleavage_length,
                           int right_cleavage_length);
+
+    int ComputeNumberSHMsForLeftEvent(IgGeneAlignmentPtr gene_alignment,
+                                      int left_cleavage_length);
+
+    int ComputeNumberSHMsForRightEvent(IgGeneAlignmentPtr, int) { return 0; }
 };

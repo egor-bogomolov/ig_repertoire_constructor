@@ -34,7 +34,7 @@ void CustomHeavyChainRecombinationGenerator::ComputeDEventStorages(VDJHitsPtr vd
     if(d_events_num == 0) {
         assert(vdj_hits->DHitsNumber() == 1);
         d_storages_[0]->AddEvent(CleavedIgGeneAlignment(
-                vdj_hits->GetAlignmentByIndex(IgGeneType::diversity_gene, 0), 0, 0));
+                vdj_hits->GetAlignmentByIndex(IgGeneType::diversity_gene, 0), 0, 0, 0, 0));
         INFO("Himeric event was added to D event storage");
     }
 }

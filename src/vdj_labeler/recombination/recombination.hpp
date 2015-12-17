@@ -6,17 +6,17 @@
 
 class HCRecombination {
     ReadPtr read_ptr_;
-    const CleavedIgGeneAlignment& v_gene_;
-    const CleavedIgGeneAlignment& d_gene_;
-    const CleavedIgGeneAlignment& j_gene_;
+    CleavedIgGeneAlignment v_gene_;
+    CleavedIgGeneAlignment d_gene_;
+    CleavedIgGeneAlignment j_gene_;
     NongenomicInsertion vd_insertion_;
     NongenomicInsertion dj_insertion_;
 
 public:
     HCRecombination(ReadPtr read_ptr,
-                    const CleavedIgGeneAlignment& v_gene,
-                    const CleavedIgGeneAlignment& d_gene,
-                    const CleavedIgGeneAlignment& j_gene,
+                    CleavedIgGeneAlignment v_gene,
+                    CleavedIgGeneAlignment d_gene,
+                    CleavedIgGeneAlignment j_gene,
                     NongenomicInsertion vd_insertion,
                     NongenomicInsertion dj_insertion) :
             read_ptr_(read_ptr),
@@ -25,6 +25,15 @@ public:
             j_gene_(j_gene),
             vd_insertion_(vd_insertion),
             dj_insertion_(dj_insertion) { }
+
+    HCRecombination(const HCRecombination &obj) :
+            v_gene_(obj.v_gene_),
+            d_gene_(obj.d_gene_),
+            j_gene_(obj.j_gene_) {
+        read_ptr_ = obj.read_ptr_;
+        vd_insertion_ = obj.vd_insertion_;
+        dj_insertion_ = obj.dj_insertion_;
+    }
 
     ReadPtr Read() const { return read_ptr_; }
 

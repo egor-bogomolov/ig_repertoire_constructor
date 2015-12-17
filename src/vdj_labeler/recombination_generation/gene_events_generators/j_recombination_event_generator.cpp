@@ -3,14 +3,14 @@
 
 using namespace std;
 
-size_t JRecombinationEventGenerator::ComputeSHMsNumber(IgGeneAlignmentPtr j_alignment, int cleavage_length) {
-    return shms_calculator_.ComputeNumberSHMs(j_alignment, cleavage_length, 0);
-}
-
 CleavedIgGeneAlignment JRecombinationEventGenerator::GenerateCleavageEvent(IgGeneAlignmentPtr j_alignment,
                                                                            size_t cleavage_length) {
-    return CleavedIgGeneAlignment(j_alignment, int(cleavage_length), 0,
-                                  ComputeSHMsNumber(j_alignment, int(cleavage_length)));
+    return CleavedIgGeneAlignment(j_alignment,
+                                  int(cleavage_length), // left cleavage length
+                                  0, // right cleavage length
+                                  shms_calculator_.ComputeNumberSHMsForLeftEvent(j_alignment,
+                                                                                 int(cleavage_length)), // # SHMs in left cleavage
+                                  0); // # SHMs in right cleavage
 }
 
 void JRecombinationEventGenerator::GenerateCleavageEvents(IgGeneAlignmentPtr j_alignment,
@@ -28,8 +28,11 @@ void JRecombinationEventGenerator::GenerateCleavageEvents(IgGeneAlignmentPtr j_a
 CleavedIgGeneAlignment JRecombinationEventGenerator::GeneratePalindromicEvent(IgGeneAlignmentPtr j_alignment,
                                                                               size_t palindrome_length) {
     int event_length = int(palindrome_length) * -1;
-    return CleavedIgGeneAlignment(j_alignment, event_length, 0,
-                                  ComputeSHMsNumber(j_alignment, event_length));
+    return CleavedIgGeneAlignment(j_alignment,
+                                  event_length,
+                                  0,
+                                  shms_calculator_.ComputeNumberSHMsForLeftEvent(j_alignment, event_length),
+                                  0);
 }
 
 void JRecombinationEventGenerator::GeneratePalindromicEvents(IgGeneAlignmentPtr j_alignment,
@@ -48,7 +51,7 @@ IgGeneRecombinationEventStoragePtr JRecombinationEventGenerator::ComputeEvents(I
     GeneratePalindromicEvents(j_alignment, j_events);
     // generation of zero event
     TRACE("Generation of zero event");
-    j_events->AddEvent(CleavedIgGeneAlignment(j_alignment, 0, 0, ComputeSHMsNumber(j_alignment, 0)));
+    j_events->AddEvent(CleavedIgGeneAlignment(j_alignment, 0, 0, 0, 0));
     // generation of cleavage events
     TRACE("Generation of cleavage events");
     GenerateCleavageEvents(j_alignment, j_events);
