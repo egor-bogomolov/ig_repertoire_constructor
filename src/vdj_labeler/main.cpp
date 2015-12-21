@@ -9,176 +9,55 @@
 #include "runtime_k.hpp"
 #include "segfault_handler.hpp"
 
-#include "fastq_read_archive.hpp"
-#include "vdj_alignments/gene_database.hpp"
-#include "vdj_alignments/vj_alignment_info.hpp"
+#include "vdj_config.hpp"
+#include "launch.hpp"
 
-#include "vdj_alignments/aligners/right_v_tail_aligner.hpp"
-#include "vdj_alignments/aligners/left_j_tail_aligner.hpp"
-#include "vdj_alignments/aligners/simple_d_aligner.hpp"
+void make_dirs() {
+    make_dir(vdj_cfg::get().io.output.output_dir);
+}
 
-#include "vdj_alignments/vdj_hits_calculators/custom_vdj_hits_calculator.hpp"
-#include "vdj_alignments/vdj_hits_calculators/info_based_vj_hits_calculator.hpp"
-#include "vdj_alignments/vdj_hits_calculators/info_based_d_hits_calculator.hpp"
-#include "vdj_alignments/vdj_hits_calculators/alignment_estimators/threshold_alignment_estimator.hpp"
+void copy_configs(std::string cfg_filename, std::string to) {
+    if (!make_dir(to)) {
+        WARN("Could not create files use in /tmp directory");
+    }
+    path::copy_files_by_ext(path::parent_path(cfg_filename), to, ".info", true);
+}
 
-#include "recombination_generation/gene_events_generators/shms_calculators/left_event_shms_calculator.hpp"
-#include "recombination_generation/gene_events_generators/shms_calculators/right_event_shms_calculator.hpp"
-#include "recombination_generation/gene_events_generators/shms_calculators/versatile_shms_calculator.hpp"
-#include "recombination_generation/custom_hc_recombination_generator.hpp"
-#include "recombination_generation/gene_events_generators/v_recombination_event_generator.hpp"
-#include "recombination_generation/gene_events_generators/d_recombination_event_generator.hpp"
-#include "recombination_generation/gene_events_generators/j_recombination_event_generator.hpp"
-#include "recombination_generation/insertion_events_generators/versatile_insertion_event_generator.hpp"
+void load_config(std::string cfg_filename) {
+    path::CheckFileExistenceFATAL(cfg_filename);
+    vdj_cfg::create_instance(cfg_filename);
+    std::string path_to_copy = path::append_path(vdj_cfg::get().io.output.output_dir, "configs");
+    copy_configs(cfg_filename, path_to_copy);
+}
 
-#include "recombination_estimators/hc_recombination_estimator.hpp"
-
-#include "recombination_calculator/hc_model_based_recombination_calculator.hpp"
-
-void create_console_logger(logging::level default_level = logging::level::L_INFO) {
+void create_console_logger(std::string cfg_filename) {
     using namespace logging;
-    std::string log_props_file = "";
-    logger *lg = create_logger(log_props_file, default_level);
+    std::string log_props_file = vdj_cfg::get().io.output.log_filename;
+    if (!path::FileExists(log_props_file)){
+        log_props_file = path::append_path(path::parent_path(cfg_filename), vdj_cfg::get().io.output.log_filename);
+    }
+    logger *lg = create_logger(path::FileExists(log_props_file) ? log_props_file : "");
     lg->add_writer(std::make_shared<console_writer>());
     attach_logger(lg);
 }
 
-void TestRecombinationCalculator(const FastqReadArchive& reads_archive, VDJHitsStoragePtr hits_storage) {
-    size_t read_index = 3;
-    ReadPtr read_3 = reads_archive[read_index];
-    VDJHitsPtr hits_3 = (*hits_storage)[read_index];
-    INFO("Read 3. #V: " << hits_3->VHitsNumber() <<
-         ", #D: " << hits_3->DHitsNumber() <<
-         ", #J: " << hits_3->JHitsNumber());
-
-    auto v_alignment = hits_3->GetAlignmentByIndex(IgGeneType::variable_gene, 0);
-    CleavedIgGeneAlignment v_event_0(v_alignment, 0, 0, 0, 0);
-    CleavedIgGeneAlignment v_event_1(v_alignment, 0, -1, 0, 0);
-    CleavedIgGeneAlignment v_event_2(v_alignment, 0, -2, 0, 0);
-    CleavedIgGeneAlignment v_event_3(v_alignment, 0, -3, 0, 1);
-
-    auto d_alignment = hits_3->GetAlignmentByIndex(IgGeneType::diversity_gene, 0);
-    CleavedIgGeneAlignment d_event_0(d_alignment, 1, 8, 0, 0);
-
-    auto j_alignment = hits_3->GetAlignmentByIndex(IgGeneType::join_gene, 0);
-    CleavedIgGeneAlignment j_event_0(j_alignment, 0, 0, 1, 0);
-    CleavedIgGeneAlignment j_event_1(j_alignment, 1, 0, 0, 0);
-
-    NongenomicInsertion vd_insertion_0(425, 441);
-    NongenomicInsertion vd_insertion_1(426, 441);
-    NongenomicInsertion vd_insertion_2(427, 441);
-    NongenomicInsertion vd_insertion_3(428, 441);
-
-    NongenomicInsertion dj_insertion_0(453, 452);
-    NongenomicInsertion dj_insertion_1(453, 453);
-
-    RecombinationStorage<HCRecombination> recombination_storage(read_3);
-    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_0, d_event_0, j_event_0,
-                                                           vd_insertion_0, dj_insertion_0));
-    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_1, d_event_0, j_event_0,
-                                                           vd_insertion_1, dj_insertion_0));
-    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_2, d_event_0, j_event_0,
-                                                           vd_insertion_2, dj_insertion_0));
-    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_3, d_event_0, j_event_0,
-                                                           vd_insertion_3, dj_insertion_0));
-    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_0, d_event_0, j_event_1,
-                                                           vd_insertion_0, dj_insertion_1));
-    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_1, d_event_0, j_event_1,
-                                                           vd_insertion_1, dj_insertion_1));
-    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_2, d_event_0, j_event_1,
-                                                           vd_insertion_2, dj_insertion_1));
-    recombination_storage.AddRecombination(HCRecombination(read_3, v_event_3, d_event_0, j_event_1,
-                                                           vd_insertion_3, dj_insertion_1));
-    INFO(recombination_storage.size() << " recombinaions were generated");
-}
-
-logging::level logger_string_to_level(std::string logger_level) {
-    if(logger_level == "TRACE")
-        return logging::level::L_TRACE;
-    return logging::level::L_INFO;
-}
-
 int main(int argc, char** argv) {
-    if(argc != 4) {
+    if(argc != 2) {
         std::cout << "Invalid input parameters" << std::endl;
-        std::cout << "vdj_labeler read.fastq vj_finder_output.csv logger_level" << std::endl;
+        std::cout << "vdj_labeler config.info" << std::endl;
         return 1;
     }
 
-    std::string fastq_reads_fname(argv[1]); //"src/vdj_labeler/test/vdj_labeling.fastq";
-    std::string vj_alignment_fname(argv[2]); //"src/vdj_labeler/test/vdj_labeling.csv";
-    std::string logger_level(argv[3]); // INFO or TRACE
-    std::string v_germline_genes_fname = "src/fast_ig_tools/germline/human/IGHV.fa";
-    std::string d_germline_genes_fname = "src/fast_ig_tools/germline/human/IGHD.fa";
-    std::string j_germline_genes_fname = "src/fast_ig_tools/germline/human/IGHJ.fa";
-
     perf_counter pc;
     segfault_handler sh;
-    create_console_logger(logger_string_to_level(logger_level));
 
-    INFO("VDJ labeler starts");
+    std::string cfg_filename = argv[1];
+    load_config(cfg_filename);
+    create_console_logger(cfg_filename);
+    make_dirs();
 
-    FastqReadArchive reads_archive(fastq_reads_fname);
-    INFO(reads_archive.size() << " reads were extracted from " << fastq_reads_fname);
+    VDJLabeler().Run(vdj_cfg::get().io, vdj_cfg::get().rp);
 
-    HC_GenesDatabase hc_db;
-    hc_db.AddGenesFromFile(IgGeneType::variable_gene, v_germline_genes_fname);
-    hc_db.AddGenesFromFile(IgGeneType::diversity_gene, d_germline_genes_fname);
-    hc_db.AddGenesFromFile(IgGeneType::join_gene, j_germline_genes_fname);
-
-    INFO(hc_db.VariableGenes().size() << " variable genes were extracted from " << v_germline_genes_fname);
-    INFO(hc_db.DiversityGenes().size() << " diversity genes were extracted from " << d_germline_genes_fname);
-    INFO(hc_db.JoinGenes().size() << " join genes were extracted from " << j_germline_genes_fname);
-
-    VJAlignmentInfo vj_alignment_info(hc_db.VariableGenes(), hc_db.JoinGenes(), reads_archive);
-    vj_alignment_info.ExtractAlignment(vj_alignment_fname);
-    INFO(vj_alignment_info.size() << " alignment lines were extracted from " << vj_alignment_fname);
-
-    INFO("Best VDJ hits alignment calculation starts");
-    RightVTailAligner v_aligner;
-    InfoBasedVJHitsCalculator v_hits_calc(IgGeneType::variable_gene, reads_archive, vj_alignment_info, v_aligner);
-    SimpleDAligner d_aligner;
-    ThresholdAlignmentEstimator d_estimator(1.0);
-    InfoBasedDHitsCalculator d_hits_calc(reads_archive,
-                                         vj_alignment_info,
-                                         hc_db.DiversityGenes(),
-                                         d_aligner, d_estimator);
-    LeftJTailAligner j_aligner;
-    InfoBasedVJHitsCalculator j_hits_calc(IgGeneType::join_gene, reads_archive, vj_alignment_info, j_aligner);
-    CustomVDJHitsCalculator vdj_hits_calc(reads_archive, vj_alignment_info, v_hits_calc, d_hits_calc, j_hits_calc);
-    auto hits_storage = vdj_hits_calc.ComputeHits();
-    INFO("Best VDJ hits alignment calculation ends");
-
-    size_t max_cleavage = 20;
-    size_t max_palindrome = 7;
-    LeftEventSHMsCalculator left_shms_calculator;
-    RightEventSHMsCalculator right_shms_calculator;
-    VersatileGeneSHMsCalculator shms_calculator(left_shms_calculator, right_shms_calculator);
-    VRecombinationEventGenerator v_generator(shms_calculator, max_cleavage, max_palindrome);
-    DRecombinationEventGenerator d_generator(shms_calculator, max_cleavage, max_palindrome);
-    JRecombinationEventGenerator j_generator(shms_calculator, max_cleavage, max_palindrome);
-    VersatileInsertionGenerator insertion_generator;
-    CustomHeavyChainRecombinationGenerator recombination_generator(v_generator,
-                                                                   d_generator,
-                                                                   j_generator,
-                                                                   insertion_generator,
-                                                                   insertion_generator);
-    HcRecombinationEstimator recombination_estimator;
-    INFO("Generator of VDJ recombinations starts");
-    for(auto it = hits_storage->cbegin(); it != hits_storage->cend(); it++) {
-        auto recombination_storage = recombination_generator.ComputeRecombinations(*it);
-        recombination_estimator.Update(recombination_storage);
-    }
-    INFO("Generator of VDJ recombinations ends");
-    recombination_estimator.OutputRecombinationNumber();
-    recombination_estimator.OutputSHMsDistribution();
-    recombination_estimator.OutputRecombinationEvents();
-
-    // test recombinations for Andrey
-    //INFO("Test recombination for Andrey");
-    //TestRecombinationCalculator(reads_archive, hits_storage);
-
-    INFO("VDJ labeler ends");
     unsigned ms = (unsigned)pc.time_ms();
     unsigned secs = (ms / 1000) % 60;
     unsigned mins = (ms / 1000 / 60) % 60;

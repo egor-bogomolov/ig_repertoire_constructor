@@ -49,6 +49,8 @@ add_executable(vdj_labeler
                 recombination_calculator/hc_model_based_recombination_calculator.cpp
                 model/recombination_model.cpp
                 recombination_estimators/hc_recombination_estimator.cpp
+                launch.cpp
+                vdj_config.cpp
                 main.cpp)
 
 target_link_libraries(vdj_labeler input yaml-cpp ${COMMON_LIBRARIES})
