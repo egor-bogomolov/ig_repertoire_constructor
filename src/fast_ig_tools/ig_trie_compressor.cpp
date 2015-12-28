@@ -1,8 +1,4 @@
-#include <vector>
-#include <string>
-#include <cassert>
-#include <algorithm>
-#include <chrono>
+#include "ig_trie_compressor.hpp"
 
 #include <seqan/seq_io.h>
 using seqan::Dna5String;
@@ -11,19 +7,13 @@ using seqan::SeqFileOut;
 using seqan::CharString;
 using seqan::length;
 
-
 #include <boost/format.hpp>
 using bformat = boost::format;
 
-#include <iostream>
 using std::cout;
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
-
-#include "ig_trie_compressor.hpp"
-#include "fast_ig_tools.hpp"
-
 
 int main(int argc, char **argv) {
     segfault_handler sh;
@@ -189,8 +179,14 @@ int main(int argc, char **argv) {
 
         INFO("Map from input reads to compressed reads was written to " << idmap_file_name);
     }
-    INFO("Construction of trie finished")
-    INFO("Running time: " << running_time_format(pc));
+    INFO("Construction of trie finished");
+
+    unsigned ms = (unsigned)pc.time_ms();
+    unsigned secs = (ms / 1000) % 60;
+    unsigned mins = (ms / 1000 / 60) % 60;
+    unsigned hours = (ms / 1000 / 60 / 60);
+    INFO("Running time: " << hours << " hours " << mins << " minutes " << secs << " seconds");
+
     return 0;
 }
 

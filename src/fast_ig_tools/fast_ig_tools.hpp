@@ -1,14 +1,6 @@
 #pragma once
 
-
-#include <string>
-#include <path_helper.hpp>
-#include <perfcounter.hpp>
-
-#include <logger/log_writers.hpp>
-#include <logger/logger.hpp>
-#include <segfault_handler.hpp>
-
+#include "standard_include.hpp"
 
 
 std::string join_cmd_line(size_t argc, char **argv) {
@@ -29,17 +21,5 @@ void create_console_logger(std::string log_props_file = "") {
     lg->add_writer(std::make_shared<console_writer>());
     attach_logger(lg);
 }
-
-
-std::string running_time_format(const perf_counter &pc) {
-    unsigned ms = (unsigned)pc.time_ms();
-    unsigned secs = (ms / 1000) % 60;
-    unsigned mins = (ms / 1000 / 60) % 60;
-    unsigned hours = (ms / 1000 / 60 / 60);
-    bformat bf("%u hours %u minutes %u seconds");
-    bf % hours % mins % secs;
-    return bf.str();
-}
-
 
 // vim: ts=4:sw=4

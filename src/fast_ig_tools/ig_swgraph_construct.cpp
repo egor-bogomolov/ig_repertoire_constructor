@@ -1,4 +1,5 @@
-#include <chrono>
+#include "ig_matcher.hpp"
+#include "ig_final_alignment.hpp"
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
@@ -6,7 +7,6 @@ namespace po = boost::program_options;
 #include <boost/format.hpp>
 using bformat = boost::format;
 
-#include <iostream>
 using std::cout;
 using std::cin;
 using std::cerr;
@@ -17,11 +17,7 @@ using seqan::Dna5String;
 using seqan::SeqFileIn;
 using seqan::CharString;
 
-#include "ig_matcher.hpp"
 #include "banded_half_smith_waterman.hpp"
-#include "ig_final_alignment.hpp"
-#include "fast_ig_tools.hpp"
-
 
 template<typename T, typename Tf>
 Graph tauDistGraph(const std::vector<T> &input_reads,
@@ -262,7 +258,11 @@ int main(int argc, char **argv) {
     }
     INFO("Graph was written to " << output_filename);
 
-    INFO("Running time: " << running_time_format(pc));
+    unsigned ms = (unsigned)pc.time_ms();
+    unsigned secs = (ms / 1000) % 60;
+    unsigned mins = (ms / 1000 / 60) % 60;
+    unsigned hours = (ms / 1000 / 60 / 60);
+    INFO("Running time: " << hours << " hours " << mins << " minutes " << secs << " seconds");
 
     return 0;
 }

@@ -1,11 +1,6 @@
 #pragma once
 
-#include <vector>
-#include <array>
-#include <memory>
-#include <cassert>
-#include <algorithm>
-#include <unordered_map>
+#include "fast_ig_tools.hpp"
 
 #include <seqan/seq_io.h>
 using seqan::length;

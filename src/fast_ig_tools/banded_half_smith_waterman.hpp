@@ -4,11 +4,10 @@
 // d("", "") = 0
 // d(s, "") = d("", s) = lizard_tail(|s|)
 // d(Xs, Yz) = max(match(X, Y) + d(s, z); indel_cost + d(Xs, z); indel_cost + d(s, Yz))
-#include <seqan/seq_io.h>
 #include <cassert>
 #include <vector>
 #include <algorithm>
-
+#include <seqan/seq_io.h>
 
 template<typename Ts1, typename Ts2, typename Tf>
 int half_hamming(const Ts1 &s1, const Ts2 &s2,

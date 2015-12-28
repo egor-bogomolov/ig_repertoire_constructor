@@ -1,16 +1,8 @@
-#include <seqan/seq_io.h>
-#include <cassert>
-#include <iostream>
-#include <sstream>
-#include <vector>
-#include <map>
-#include <memory>
-#include <unordered_map>
-#include <fstream>
-#include <boost/format.hpp>
-#include <mutex>
-#include <chrono>
+#include "fast_ig_tools.hpp"
 
+#include <boost/format.hpp>
+
+#include <seqan/seq_io.h>
 using seqan::Dna5String;
 using seqan::CharString;
 using seqan::length;
@@ -27,9 +19,7 @@ using std::make_pair;
 using bformat = boost::format;
 
 #include <boost/program_options.hpp>
-#include "fast_ig_tools.hpp"
 using path::make_dirs;
-
 
 namespace fast_ig_tools {
 
@@ -862,7 +852,12 @@ int main(int argc, char **argv) {
     size_t num_bad_reads = reads.size() - good_reads;
     INFO(num_good_reads << " Ig-Seq reads were written to " << param.output_filename);
     INFO(num_bad_reads << " junk (not Ig-Seq) reads were written to " << param.bad_output_filename);
-    INFO("Running time: " << running_time_format(pc));
+
+    unsigned ms = (unsigned)pc.time_ms();
+    unsigned secs = (ms / 1000) % 60;
+    unsigned mins = (ms / 1000 / 60) % 60;
+    unsigned hours = (ms / 1000 / 60 / 60);
+    INFO("Running time: " << hours << " hours " << mins << " minutes " << secs << " seconds");
     return 0;
 }
 
