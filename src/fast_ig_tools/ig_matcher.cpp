@@ -1,5 +1,6 @@
-#include "ig_matcher.hpp"
+#include <chrono>
 
+#include <future>
 using std::async;
 
 #include <boost/program_options.hpp>
@@ -8,6 +9,7 @@ namespace po = boost::program_options;
 #include <boost/format.hpp>
 using bformat = boost::format;
 
+#include <iostream>
 using std::cout;
 using std::cin;
 using std::cerr;
@@ -20,7 +22,9 @@ using seqan::CharString;
 
 #include <openmp_wrapper.h>
 
+#include "ig_matcher.hpp"
 #include "banded_half_smith_waterman.hpp"
+#include "fast_ig_tools.hpp"
 
 
 class BestScoreIndices {

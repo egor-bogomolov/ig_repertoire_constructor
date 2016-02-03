@@ -1,5 +1,3 @@
-#include "fast_ig_tools.hpp"
-
 #include <fstream>
 #include <vector>
 #include <cassert>
@@ -16,14 +14,15 @@ namespace po = boost::program_options;
 #include <boost/format.hpp>
 using bformat = boost::format;
 
-#include "ig_final_alignment.hpp"
-
-// temporary fix: seqan inclusions are the last ones
 #include <seqan/seq_io.h>
 using seqan::Dna5String;
 using seqan::SeqFileIn;
 using seqan::SeqFileOut;
 using seqan::CharString;
+
+#include "ig_final_alignment.hpp"
+#include "fast_ig_tools.hpp"
+
 
 std::pair<std::unordered_map<std::string, size_t>, std::vector<std::string>> read_rcm_file_string(const std::string &file_name) {
     std::ifstream rcm(file_name.c_str());
@@ -229,11 +228,7 @@ int main(int argc, char **argv) {
 
     INFO("Final repertoire was written to " << output_file);
 
-    unsigned ms = (unsigned)pc.time_ms();
-    unsigned secs = (ms / 1000) % 60;
-    unsigned mins = (ms / 1000 / 60) % 60;
-    unsigned hours = (ms / 1000 / 60 / 60);
-    INFO("Running time: " << hours << " hours " << mins << " minutes " << secs << " seconds");
+    INFO("Running time: " << running_time_format(pc));
 
     return 0;
 }

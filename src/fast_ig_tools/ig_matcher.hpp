@@ -1,6 +1,11 @@
 #pragma once
 
-#include "fast_ig_tools.hpp"
+#include <cassert>
+#include <algorithm>
+#include <vector>
+#include <unordered_map>
+#include <fstream>
+#include <exception>
 
 #include <seqan/seq_io.h>
 using seqan::length;
@@ -20,15 +25,15 @@ std::vector<size_t> polyhashes(const T &s, size_t K) {
     size_t p_pow_K = 1;
     for (size_t i = 0; i < K; ++i) {
         first *= p;
-        first += int(s[i]); //size_t(s[i]);
+        first += size_t(s[i]);
         p_pow_K *= p;
     }
 
     result[0] = first;
     for (size_t i = 1; i < result.size(); ++i) {
         first *= p;
-        first += int(s[K + i - 1]); //size_t(s[K + i - 1]);
-        first -= int(s[i - 1]) * p_pow_K; //size_t(s[i - 1]) * p_pow_K;
+        first += size_t(s[K + i - 1]);
+        first -= size_t(s[i - 1]) * p_pow_K;
         result[i] = first;
     }
 
