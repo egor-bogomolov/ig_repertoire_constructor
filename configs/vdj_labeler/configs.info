@@ -5,9 +5,9 @@ io_params {
 
 	germlines {
 	     igh {
-                 variable_genes src/fast_ig_tools/germline/human/IGHV.fa
-                 diversity_genes src/fast_ig_tools/germline/human/IGHD.fa
-                 join_genes src/fast_ig_tools/germline/human/IGHJ.fa
+                 variable_genes src/fast_ig_tools/germline/human_walczak_blank/heavy_chain/genomicVs.fasta
+                 diversity_genes src/fast_ig_tools/germline/human_walczak_blank/heavy_chain/genomicDs.fasta
+                 join_genes src/fast_ig_tools/germline/human_walczak_blank/heavy_chain/genomicJs.fasta
              }   
 	     igl {
                  variable_genes src/fast_ig_tools/germline/human/IGLV.fa
