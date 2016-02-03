@@ -1,8 +1,17 @@
-#include "fast_ig_tools.hpp"
-
-#include <boost/format.hpp>
-
 #include <seqan/seq_io.h>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <vector>
+#include <map>
+#include <memory>
+#include <unordered_map>
+#include <fstream>
+#include <boost/format.hpp>
+#include <boost/algorithm/string/replace.hpp>
+#include <mutex>
+#include <chrono>
+
 using seqan::Dna5String;
 using seqan::CharString;
 using seqan::length;
@@ -19,7 +28,9 @@ using std::make_pair;
 using bformat = boost::format;
 
 #include <boost/program_options.hpp>
+#include "fast_ig_tools.hpp"
 using path::make_dirs;
+
 
 namespace fast_ig_tools {
 
@@ -254,31 +265,39 @@ private:
                 std::vector<size_t> next(combined.size());
                 std::iota(next.begin(), next.end(), 0);
 
-                // auto has_edge_old = [](const Match &a, const Match &b) -> bool {
-                //   return std::min(b.needle_pos - a.needle_pos, b.read_pos - a.read_pos) >= int(a.length); // signed/unsigned comparisson
-                // };
-                //
-                auto has_edge = [&](const Match &a, const Match &b) -> bool {
-                    // int sha = a.read_pos - a.needle_pos;
-                    // int shb = b.read_pos - b.needle_pos;
+                auto overlap_length = [](const Match &a, const Match &b) -> int {
+                    return std::max<int>(std::max<int>(a.length - (b.needle_pos - a.needle_pos),
+                                                       a.length - (b.read_pos - a.read_pos)),
+                                         0);
+                };
 
+                auto has_edge = [&](const Match &a, const Match &b) -> bool {
                     int read_gap = b.read_pos - a.read_pos;
                     int needle_gap = b.needle_pos - a.needle_pos;
                     int insert_size = read_gap - needle_gap;
 
                     if (insert_size > max_local_insertions || -insert_size > max_local_deletions) return false;
-                    return std::min(b.needle_pos - a.needle_pos, b.read_pos - a.read_pos) >= int(a.length); // signed/unsigned comparisson
+
+                    // Crossing check
+                    if (a.needle_pos >= b.needle_pos || a.read_pos >= b.read_pos) return false;
+
+                    // Obsolete overlap checking
+                    // return std::min(b.needle_pos - a.needle_pos, b.read_pos - a.read_pos) >= int(a.length); // signed/unsigned comparisson
+                    return true;
                 };
 
-                for (int i = combined.size() - 1; i >= 0; --i) {
+                for (size_t i = combined.size() - 1; i + 1 > 0; --i) {
+                    values[i] = combined[i].length;
+
                     for (size_t j = i + 1; j < combined.size(); ++j) {
-                        if (has_edge(combined[i], combined[j]) && (values[j] > values[i])) {
-                            values[i] = values[j];
-                            next[i] = j;
+                        if (has_edge(combined[i], combined[j])) {
+                            double new_val = combined[i].length + values[j] - overlap_length(combined[i], combined[j]);
+                            if (new_val > values[i]) {
+                                next[i] = j;
+                                values[i] = new_val;
+                            }
                         }
                     }
-
-                    values[i] += combined[i].length;
                 }
 
                 std::vector<Match> path;
@@ -293,6 +312,11 @@ private:
                     } else {
                         maxi = next[maxi];
                     }
+                }
+
+                // Fix overlaps (truncate tail of left match)
+                for (size_t i = 0; i < path.size() - 1; ++i) {
+                    path[i].length -= overlap_length(path[i], path[i+1]);
                 }
 
                 int coverage_length = path_coverage_length(path);
@@ -367,7 +391,8 @@ struct Ig_KPlus_Finder_Parameters {
     int K = 7; // anchor length
     int word_size_j = 5;
     int left_uncoverage_limit = 16;
-    int right_uncoverage_limit = 0; // We have to cover (D)J region too. Maybe it should be even negative
+    int right_uncoverage_limit = 9; // It should be at least 4 (=1 + 3cropped) 1bp trimming is common
+    int min_vsegment_length = 100;
     std::string input_file = "", organism = "human";
     int max_local_deletions = 12;
     int max_local_insertions = 12;
@@ -376,6 +401,7 @@ struct Ig_KPlus_Finder_Parameters {
     int min_k_coverage_j = 9;
     int max_candidates = 3;
     int max_candidates_j = 3;
+    std::string type = "bcr";
     std::string chain = "all";
     std::string db_directory = "./germline";
     std::string output_dir;
@@ -397,6 +423,7 @@ struct Ig_KPlus_Finder_Parameters {
     std::vector<Dna5String> v_reads;
     std::vector<CharString> j_ids;
     std::vector<Dna5String> j_reads;
+    std::string separator = "comma";
 
     Ig_KPlus_Finder_Parameters(const Ig_KPlus_Finder_Parameters &) = delete;
     Ig_KPlus_Finder_Parameters(Ig_KPlus_Finder_Parameters &&) = delete;
@@ -432,8 +459,10 @@ struct Ig_KPlus_Finder_Parameters {
             ("no-pseudogenes", "don't use pseudogenes along with normal genes")
             ("silent,S", "suppress output for each query (default)")
             ("no-silent,V", "produce info output for each query")
+            ("type,T", po::value<std::string>(&type)->default_value(type),
+             "CR chain type: 'bcr' (default) or 'tcr'")
             ("chain,C", po::value<std::string>(&chain)->default_value(chain),
-             "IG chain: 'all' (default), 'heavy', 'lambda', 'kappa' or 'light' ('lambda' + 'kappa')")
+             "CR chain; for BCRs(Ig): 'all' (default), 'heavy', 'lambda', 'kappa' or 'light' ('lambda' + 'kappa'); for TCRs(B-cell): 'all' (default), 'alpha', 'beta', 'gamma', 'delta', 'heavy' (the same as 'beta') or 'light' (the same as 'alpha')")
             ("db-directory", po::value<std::string>(&db_directory)->default_value(db_directory),
              "directory with germline database")
             ("threads,t", po::value<int>(&threads)->default_value(threads),
@@ -451,7 +480,7 @@ struct Ig_KPlus_Finder_Parameters {
             ("max-candidates-j", po::value<int>(&max_candidates_j)->default_value(max_candidates_j),
              "maximal number of J-gene candidates for each query")
             ("organism", po::value<std::string>(&organism)->default_value(organism),
-             "organism ('human' and 'mouse' are supported for this moment)")
+             "organism ('human', 'mouse', 'pig', 'rabbit', 'rat' and 'rhesus_monkey' are supported for this moment)")
             ("fill-prefix-by-germline",
              "fill truncated V-gene prefix by germline content")
             ("no-fill-prefix-by-germline (default)",
@@ -460,6 +489,8 @@ struct Ig_KPlus_Finder_Parameters {
              "replace spaces in read ids by underline symbol '_' (default)")
             ("no-fix-spaces",
              "save spaces in read ids, do not replace them")
+            ("separator", po::value<std::string>(&separator)->default_value(separator),
+             "separator for alignment info file: 'comma' (default), 'semicolon', 'tab' (or 'tabular') or custom string)")
             ;
 
         // Hidden options, will be allowed both on command line and
@@ -479,6 +510,8 @@ struct Ig_KPlus_Finder_Parameters {
              "maximal allowed size of local deletion")
             ("left-fill-germline", po::value<int>(&left_fill_germline)->default_value(left_fill_germline),
              "the number left positions which will be filled by germline")
+            ("min-vsegment-length", po::value<int>(&min_vsegment_length)->default_value(min_vsegment_length),
+             "minimal allowed length of V gene segment")
             ("right-cropped", po::value<size_t>(&num_cropped_nucls)->default_value(num_cropped_nucls),
              "the number of right positions which will be cropped")
             ;
@@ -563,17 +596,29 @@ struct Ig_KPlus_Finder_Parameters {
             fix_spaces = true;
         }
 
+        if (separator == "comma") {
+            separator = ",";
+        } else if (separator == "semicolon") {
+            separator = ";";
+        } else if (separator == "tab" || separator == "tabular") {
+            separator = "\t";
+        } else {
+            // Let it be. Do nothing
+        }
+
         INFO(bformat("Input FASTQ reads: %s") % input_file);
         INFO(bformat("Output directory: %s") % output_dir);
-        INFO("Short k-mer size: " << K);
+        INFO(bformat("Organism: %s") % organism);
+        INFO(bformat("Lymphocyte type: %s") % type);
+        INFO(bformat("Chain type: %s") % chain);
+        INFO("Word size for V-gene: " << K);
+        INFO("Word size for J-gene: " << word_size_j);
 
         prepare_output();
 
-        read_genes();
-        if (pseudogenes) {
-            // Read pseudogenes
-            read_genes(true);
-        }
+        read_genes(pseudogenes);
+        INFO("V-gene germline database size: " << v_reads.size());
+        INFO("J-gene germline database size: " << j_reads.size());
     }
 
 private:
@@ -591,24 +636,43 @@ private:
 
     std::string gene_file_name(const std::string &chain_letter,
                                const std::string &gene,
-                               bool pseudo = false) {
-        return db_directory + "/" + organism + "/IG" + chain_letter + gene + (pseudo ? "-pseudo" : "") + ".fa";
+                               bool pseudo = false) const {
+        return db_directory + "/" + organism + "/" + (type == "bcr" ? "IG" : "TR") + chain_letter + gene + (pseudo ? "-allP" : "") + ".fa";
     }
 
-    std::vector<std::string> chain_letters() {
-        if (chain == "heavy") {
-            return { "H" };
-        } else if (chain == "lambda") {
-            return { "L" };
-        } else if (chain == "kappa") {
-            return { "K" };
-        } else if (chain == "light") {
-            return { "K", "L" };
-        } else if (chain == "all") {
-            return { "K", "L", "H" };
+    std::vector<std::string> chain_letters() const {
+        if (type == "bcr") {
+            if (chain == "heavy") {
+                return { "H" };
+            } else if (chain == "lambda") {
+                return { "L" };
+            } else if (chain == "kappa") {
+                return { "K" };
+            } else if (chain == "light") {
+                return { "K", "L" };
+            } else if (chain == "all") {
+                return { "K", "L", "H" };
+            } else {
+                throw "Unknown BCR chain type";
+                return {};
+            }
+        } else if (type == "tcr") {
+            if (chain == "beta" || chain == "heavy") {
+                return { "B" };
+            } else if (chain == "alpha" || chain == "light") {
+                return { "A" };
+            } else if (chain == "delta") {
+                return { "D" };
+            } else if (chain == "gamma") {
+                return { "G" };
+            } else if (chain == "all") {
+                return { "A", "B", "D", "G"};
+            } else {
+                throw "Unknown TCR chain type";
+                return {};
+            }
         } else {
-            throw "Unknown chain type";
-            return {};
+            throw "Unknown lymphocyte type";
         }
     }
 
@@ -645,7 +709,7 @@ private:
 template<typename T>
 size_t replace_spaces(T &s, char target = '_') {
     size_t count = 0;
-    for(size_t i = 0, l = length(s); i < l; ++i) {
+    for (size_t i = 0, l = length(s); i < l; ++i) {
         if (s[i] == ' ') {
             s[i] = target;
             ++count;
@@ -693,6 +757,8 @@ int main(int argc, char **argv) {
 
     vector<int> output_isok(reads.size());  // Do not use vector<bool> here due to it is not thread-safe
     std::vector<std::string> add_info_strings(reads.size());
+    std::string output_pat = "%s, %d, %d, %d, %d, %d, %d, %1.2f, %s, %d, %d, %d, %d, %d, %d, %1.2f, %s";
+    boost::replace_all(output_pat, ", ", param.separator);
 
     omp_set_num_threads(param.threads);
     INFO(bformat("Alignment reads using %d threads starts") % param.threads);
@@ -725,6 +791,16 @@ int main(int argc, char **argv) {
         bool aligned = false;
         if (!result.empty()) { // If we found at least one alignment
             for (const auto &align : result) {
+                if (-align.start > param.left_uncoverage_limit) {
+                    // Discard read
+                    break;
+                }
+
+                if (align.last_match_read_pos() - align.start < param.min_vsegment_length) { // TODO check +-1
+                    // Discard read
+                    break;
+                }
+
                 auto last_match = align.path[align.path.size() - 1];
                 int end_of_v = last_match.read_pos + last_match.length;
                 auto suff = suffix(stranded_read, end_of_v);
@@ -780,17 +856,24 @@ int main(int argc, char **argv) {
 
                     const auto &jalign = *jresult.cbegin();
 
+                    if (jalign.finish - int(length(suff)) > param.right_uncoverage_limit) {
+                        // Discard read
+                        // INFO(suff);
+                        // INFO("Read discarded by J gene threshold " << jalign.finish << " " << length(suff));
+                        break;
+                    }
+
                     {
                         const auto &first_jalign = jalign.path[0];
                         const auto &last_jalign = jalign.path[jalign.path.size() - 1];
 
-                        bformat bf("%s %d %d %d %d %d %d %1.2f %s %d %d %d %d %d %d %1.2f %s");
+                        bformat bf(output_pat);
                         bf % read_id
                            % (align.start+1)             % end_of_v
                            % (align.first_match_read_pos() + 1) % (align.first_match_needle_pos() + 1)
                            % (align.last_match_read_pos()) % (align.last_match_needle_pos())
                            % align.score                 % toCString(v_ids[align.needle_index])
-                           % (first_jalign.read_pos + 1 + end_of_v) % (last_jalign.read_pos + last_jalign.length + end_of_v)
+                           % (first_jalign.read_pos + 1 + end_of_v) % (jalign.finish + end_of_v)
                            % (jalign.first_match_read_pos() + 1 + end_of_v) % (jalign.first_match_needle_pos() + 1)
                            % (jalign.last_match_read_pos() + end_of_v) % (jalign.last_match_needle_pos())
                            % jalign.score                % toCString(j_ids[jalign.needle_index]);
@@ -825,7 +908,9 @@ int main(int argc, char **argv) {
     seqan::SeqFileOut cropped_reads_seqFile(param.output_filename.c_str());
     seqan::SeqFileOut bad_reads_seqFile(param.bad_output_filename.c_str());
     std::ofstream add_info(param.add_info_filename.c_str());
-    add_info << bformat("%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s\n")
+    std::string pat = "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n";
+    boost::replace_all(pat, ", ", param.separator);
+    add_info << bformat(pat)
         % "id"
         % "Vstart" % "Vend"
         % "VfirstTrustfulMatchRead" % "VfirstTrustfulMatchGene"
@@ -852,12 +937,7 @@ int main(int argc, char **argv) {
     size_t num_bad_reads = reads.size() - good_reads;
     INFO(num_good_reads << " Ig-Seq reads were written to " << param.output_filename);
     INFO(num_bad_reads << " junk (not Ig-Seq) reads were written to " << param.bad_output_filename);
-
-    unsigned ms = (unsigned)pc.time_ms();
-    unsigned secs = (ms / 1000) % 60;
-    unsigned mins = (ms / 1000 / 60) % 60;
-    unsigned hours = (ms / 1000 / 60 / 60);
-    INFO("Running time: " << hours << " hours " << mins << " minutes " << secs << " seconds");
+    INFO("Running time: " << running_time_format(pc));
     return 0;
 }
 

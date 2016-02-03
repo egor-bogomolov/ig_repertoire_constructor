@@ -1,0 +1,5 @@
+rrr <- read.csv('a', header=F)
+a <- runif(25 * nrow(rrr))
+a <- matrix(a, nrow = nrow(rrr), ncol = 25)
+rrr <- cbind(rrr, a)
+write.table(rrr, 'a', sep=',', quote=F, col.names=F, row.names=F)
