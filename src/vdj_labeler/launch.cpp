@@ -72,49 +72,71 @@ void VDJLabeler::Run(const vdj_config::io_params &io, const vdj_config::run_para
     INFO(hc_db.DiversityGenes().size() << " diversity genes were extracted from " << d_germline_genes_fname);
     INFO(hc_db.JoinGenes().size() << " join genes were extracted from " << j_germline_genes_fname);
 
-    VJAlignmentInfo vj_alignment_info(hc_db.VariableGenes(), hc_db.JoinGenes(), reads_archive);
-    vj_alignment_info.ExtractAlignment(vj_alignment_fname);
-    INFO(vj_alignment_info.size() << " alignment lines were extracted from " << vj_alignment_fname);
+    // VJAlignmentInfo vj_alignment_info(hc_db.VariableGenes(), hc_db.JoinGenes(), reads_archive);
+    // vj_alignment_info.ExtractAlignment(vj_alignment_fname);
+    // INFO(vj_alignment_info.size() << " alignment lines were extracted from " << vj_alignment_fname);
 
-    INFO("Best VDJ hits alignment calculation starts");
-    RightVTailAligner v_aligner;
-    InfoBasedVJHitsCalculator v_hits_calc(IgGeneType::variable_gene, reads_archive, vj_alignment_info, v_aligner);
-    SimpleDAligner d_aligner;
-    ThresholdAlignmentEstimator d_estimator(1.0);
-    InfoBasedDHitsCalculator d_hits_calc(reads_archive,
-                                         vj_alignment_info,
-                                         hc_db.DiversityGenes(),
-                                         d_aligner, d_estimator);
-    LeftJTailAligner j_aligner;
-    InfoBasedVJHitsCalculator j_hits_calc(IgGeneType::join_gene, reads_archive, vj_alignment_info, j_aligner);
-    CustomVDJHitsCalculator vdj_hits_calc(reads_archive, vj_alignment_info, v_hits_calc, d_hits_calc, j_hits_calc);
-    auto hits_storage = vdj_hits_calc.ComputeHits();
-    INFO("Best VDJ hits alignment calculation ends");
+    // INFO("Best VDJ hits alignment calculation starts");
+    // RightVTailAligner v_aligner;
+    // InfoBasedVJHitsCalculator v_hits_calc(IgGeneType::variable_gene, reads_archive, vj_alignment_info, v_aligner);
+    // SimpleDAligner d_aligner;
+    // ThresholdAlignmentEstimator d_estimator(1.0);
+    // InfoBasedDHitsCalculator d_hits_calc(reads_archive,
+    //                                      vj_alignment_info,
+    //                                      hc_db.DiversityGenes(),
+    //                                      d_aligner, d_estimator);
+    // LeftJTailAligner j_aligner;
+    // InfoBasedVJHitsCalculator j_hits_calc(IgGeneType::join_gene, reads_archive, vj_alignment_info, j_aligner);
+    // CustomVDJHitsCalculator vdj_hits_calc(reads_archive, vj_alignment_info, v_hits_calc, d_hits_calc, j_hits_calc);
+    // auto hits_storage = vdj_hits_calc.ComputeHits();
+    // INFO("Best VDJ hits alignment calculation ends");
 
-    size_t max_cleavage = 20;
-    size_t max_palindrome = 7;
-    LeftEventSHMsCalculator left_shms_calculator;
-    RightEventSHMsCalculator right_shms_calculator;
-    VersatileGeneSHMsCalculator shms_calculator(left_shms_calculator, right_shms_calculator);
-    VRecombinationEventGenerator v_generator(shms_calculator, max_cleavage, max_palindrome);
-    DRecombinationEventGenerator d_generator(shms_calculator, max_cleavage, max_palindrome);
-    JRecombinationEventGenerator j_generator(shms_calculator, max_cleavage, max_palindrome);
-    VersatileInsertionGenerator insertion_generator;
-    CustomHeavyChainRecombinationGenerator recombination_generator(v_generator,
-                                                                   d_generator,
-                                                                   j_generator,
-                                                                   insertion_generator,
-                                                                   insertion_generator);
-    HcRecombinationEstimator recombination_estimator;
-    INFO("Generator of VDJ recombinations starts");
-    for(auto it = hits_storage->cbegin(); it != hits_storage->cend(); it++) {
-        auto recombination_storage = recombination_generator.ComputeRecombinations(*it);
-        recombination_estimator.Update(recombination_storage);
+    // size_t max_cleavage = 20;
+    // size_t max_palindrome = 7;
+    // LeftEventSHMsCalculator left_shms_calculator;
+    // RightEventSHMsCalculator right_shms_calculator;
+    // VersatileGeneSHMsCalculator shms_calculator(left_shms_calculator, right_shms_calculator);
+    // VRecombinationEventGenerator v_generator(shms_calculator, max_cleavage, max_palindrome);
+    // DRecombinationEventGenerator d_generator(shms_calculator, max_cleavage, max_palindrome);
+    // JRecombinationEventGenerator j_generator(shms_calculator, max_cleavage, max_palindrome);
+    // VersatileInsertionGenerator insertion_generator;
+    // CustomHeavyChainRecombinationGenerator recombination_generator(v_generator,
+    //                                                                d_generator,
+    //                                                                j_generator,
+    //                                                                insertion_generator,
+    //                                                                insertion_generator);
+    // HcRecombinationEstimator recombination_estimator;
+    // INFO("Generator of VDJ recombinations starts");
+    // for(auto it = hits_storage->cbegin(); it != hits_storage->cend(); it++) {
+    //     auto recombination_storage = recombination_generator.ComputeRecombinations(*it);
+    //     recombination_estimator.Update(recombination_storage);
+    // }
+    // INFO("Generator of VDJ recombinations ends");
+    // recombination_estimator.OutputRecombinationNumber();
+    // recombination_estimator.OutputSHMsDistribution();
+    // recombination_estimator.OutputRecombinationEvents();
+
+    {
+        std::ifstream in("src/vdj_labeler/test/blank_model.csv");
+        // HCProbabilityRecombinationModel model(in, hc_db);
+        // cout << model;
+        IgGeneProbabilityModel model_V(in, hc_db.VariableGenes());
+        //cout << model_V;
+        IgGeneProbabilityModel model_D(in, hc_db.DiversityGenes());
+        // cout << model_D;
+        IgGeneProbabilityModel model_J(in, hc_db.JoinGenes());
+        // cout << model_J;
+        // NongenomicInsertionModel modelVD(in);
+        // NongenomicInsertionModel modelDJ(in);
+        // cout << modelVD;
+        // cout << modelDJ;
+        // PalindromeDeletionModel modelDelV(in, hc_db.VariableGenes());
+        // cout << modelDelV;
+        // PalindromeDeletionModel modelDelJ(in, hc_db.JoinGenes());
+        // PalindromeDeletionModel modelDelDL(in, hc_db.DiversityGenes());
+        // PalindromeDeletionModel modelDelDR(in, hc_db.DiversityGenes());
+
+        // HCModelBasedRecombinationCalculator recombination_calculator(model);
     }
-    INFO("Generator of VDJ recombinations ends");
-    recombination_estimator.OutputRecombinationNumber();
-    recombination_estimator.OutputSHMsDistribution();
-    recombination_estimator.OutputRecombinationEvents();
-
     INFO("VDJ labeler ends");
 }
