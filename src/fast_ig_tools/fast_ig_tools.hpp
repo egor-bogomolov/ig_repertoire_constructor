@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/format.hpp>
+using bformat = boost::format;
 
 #include <string>
 #include <path_helper.hpp>

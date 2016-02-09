@@ -47,7 +47,7 @@ std::ostream& operator<<(std::ostream& out, const IgGeneProbabilityModel& model)
     for (size_t i = 0; i < model.size(); ++i)
         out << "Gene_id: " << model.GetIgGeneDatabase() -> GetByIndex(i) -> name()
             << ", " << "Gene probability: " << model.GetIgGeneProbabilities().at(i) << "\n";
-    return out;
+return out;
 }
 
 //double IgGeneProbabilityModel::GetProbabilityByGenId(const IgGene& ig_gene) const {
