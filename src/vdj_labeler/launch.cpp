@@ -116,27 +116,32 @@ void VDJLabeler::Run(const vdj_config::io_params &io, const vdj_config::run_para
     // recombination_estimator.OutputSHMsDistribution();
     // recombination_estimator.OutputRecombinationEvents();
 
+    // Andy: Blank model "tested" here
     {
         std::ifstream in("src/vdj_labeler/test/blank_model.csv");
-        // HCProbabilityRecombinationModel model(in, hc_db);
+        HCProbabilityRecombinationModel model(in, hc_db);
         // cout << model;
-        IgGeneProbabilityModel model_V(in, hc_db.VariableGenes());
-        //cout << model_V;
-        IgGeneProbabilityModel model_D(in, hc_db.DiversityGenes());
-        // cout << model_D;
-        IgGeneProbabilityModel model_J(in, hc_db.JoinGenes());
-        // cout << model_J;
+        // IgGeneProbabilityModel model_V(in, hc_db.VariableGenes());
+        // // cout << model_V;
+        // IgGeneProbabilityModel model_D(in, hc_db.DiversityGenes());
+        // // cout << model_D;
+        // IgGeneProbabilityModel model_J(in, hc_db.JoinGenes());
+        // // cout << model_J;
         // NongenomicInsertionModel modelVD(in);
         // NongenomicInsertionModel modelDJ(in);
-        // cout << modelVD;
-        // cout << modelDJ;
+        // // cout << modelVD;
+        // // cout << modelDJ;
         // PalindromeDeletionModel modelDelV(in, hc_db.VariableGenes());
-        // cout << modelDelV;
+        // // cout << modelDelV;
+        // // cout << modelDelV.GetIgGeneDatabase() -> GetByIndex(0) -> name() << " ";
+        // // cout << modelDelV.GetDeletionProbability(0, 0) << endl;
         // PalindromeDeletionModel modelDelJ(in, hc_db.JoinGenes());
+        // // cout << modelDelJ.GetIgGeneDatabase() -> GetByIndex(1) -> name() << " ";
+        // // cout << modelDelJ.GetDeletionProbability(1, -2) << endl;
         // PalindromeDeletionModel modelDelDL(in, hc_db.DiversityGenes());
         // PalindromeDeletionModel modelDelDR(in, hc_db.DiversityGenes());
 
-        // HCModelBasedRecombinationCalculator recombination_calculator(model);
+        HCModelBasedRecombinationCalculator recombination_calculator(model);
     }
     INFO("VDJ labeler ends");
 }
