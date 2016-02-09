@@ -1,6 +1,0 @@
-1. iterators
-2. print -> <<
-3. getters ?
-4. map<string, ... > -> map<IgGene, ...>
-5. NongenomicInsertions. SeqAn --- interface trans[<pair<A, C>]
-6. SeQan
