@@ -37,7 +37,19 @@ IgGeneAlignmentPtr SimpleDAligner::ComputeAlignment(IgGeneAlignmentPositions ali
     assignSource(row(align, 0), read_segment);
     assignSource(row(align, 1), alignment_positions.ig_gene->seq());
     TRACE("Read segment (" << length(read_segment) << "): " << read_segment);
-    int score = localAlignment(align, Score<int, Simple>(2, -1, -3, -2));
+
+    // Link: https://nar.oxfordjournals.org/content/early/2013/05/11/nar.gkt382.full.pdf
+    // Citation:
+    // SEARCH STRATEGY AND IMPLEMENTATION
+    // ------ Default BLAST search parameters are used unless indicated otherwise;
+    // ------ https://www.arabidopsis.org/Blast/BLASToptions.jsp
+    // Identifying the V, D and J gene hits/:
+    // ------ The default mismatch penalty is conservatively
+    // ------ set to a relatively high value (-4) to minimize the
+    // ------ chance of spurious matches. 
+    // Score::Score(match, mismatch, gap[, gapOpen]); 
+    int score = localAlignment(align, Score<int, Simple>(1, -4, -5, -2)); 
+
     //cout << "Score: " << score << endl;
     //cout << align << endl;
     IgGeneAlignmentPtr d_gene_alignment(new IgGeneAlignment(alignment_positions, align, score));

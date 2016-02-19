@@ -34,6 +34,7 @@ add_executable(vdj_labeler
                 vdj_alignments/vdj_hits_calculators/custom_vdj_hits_calculator.cpp
                 vdj_alignments/vdj_hits_calculators/info_based_vj_hits_calculator.cpp
                 vdj_alignments/vdj_hits_calculators/info_based_d_hits_calculator.cpp
+                vdj_alignments/vdj_hits_calculators/alignment_estimators/match_threshold_alignment_estimator.cpp
                 recombination/cleaved_gene.cpp
                 recombination/nongenomic_insertion.cpp
                 recombination/recombination.cpp
