@@ -10,10 +10,10 @@ class MatchThresholdAlignmentEstimator : public AlignmentEstimator {
      * "The default word size is 5, which requires a minimum of five consecutive nucleotide
      * matches for a D gene to be found."
      */
-    double normalized_score_threshold_ = 5;
+    int normalized_score_threshold_ = 5;
 
 public:
-    MatchThresholdAlignmentEstimator(double normalized_score_threshold) :
+    MatchThresholdAlignmentEstimator(int normalized_score_threshold) :
             normalized_score_threshold_(normalized_score_threshold) { }
 
     bool AlignmentIsGood(IgGeneAlignmentPtr ig_gene_alignment);
