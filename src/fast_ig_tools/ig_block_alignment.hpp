@@ -384,6 +384,7 @@ public:
         AlignmentPath path;
         int start, finish;
         size_t needle_index;
+        size_t needle_length;
         int overlap_length;
         double score;
 
@@ -406,6 +407,19 @@ public:
         size_t last_match_read_pos() const {
             return path.last().read_pos + path.last().length;
         }
+
+        size_t left_half_segment_length() const {
+            return last_match_needle_pos();
+        }
+
+        size_t right_half_segment_length() const {
+            return needle_length - first_match_needle_pos();
+        }
+
+        size_t segment_length() const {
+            return last_match_needle_pos() - first_match_needle_pos();
+        }
+
 
         TAlign seqan_alignment(const Dna5String &read,
                                const Dna5String &gene,
@@ -438,6 +452,7 @@ public:
             align.finish = finish;
             align.needle_index = needle_index;
             align.overlap_length = needle_overlap_length;
+            align.needle_length = length(query);
 
             return align;
         }
@@ -466,8 +481,8 @@ public:
             }
         }
 
-    std::vector<Alignment> query(const Dna5String &read, size_t limit) const {
-        auto result = query_unordered(read);
+    std::vector<Alignment> query(const Dna5String &read, size_t limit, size_t start = 0, size_t finish = 10005000) const {
+        auto result = query_unordered(read, start, finish);
 
         // std::cout << "SIZE: " << result.size() << std::endl;
 
@@ -536,7 +551,8 @@ private:
         return Alignment::path2Alignment(path, read, query, needle_index);
     }
 
-    bool check_alignment(const Alignment &align, const Dna5String &read, const Dna5String &query) const {
+    bool check_alignment(const Alignment &align, const Dna5String &read, const Dna5String &query,
+                         size_t start, size_t finish) const {
         const auto &path =  align.path; // FIXME
 
         if (std::abs(path.global_gap()) > max_global_gap) { // TODO split into 2 args (ins/dels) positive gap is deletion here
@@ -549,8 +565,8 @@ private:
             return false;
         }
 
-        int shift_min = -left_uncoverage_limit;
-        int shift_max = static_cast<int>(length(read)) - static_cast<int>(length(query)) + right_uncoverage_limit;
+        int shift_min = start - left_uncoverage_limit;
+        int shift_max = static_cast<int>(finish) - static_cast<int>(length(query)) + right_uncoverage_limit;
 
         if (path.left_shift() < shift_min || path.right_shift() > shift_max) {
             // Omit candidates with unproper final shift
@@ -561,16 +577,23 @@ private:
         return true;
     }
 
-    std::vector<Alignment> query_unordered(const Dna5String &read) const {
+    std::vector<Alignment> query_unordered(const Dna5String &read, size_t start = 0, size_t finish = 10005000) const {
         std::vector<std::vector<KmerMatch>> needle2matches(queries.size());
 
-        if (length(read) < K) {
+        // if (length(read) < K) {
+        //     // Return empty result
+        //     return {  };
+        // }
+
+        finish = std::min(finish, length(read));
+        assert(start <= finish);
+        if (finish - start < K) {
             // Return empty result
             return {  };
         }
 
         auto hashes = polyhashes(read, K);
-        for (size_t j = 0; j < hashes.size(); ++j) {
+        for (size_t j = start; j < finish - K + 1; ++j) { // Scan k-mers on given interval
             auto kmer = hashes[j];
             auto it = kmer2needle.find(kmer);
 
@@ -585,8 +608,10 @@ private:
                 int shift = static_cast<int>(kmer_pos_in_read) - static_cast<int>(kmer_pos_in_needle);
 
                 // We make these limits less strict because of possibility of indels
-                int shift_min = -left_uncoverage_limit - max_global_gap;
-                int shift_max = static_cast<int>(length(read)) - static_cast<int>(length(queries[needle_index])) + right_uncoverage_limit + max_global_gap;
+                // int shift_min = -left_uncoverage_limit - max_global_gap;
+                // int shift_max = static_cast<int>(length(read)) - static_cast<int>(length(queries[needle_index])) + right_uncoverage_limit + max_global_gap;
+                int shift_min = static_cast<int>(start) - left_uncoverage_limit - max_global_gap;
+                int shift_max = static_cast<int>(finish) - static_cast<int>(length(queries[needle_index])) + right_uncoverage_limit + max_global_gap;
 
                 if (shift >= shift_min && shift <= shift_max) {
                     needle2matches[needle_index].push_back( { static_cast<int>(kmer_pos_in_needle), static_cast<int>(kmer_pos_in_read) } );
@@ -607,7 +632,7 @@ private:
             assert(combined.size() > 0);
 
             Alignment align = make_align(combined, read, queries[needle_index], needle_index);
-            if (check_alignment(align, read, queries[needle_index])) {
+            if (check_alignment(align, read, queries[needle_index], start, finish)) {
                 result.push_back(std::move(align));
             }
         }
