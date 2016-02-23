@@ -51,19 +51,18 @@ struct Ig_KPlus_Finder_Parameters {
     std::string db_directory = "./germline";
     std::string output_dir;
     size_t threads = 4;
-    bool silent = true;
-    bool fill_prefix_by_germline = true;
+    bool verbose = false;
     bool compress = false;
     bool pseudogenes = true;
     bool fix_spaces = true;
-    std::string config_file = "";
     std::string output_filename;
     std::string bad_output_filename;
     std::string add_info_filename;
     std::string discard_info_filename;
     std::string vgenes_filename;
     std::string jgenes_filename;
-    std::string separator = "comma";
+    const std::string separator_default = "comma";
+    std::string separator = "";
     size_t min_len = 300;
 
     bool fill_left = true;
@@ -88,25 +87,36 @@ struct Ig_KPlus_Finder_Parameters {
         generic.add_options()
             ("version,v", "print version string")
             ("help,h", "produce help message")
-            ("config,c", po::value<std::string>(&config_file)->default_value(config_file),
-             "name of a file of a configuration")
-            ("input-file,i", po::value<std::string>(&input_file),
+            ("config-file,c", "name of a file of a configuration")
+            ("input-file,i", po::value<std::string>(&input_file)->required(),
              "name of an input file (FASTA|FASTQ)")
+            ("output-dir,o", po::value<std::string>(&output_dir)->required(),
+             "output directory")
             ;
+
+        auto separator_notifier = [this](const std::string &arg) {
+            if (arg == "comma") {
+                separator = ",";
+            } else if (arg == "semicolon") {
+                separator = ";";
+            } else if (arg == "tab" || arg == "tabular") {
+                separator = "\t";
+            } else {
+                separator = arg;
+            }
+        };
 
         // Declare a group of options that will be
         // allowed both on command line and in
         // config file
         po::options_description config("Configuration");
         config.add_options()
-            ("output,o", po::value<std::string>(&output_dir),
-             "output directory")
-            ("compress,Z", "compress FASTA files using Zlib")
-            ("no-compress", "don't compress FASTA files (default)")
-            ("pseudogenes,P", "use pseudogenes along with normal genes (default)")
-            ("no-pseudogenes", "don't use pseudogenes along with normal genes")
-            ("silent,S", "suppress output for each query (default)")
-            ("no-silent,V", "produce info output for each query")
+            ("compress,Z", po::value<bool>(&compress)->default_value(compress),
+             "compress output FASTA files using zlib")
+            ("pseudogenes,P", po::value<bool>(&pseudogenes)->default_value(pseudogenes),
+             "use pseudogenes along with normal germline genes")
+            ("verbose,V", po::value<bool>(&verbose)->default_value(verbose),
+             "produce alignment output for each query")
             ("loci,l", po::value<std::string>(&loci)->default_value(loci),
              "loci: IGH, IGL, IGK, IG (all BCRs), TRA, TRB, TRG, TRD, TR (all TCRs) or all")
             ("db-directory", po::value<std::string>(&db_directory)->default_value(db_directory),
@@ -126,17 +136,11 @@ struct Ig_KPlus_Finder_Parameters {
             ("max-candidates-j", po::value<int>(&max_candidates_j)->default_value(max_candidates_j),
              "maximal number of J-gene candidates for each query")
             ("organism", po::value<std::string>(&organism)->default_value(organism),
-             "organism ('human', 'mouse', 'pig', 'rabbit', 'rat' and 'rhesus_monkey' are supported for this moment)")
-            ("fill-prefix-by-germline",
-             "fill truncated V-gene prefix by germline content")
-            ("no-fill-prefix-by-germline (default)",
-             "fill truncated V-gene prefix by 'N'-s")
-            ("fix-spaces",
-             "replace spaces in read ids by underline symbol '_' (default)")
-            ("no-fix-spaces",
-             "save spaces in read ids, do not replace them")
-            ("separator", po::value<std::string>(&separator)->default_value(separator),
-             "separator for alignment info file: 'comma' (default), 'semicolon', 'tab' (or 'tabular') or custom string)")
+             "organism ('human', 'mouse', 'pig', 'rabbit', 'rat' and 'rhesus_monkey' are supported)")
+            ("fix-spaces", po::value<bool>(&fix_spaces)->default_value(fix_spaces),
+             "replace spaces in read ids by underline symbol '_'")
+            ("separator", po::value<std::string>()->default_value(separator_default)->notifier(separator_notifier),
+             "separator for alignment info file: 'comma', 'semicolon', 'tab' (or 'tabular') or custom string")
             ("min-len", po::value<size_t>(&min_len)->default_value(min_len),
              "minimal length of reported sequence")
             ;
@@ -156,12 +160,22 @@ struct Ig_KPlus_Finder_Parameters {
              "maximal allowed size of local insertion")
             ("max-local-deletions", po::value<int>(&max_local_deletions)->default_value(max_local_deletions),
              "maximal allowed size of local deletion")
-            ("left-fill-germline", po::value<size_t>(&fix_left)->default_value(fix_left),
-             "the number left positions which will be filled by germline")
             ("min-vsegment-length", po::value<size_t>(&min_v_segment_length)->default_value(min_v_segment_length),
              "minimal allowed length of V gene segment")
             ("min-jsegment-length", po::value<size_t>(&min_j_segment_length)->default_value(min_j_segment_length),
              "minimal allowed length of J gene segment")
+            ("fill-left", po::value<bool>(&fill_left)->default_value(fill_left),
+             "fill left cropped positions by germline")
+            ("fill-right", po::value<bool>(&fill_right)->default_value(fill_right),
+             "fill right cropped positions by germline")
+            ("crop-left", po::value<bool>(&crop_left)->default_value(crop_left),
+             "crop extra left positions")
+            ("crop-right", po::value<bool>(&crop_right)->default_value(crop_right),
+             "crop extra right positions")
+            ("fix-left", po::value<size_t>(&fix_left)->default_value(fix_left),
+             "the number left read positions which will be fixed by germline")
+            ("fix-right", po::value<size_t>(&fix_right)->default_value(fix_right),
+             "the number right read positions which will be fixed by germline")
             ;
 
         po::options_description cmdline_options("All command line options");
@@ -174,14 +188,29 @@ struct Ig_KPlus_Finder_Parameters {
         visible.add(generic).add(config);
 
         po::positional_options_description p;
-        p.add("input-file", -1);
+        p.add("input-file", 1).add("output-dir", 1);
 
         po::variables_map vm;
         store(po::command_line_parser(argc, argv).
               options(cmdline_options).positional(p).run(), vm);
-        notify(vm);
 
-        if (config_file != "") {
+        if (vm.count("help-hidden")) {
+            cout << cmdline_options << std::endl;
+            exit(0);
+        }
+
+        if (vm.count("help")) {
+            cout << visible << "\n";
+            exit(0);
+        }
+
+        if (vm.count("version")) {
+            cout << "ig_kplus_vjfinder version 0.2" << std::endl;
+            exit(0);
+        }
+
+        if (vm.count("config-file")) {
+            std::string config_file = vm["config-file"].as<std::string>();
             std::ifstream ifs(config_file.c_str());
             if (!ifs) {
                 ERROR("Config file " << config_file << " was not found");
@@ -191,80 +220,39 @@ struct Ig_KPlus_Finder_Parameters {
                 // reparse cmd line again for update config defaults
                 store(po::command_line_parser(argc, argv).
                       options(cmdline_options).positional(p).run(), vm);
-                notify(vm);
             }
         }
 
-        if (vm.count("help-hidden")) {
-            cout << cmdline_options << std::endl;
-            exit(0);
+        try {
+            notify(vm);
+        } catch (const po::error &e) {
+            ERROR("Command-line parser error: " << e.what());
+            exit(1);
+        } catch (const std::exception &e) {
+            ERROR("Unknown exception: " << e.what());
+            exit(1);
         }
 
-        if (vm.count("help") || !vm.count("input-file")) { // TODO Process required arguments by the proper way
-            cout << visible << "\n";
-            exit(0);
-        }
+        // if (separator == "comma") {
+        //     separator = ",";
+        // } else if (separator == "semicolon") {
+        //     separator = ";";
+        // } else if (separator == "tab" || separator == "tabular") {
+        //     separator = "\t";
+        // } else {
+        //     // Let it be. Do nothing
+        // }
+    }
 
-        if (vm.count("version")) {
-            cout << "<Some cool name> version 0.1" << vm.count("version") << std::endl;
-            exit(0);
-        }
-
-        if (vm.count("silent")) {
-            silent = true;
-        } else if (vm.count("no-silent")) {
-            silent = false;
-        }
-
-        if (vm.count("compress")) {
-            compress = true;
-        } else if (vm.count("no-compress")) {
-            compress = false;
-        }
-
-        if (vm.count("pseudogenes")) {
-            pseudogenes = true;
-        } else if (vm.count("no-pseudogenes")) {
-            pseudogenes = false;
-        }
-
-        if (vm.count("no-fill-prefix-by-germline")) {
-            fill_left = false;
-        }
-
-        if (vm.count("fill-prefix-by-germline")) {
-            fill_left = true;
-        }
-
-        if (vm.count("no-fix-spaces")) {
-            fix_spaces = false;
-        }
-
-        if (vm.count("fix-spaces")) {
-            fix_spaces = true;
-        }
-
-        if (separator == "comma") {
-            separator = ",";
-        } else if (separator == "semicolon") {
-            separator = ";";
-        } else if (separator == "tab" || separator == "tabular") {
-            separator = "\t";
-        } else {
-            // Let it be. Do nothing
-        }
-
+    void print_info() const {
         INFO(bformat("Input FASTQ reads: %s") % input_file);
         INFO(bformat("Output directory: %s") % output_dir);
         INFO(bformat("Organism: %s") % organism);
         INFO(bformat("Locus: %s") % loci);
         INFO("Word size for V-gene: " << K);
         INFO("Word size for J-gene: " << word_size_j);
-
-        prepare_output();
     }
 
-private:
     void prepare_output() {
         make_dirs(output_dir);
         output_filename = output_dir + "/cleaned_reads.fa";
@@ -301,9 +289,11 @@ int main(int argc, char **argv) {
     INFO("Command line: " << join_cmd_line(argc, argv));
 
     Ig_KPlus_Finder_Parameters param(argc, argv);
+    param.prepare_output();
 
     const VJAligner db(param);
 
+    param.print_info();
     INFO("V gene germline database size: " << db.all_loci_database.v_reads.size());
     INFO("J gene germline database size: " << db.all_loci_database.j_reads.size());
 
@@ -345,7 +335,7 @@ int main(int argc, char **argv) {
         }
 
         const auto RESULT = db.Query(reads[j], true, true, param);
-        if (!param.silent) {
+        if (param.verbose) {
             std::lock_guard<std::mutex> lck(stdout_mtx); //TODO Use OMP critical section
 
             cout << "Query: " << read_id << endl;
