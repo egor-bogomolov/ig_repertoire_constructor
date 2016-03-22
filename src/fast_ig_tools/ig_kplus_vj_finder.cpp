@@ -333,6 +333,7 @@ int main(int argc, char **argv) {
                         % (vjalignment.VStart(i) + 1 ) % vjalignment.VEnd(i)
                         % vjalignment.VScore(i)        % vjalignment.VId(i);
 
+                    cout << vjalignment.VMatches(i) << endl;
                     cout << vjalignment.VAlignmentSeqAn(i);
                 }
             } else {
@@ -345,6 +346,7 @@ int main(int argc, char **argv) {
                         % (vjalignment.JStart(i) + 1 )  % vjalignment.JEnd(i)
                         % vjalignment.JScore(i)         % vjalignment.JId(i);
 
+                    cout << vjalignment.JMatches(i) << endl;
                     cout << vjalignment.JAlignmentSeqAn(i);
                 }
             } else {

@@ -427,6 +427,11 @@ public:
             return path2seqanAlignment(this->path, read, gene, clipped_head);
         }
 
+        std::string visualize(const Dna5String &read,
+                              const Dna5String &gene) const {
+            return this->path.visualize_matches(length(gene), length(read));
+        }
+
         static Alignment path2Alignment(AlignmentPath &path,
                                         const Dna5String &read,
                                         const Dna5String &query,

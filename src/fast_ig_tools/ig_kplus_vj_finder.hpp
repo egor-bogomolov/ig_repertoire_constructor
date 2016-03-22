@@ -258,6 +258,15 @@ public:
         return JHit(j_hit_index).seqan_alignment(read, JSeq(j_hit_index));
     }
 
+    std::string VMatches(size_t v_hit_index = 0) const {
+        return VHit(v_hit_index).visualize(read, VSeq(v_hit_index));
+    }
+
+    std::string JMatches(size_t j_hit_index = 0) const {
+        return JHit(j_hit_index).visualize(read, JSeq(j_hit_index));
+    }
+
+
     std::pair<TAlign, TAlign> AlignmentsSeqan(size_t v_hit_index = 0,
                                               size_t j_hit_index = 0) const {
         return { VAlignmentSeqAn(v_hit_index), JAlignmentSeqAn(j_hit_index) };
