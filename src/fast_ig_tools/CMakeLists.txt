@@ -94,7 +94,7 @@ add_executable(ig_consensus_finder ig_consensus_finder.cpp)
 
 
 
-add_custom_command(TARGET ig_kplus_vj_finder POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${PROJECT_SOURCE_DIR}/germline"
-        $<TARGET_FILE_DIR:ig_kplus_vj_finder>/germline)
+# add_custom_command(TARGET ig_kplus_vj_finder POST_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E copy_directory
+#         "${PROJECT_SOURCE_DIR}/germline"
+#         $<TARGET_FILE_DIR:ig_kplus_vj_finder>/germline)
