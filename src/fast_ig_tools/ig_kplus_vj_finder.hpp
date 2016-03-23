@@ -21,14 +21,13 @@ struct VJAlignerParameters {
     int K = 7;
     int word_size_j = 5;
     std::string organism = "human";
-    int max_global_gap = 24;
     int min_k_coverage = 50;
     int min_k_coverage_j = 13;
-    int max_local_deletions = 12;
-    int max_local_insertions = 12;
     std::string loci = "all";
     std::string db_directory = "./germline";
     bool pseudogenes = true;
+
+    BlockAligner::ScoringScheme scoring;
 };
 
 
@@ -326,14 +325,14 @@ public:
         }
         all_loci_database.reset(all_db);
 
-        valigner.reset(new BlockAligner(all_loci_database->v_reads, param.K, param.max_global_gap,
-                                        param.max_local_insertions, param.max_local_deletions, param.min_k_coverage));
-        jaligner.reset(new BlockAligner(all_loci_database->j_reads, param.word_size_j, param.max_global_gap,
-                                        param.max_local_insertions, param.max_local_deletions, param.min_k_coverage_j));
+        valigner.reset(new BlockAligner(all_loci_database->v_reads, param.K, param.scoring,
+                                        param.min_k_coverage));
+        jaligner.reset(new BlockAligner(all_loci_database->j_reads, param.word_size_j, param.scoring,
+                                        param.min_k_coverage_j));
 
         for (const auto db : locus_databases) {
-            BlockAligner *p = new BlockAligner(db->j_reads, param.word_size_j, param.max_global_gap,
-                                               param.max_local_insertions, param.max_local_deletions, param.min_k_coverage_j);
+            BlockAligner *p = new BlockAligner(db->j_reads, param.word_size_j, param.scoring,
+                                               param.min_k_coverage_j);
             jaligners.push_back(std::shared_ptr<BlockAligner>(p));
         }
     }
