@@ -24,7 +24,7 @@ struct VJAlignerParameters {
     int min_k_coverage = 50;
     int min_k_coverage_j = 13;
     std::string loci = "all";
-    std::string db_directory = "./germline";
+    std::string db_directory = "./data/germline";
     bool pseudogenes = true;
 
     BlockAligner::ScoringScheme scoring;
