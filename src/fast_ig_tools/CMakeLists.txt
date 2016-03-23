@@ -67,6 +67,8 @@ add_executable(ig_kmer_counter ig_kmer_counter.cpp)
 add_executable(ig_hgc_complexity_estimator ig_hgc_complexity_estimator.cpp)
 add_executable(ig_consensus_finder ig_consensus_finder.cpp)
 
+make_essential_test(test_ig_kplus_vj_finder test_ig_kplus_vj_finder.cpp)
+
 # add_executable(test1 test_ig_kplus_vj_finder.cpp)
 # target_link_libraries(test1 gtest_main gtest)
 # add_test(NAME mytest1 COMMAND test1)
