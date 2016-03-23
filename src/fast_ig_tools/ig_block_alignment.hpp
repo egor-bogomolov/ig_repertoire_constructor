@@ -557,8 +557,7 @@ private:
         return Alignment::path2Alignment(path, read, query, needle_index);
     }
 
-    bool check_alignment(const Alignment &align, const Dna5String &read, const Dna5String &query,
-                         size_t start, size_t finish) const {
+    bool check_alignment(const Alignment &align) const {
         const auto &path =  align.path; // FIXME
 
         if (std::abs(path.global_gap()) > max_global_gap) { // TODO split into 2 args (ins/dels) positive gap is deletion here
@@ -602,7 +601,6 @@ private:
                 size_t needle_index = p.needle_index;
                 size_t kmer_pos_in_read = j;
                 size_t kmer_pos_in_needle = p.position;
-                int shift = static_cast<int>(kmer_pos_in_read) - static_cast<int>(kmer_pos_in_needle);
 
                 needle2matches[needle_index].push_back( { static_cast<int>(kmer_pos_in_needle), static_cast<int>(kmer_pos_in_read) } );
             }
@@ -621,7 +619,7 @@ private:
             assert(combined.size() > 0);
 
             Alignment align = make_align(combined, read, queries[needle_index], needle_index);
-            if (check_alignment(align, read, queries[needle_index], start, finish)) {
+            if (check_alignment(align)) {
                 result.push_back(std::move(align));
             }
         }
