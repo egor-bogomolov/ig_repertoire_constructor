@@ -327,15 +327,12 @@ public:
         all_loci_database.reset(all_db);
 
         valigner.reset(new BlockAligner(all_loci_database->v_reads, param.K, param.max_global_gap,
-                                        100500, 100500,
                                         param.max_local_insertions, param.max_local_deletions, param.min_k_coverage));
         jaligner.reset(new BlockAligner(all_loci_database->j_reads, param.word_size_j, param.max_global_gap,
-                                        100500, 100500,
                                         param.max_local_insertions, param.max_local_deletions, param.min_k_coverage_j));
 
         for (const auto db : locus_databases) {
             BlockAligner *p = new BlockAligner(db->j_reads, param.word_size_j, param.max_global_gap,
-                                               100500, 100500,
                                                param.max_local_insertions, param.max_local_deletions, param.min_k_coverage_j);
             jaligners.push_back(std::shared_ptr<BlockAligner>(p));
         }

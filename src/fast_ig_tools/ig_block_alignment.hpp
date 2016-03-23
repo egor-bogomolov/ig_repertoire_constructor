@@ -466,15 +466,13 @@ public:
 public:
     BlockAligner(const std::vector<Dna5String> &queries,
                  size_t K,
-                 int max_global_gap, int left_uncoverage_limit, int right_uncoverage_limit,
+                 int max_global_gap,
                  int max_local_insertions,
                  int max_local_deletions,
                  int min_k_coverage) : max_local_insertions{max_local_insertions},
                                        max_local_deletions{max_local_deletions},
                                        min_k_coverage{min_k_coverage},
                                        K{K},
-                                       left_uncoverage_limit{left_uncoverage_limit},
-                                       right_uncoverage_limit{right_uncoverage_limit},
                                        max_global_gap{max_global_gap} {
             this->queries = queries;
 
@@ -573,15 +571,6 @@ private:
             return false;
         }
 
-        int shift_min = start - left_uncoverage_limit;
-        int shift_max = static_cast<int>(finish) - static_cast<int>(length(query)) + right_uncoverage_limit;
-
-        if (path.left_shift() < shift_min || path.right_shift() > shift_max) {
-            // Omit candidates with unproper final shift
-            // Maybe we should make these limits less strict because of possibility of indels on edges?
-            return false;
-        }
-
         return true;
     }
 
@@ -615,15 +604,7 @@ private:
                 size_t kmer_pos_in_needle = p.position;
                 int shift = static_cast<int>(kmer_pos_in_read) - static_cast<int>(kmer_pos_in_needle);
 
-                // We make these limits less strict because of possibility of indels
-                // int shift_min = -left_uncoverage_limit - max_global_gap;
-                // int shift_max = static_cast<int>(length(read)) - static_cast<int>(length(queries[needle_index])) + right_uncoverage_limit + max_global_gap;
-                int shift_min = static_cast<int>(start) - left_uncoverage_limit - max_global_gap;
-                int shift_max = static_cast<int>(finish) - static_cast<int>(length(queries[needle_index])) + right_uncoverage_limit + max_global_gap;
-
-                if (shift >= shift_min && shift <= shift_max) {
-                    needle2matches[needle_index].push_back( { static_cast<int>(kmer_pos_in_needle), static_cast<int>(kmer_pos_in_read) } );
-                }
+                needle2matches[needle_index].push_back( { static_cast<int>(kmer_pos_in_needle), static_cast<int>(kmer_pos_in_read) } );
             }
         }
 
@@ -653,7 +634,6 @@ private:
     int max_local_deletions;
     int min_k_coverage;
     size_t K;
-    int left_uncoverage_limit, right_uncoverage_limit;
     int max_global_gap;
     std::unordered_map<size_t, std::vector<PositionInDB>> kmer2needle;
 };
