@@ -390,10 +390,6 @@ public:
         int overlap_length;
         double score;
 
-        bool operator< (const Alignment& b) const {
-            return this->kp_coverage < b.kp_coverage;
-        }
-
         size_t first_match_read_pos() const {
             return path.first().read_pos;
         }
@@ -509,7 +505,6 @@ public:
 
         using ctuple_type = decltype(*result.cbegin());
 
-        // auto score_function = [](const ctuple_type &a) { return a.kp_coverage; };
         auto score_function = [](const ctuple_type &a) { return a.int_score; };
         auto comp = [&score_function](const ctuple_type &a,
                                       const ctuple_type &b) -> bool { return score_function(a) > score_function(b); };
