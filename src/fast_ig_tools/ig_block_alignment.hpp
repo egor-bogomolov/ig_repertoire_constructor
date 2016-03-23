@@ -525,7 +525,10 @@ public:
     }
 
 private:
-    Alignment make_align(const std::vector<Match> &combined, const Dna5String &read, const Dna5String &query, size_t needle_index) const {
+    Alignment make_align(const std::vector<Match> &combined,
+                         const Dna5String &read,
+                         const Dna5String &query,
+                         size_t needle_index) const {
         // std::sort(combined.begin(), combined.end(),
         //           [](const Match &a, const Match &b) -> bool { return a.needle_pos < b.needle_pos; });
         // assert(combined.size() > 0);
