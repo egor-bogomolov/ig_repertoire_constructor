@@ -484,10 +484,11 @@ public:
             }
         }
 
-    std::vector<Alignment> query(const Dna5String &read, size_t limit, size_t start = 0, size_t finish = 10005000) const {
+    std::vector<Alignment> query(const Dna5String &read,
+                                 size_t limit,
+                                 size_t start = 0, size_t finish = 10005000) const {
         auto result = query_unordered(read, start, finish);
 
-        // std::cout << "SIZE: " << result.size() << std::endl;
 
         limit = std::min(limit, result.size());
         if (limit == 0) {
@@ -504,20 +505,6 @@ public:
         std::nth_element(result.begin(), result.begin() + limit, result.end(), comp);
         result.resize(std::min(result.size(), limit));
         std::sort(result.begin(), result.end(), comp);
-
-        // const auto &gene = this->queries[result[0].needle_index];
-        // std::cout << read << std::endl;
-        // std::cout << gene << std::endl;
-        // std::cout << result[0].path.visualize_matches(length(gene), length(read)) << std::endl;
-        // auto align = path2seqanAlignment(result[0].path, read, gene);
-        // // replace_prefix_for_full_read(align, "AAAAAAAAAAAAAAAAAA" + read);
-        //
-        // Dna5String long_read = "AAAAAAAAA";
-        // int clipped_head = length(long_read);
-        // long_read += read;
-        // auto align2 = path2seqanAlignment(result[0].path, long_read, gene, clipped_head);
-        // std::cout << align;
-        // std::cout << align2;
 
         return result;
     }
@@ -573,7 +560,8 @@ private:
         return true;
     }
 
-    std::vector<Alignment> query_unordered(const Dna5String &read, size_t start = 0, size_t finish = 10005000) const {
+    std::vector<Alignment> query_unordered(const Dna5String &read,
+                                           size_t start = 0, size_t finish = 10005000) const {
         std::vector<std::vector<KmerMatch>> needle2matches(queries.size());
 
         // if (length(read) < K) {
