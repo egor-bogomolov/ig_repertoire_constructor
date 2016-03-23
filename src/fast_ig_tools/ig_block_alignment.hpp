@@ -186,8 +186,7 @@ int find_simple_gap(const Tsequence1 &read, const Tsequence2 &gene) {
 
 
 using TAlign = seqan::Align<Dna5String, seqan::ArrayGaps>;     // align type
-TAlign path2seqanAlignment(const AlignmentPath &path, const Dna5String &read, const Dna5String &gene,
-                           size_t clipped_head = 0) {
+TAlign path2seqanAlignment(const AlignmentPath &path, const Dna5String &read, const Dna5String &gene) {
     assert(path.check_overlaps());
     assert(!path.empty());
 
@@ -203,8 +202,7 @@ TAlign path2seqanAlignment(const AlignmentPath &path, const Dna5String &read, co
     TRow & row_read = row(align, 1);
 
     // Clip head
-    setBeginPosition(row_read, clipped_head);
-    size_t read_len = length(read) - clipped_head;
+    size_t read_len = length(read);
     size_t gene_len = length(gene);
 
     // Add finishing gaps (reverse order since insert_gaps works with VIEW position!)
@@ -215,7 +213,7 @@ TAlign path2seqanAlignment(const AlignmentPath &path, const Dna5String &read, co
     } else if (finishing_gap < 0) {
         // insertGaps(row_gene, gene_len, -finishing_gap);
         // Use clipping:
-        setEndPosition(row_read, clipped_head + read_len + finishing_gap);
+        setEndPosition(row_read, read_len + finishing_gap);
     } else {
         // Do nothing
     }
@@ -249,7 +247,7 @@ TAlign path2seqanAlignment(const AlignmentPath &path, const Dna5String &read, co
     } else if (starting_gap < 0) {
         // insertGaps(row_gene, 0, -starting_gap);
         // Use clipping:
-        setBeginPosition(row_read, clipped_head - starting_gap);
+        setBeginPosition(row_read, -starting_gap);
     } else {
         // Do nothing
     }
@@ -420,9 +418,8 @@ public:
 
 
         TAlign seqan_alignment(const Dna5String &read,
-                               const Dna5String &gene,
-                               size_t clipped_head = 0) const {
-            return path2seqanAlignment(this->path, read, gene, clipped_head);
+                               const Dna5String &gene) const {
+            return path2seqanAlignment(this->path, read, gene);
         }
 
         std::string visualize(const Dna5String &read,
