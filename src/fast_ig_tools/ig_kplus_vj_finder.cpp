@@ -82,6 +82,17 @@ struct VJFinderParameters : public VJAlignerParameters, public VJQueryParameters
             }
         };
 
+        // Set defaults (as in IgBLAST)
+        scoring_v.gap_opening_cost = 4;
+        scoring_v.gap_extention_cost = 1;
+        scoring_v.gap_opening_cost = 5;
+        scoring_v.gap_extention_cost = 2;
+
+        scoring_v.mismatch_extention_cost = 0;
+        scoring_v.mismatch_opening_cost = 0;
+        scoring_j.mismatch_extention_cost = 0;
+        scoring_j.mismatch_opening_cost = 0;
+
         // Declare a group of options that will be
         // allowed both on command line and in
         // config file
@@ -126,24 +137,46 @@ struct VJFinderParameters : public VJAlignerParameters, public VJQueryParameters
         po::options_description hidden("Hidden options");
         hidden.add_options()
             ("help-hidden", "show all options, including developers' ones")
+
             ("left-uncoverage-limit", po::value<size_t>(&left_uncovered_limit)->default_value(left_uncovered_limit),
              "uncoverage limit of left end")
             ("right-uncoverage-limit", po::value<size_t>(&right_uncovered_limit)->default_value(right_uncovered_limit),
              "uncoverage limit of right end")
-            ("max-global-gap", po::value<int>(&scoring.max_global_gap)->default_value(scoring.max_global_gap),
-             "maximal allowed size of global gap")
-            ("max-local-insertions", po::value<int>(&scoring.max_local_insertions)->default_value(scoring.max_local_insertions),
-             "maximal allowed size of local insertion")
-            ("max-local-deletions", po::value<int>(&scoring.max_local_deletions)->default_value(scoring.max_local_deletions),
-             "maximal allowed size of local deletion")
-            ("gap-opening-cost", po::value<int>(&scoring.gap_opening_cost)->default_value(scoring.gap_opening_cost),
-             "gap opening cost")
-            ("gap-extention-cost", po::value<int>(&scoring.gap_extention_cost)->default_value(scoring.gap_extention_cost),
-             "gap extention cost")
+
+            ("max-global-gap-v", po::value<int>(&scoring_v.max_global_gap)->default_value(scoring_v.max_global_gap),
+             "maximal allowed size of global gap for V gene")
+            ("max-local-insertions-v", po::value<int>(&scoring_v.max_local_insertions)->default_value(scoring_v.max_local_insertions),
+             "maximal allowed size of local insertion for V gene")
+            ("max-local-deletions-v", po::value<int>(&scoring_v.max_local_deletions)->default_value(scoring_v.max_local_deletions),
+             "maximal allowed size of local deletion for V gene")
+            ("gap-opening-cost-v", po::value<int>(&scoring_v.gap_opening_cost)->default_value(scoring_v.gap_opening_cost),
+             "gap opening cost for V gene alignement")
+            ("gap-extention-cost-v", po::value<int>(&scoring_v.gap_extention_cost)->default_value(scoring_v.gap_extention_cost),
+             "gap extention cost for V gene alignment")
+            ("mismatch-extention-cost-v", po::value<int>(&scoring_v.mismatch_extention_cost)->default_value(scoring_v.mismatch_extention_cost),
+             "mismatch extention cost for V gene alignment")
+            ("mismatch-opening-cost-v", po::value<int>(&scoring_v.mismatch_opening_cost)->default_value(scoring_v.mismatch_opening_cost),
+             "mismatch opening cost for V gene alignment")
             ("min-vsegment-length", po::value<size_t>(&min_v_segment_length)->default_value(min_v_segment_length),
              "minimal allowed length of V gene segment")
+
+            ("max-global-gap-j", po::value<int>(&scoring_j.max_global_gap)->default_value(scoring_j.max_global_gap),
+             "maximal allowed size of global gap for J gene")
+            ("max-local-insertions-j", po::value<int>(&scoring_j.max_local_insertions)->default_value(scoring_j.max_local_insertions),
+             "maximal allowed size of local insertion for J gene")
+            ("max-local-deletions-j", po::value<int>(&scoring_j.max_local_deletions)->default_value(scoring_j.max_local_deletions),
+             "maximal allowed size of local deletion for J gene")
+            ("gap-opening-cost-j", po::value<int>(&scoring_j.gap_opening_cost)->default_value(scoring_j.gap_opening_cost),
+             "gap opening cost for J gene alignment")
+            ("gap-extention-cost-j", po::value<int>(&scoring_j.gap_extention_cost)->default_value(scoring_j.gap_extention_cost),
+             "gap extention cost for J gene alignment")
+            ("mismatch-extention-cost-j", po::value<int>(&scoring_j.mismatch_extention_cost)->default_value(scoring_j.mismatch_extention_cost),
+             "mismatch extention cost for J gene alignment")
+            ("mismatch-opening-cost-j", po::value<int>(&scoring_j.mismatch_opening_cost)->default_value(scoring_j.mismatch_opening_cost),
+             "mismatch opening cost for J gene alignment")
             ("min-jsegment-length", po::value<size_t>(&min_j_segment_length)->default_value(min_j_segment_length),
              "minimal allowed length of J gene segment")
+
             ("fill-left", po::value<bool>(&fill_left)->default_value(fill_left),
              "fill left cropped positions by germline")
             ("fill-right", po::value<bool>(&fill_right)->default_value(fill_right),

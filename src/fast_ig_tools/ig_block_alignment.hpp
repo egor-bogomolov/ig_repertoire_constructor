@@ -470,6 +470,8 @@ public:
         int gap_opening_cost = 4;
         int gap_extention_cost = 1;
         int match_reward = 1;
+        int mismatch_extention_cost = 0;
+        int mismatch_opening_cost = 2;
     };
 
 
@@ -544,8 +546,12 @@ private:
             int read_gap = b.read_pos - a.read_pos;
             int needle_gap = b.needle_pos - a.needle_pos;
             int gap = read_gap - needle_gap;
+            int mmatch = std::min(b.read_pos - a.read_pos - a.length, b.needle_pos - a.needle_pos - a.length);
+            mmatch = std::max(0, mmatch);
 
-            return -Match::overlap(a, b) - ((gap) ? (scoring.gap_opening_cost + std::abs(gap) * scoring.gap_extention_cost) : 0);
+            return - Match::overlap(a, b)
+                   - ((gap) ? (scoring.gap_opening_cost + std::abs(gap) * scoring.gap_extention_cost) : 0)
+                   - ((mmatch) ? scoring.mismatch_opening_cost + mmatch * scoring.mismatch_extention_cost : 0);
         };
 
         auto _ = weighted_longest_path_in_DAG(combined, has_edge, edge_weight, vertex_weight);

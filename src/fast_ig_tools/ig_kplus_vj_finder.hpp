@@ -27,7 +27,8 @@ struct VJAlignerParameters {
     std::string db_directory = "./data/germline";
     bool pseudogenes = true;
 
-    BlockAligner::ScoringScheme scoring;
+    BlockAligner::ScoringScheme scoring_v;
+    BlockAligner::ScoringScheme scoring_j;
 };
 
 
@@ -325,13 +326,13 @@ public:
         }
         all_loci_database.reset(all_db);
 
-        valigner.reset(new BlockAligner(all_loci_database->v_reads, param.K, param.scoring,
+        valigner.reset(new BlockAligner(all_loci_database->v_reads, param.K, param.scoring_v,
                                         param.min_k_coverage));
-        jaligner.reset(new BlockAligner(all_loci_database->j_reads, param.word_size_j, param.scoring,
+        jaligner.reset(new BlockAligner(all_loci_database->j_reads, param.word_size_j, param.scoring_j,
                                         param.min_k_coverage_j));
 
         for (const auto db : locus_databases) {
-            BlockAligner *p = new BlockAligner(db->j_reads, param.word_size_j, param.scoring,
+            BlockAligner *p = new BlockAligner(db->j_reads, param.word_size_j, param.scoring_j,
                                                param.min_k_coverage_j);
             jaligners.push_back(std::shared_ptr<BlockAligner>(p));
         }
