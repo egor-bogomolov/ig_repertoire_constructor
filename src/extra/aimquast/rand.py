@@ -92,7 +92,6 @@ def FM_index(X, Y):
     return float(S00) / math.sqrt((S00 + S10) * (S00 + S01))
 
 def jaccard(X, Y):
-    import math
     S00, S11, S01, S10 = randstats(X, Y)
 
     return float(S00) / (S00 + S10 + S01)
@@ -106,6 +105,120 @@ import sklearn.metrics
 assert sklearn.metrics.adjusted_rand_score([0, 1, 1], [0, 1, 2]) ==  rand_adj([0, 1, 1], [0, 1, 2])
 assert sklearn.metrics.adjusted_rand_score([0, 1, 1], [0, 1, 1]) == rand_adj([0, 1, 1], [0, 1, 1])
 assert sklearn.metrics.adjusted_rand_score([0, 0, 1, 2], [0, 0, 1, 1]) == rand_adj([0, 0, 1, 2], [0, 0, 1, 1])
+
+
+
+
+def parse_rcm(filename):
+    rcm = {}
+    with open(filename) as f:
+        for line in f:
+            id, cluster = line.strip().split("\t")
+            id = id.strip()
+            cluster = cluster.strip()
+            rcm[id] = cluster
+
+    return rcm
+
+def rcm_vs_rcm(rcm1, rcm2, score=FM_index):
+    rcm1, rcm2 = parse_rcm(rcm1), parse_rcm(rcm2)
+
+    clustering1 = []
+    clustering2 = []
+    for id, cluster1 in rcm1.iteritems():
+        if id in rcm2:
+            cluster2 = rcm2[id]
+            clustering1.append(cluster1)
+            clustering2.append(cluster2)
+
+    return score(clustering1, clustering2)
+
+def make_ideal_rcm(filename, output):
+    import re
+
+    with open(filename) as fh, open(output, "w") as out:
+        for line in fh:
+            id, cluster = line.strip().split("\t")
+            cluster = int(cluster)
+            m = re.match("^antibody_(\\d+)_", id)
+            ant = m.groups()[0]
+
+            out.write("%s\t%s\n" % (id, ant))
+
+
+def parse_cluster_mult(id):
+    import re
+    id = str(id)
+    m = re.match(r"^cluster___(\d+)___size___(\d+)$", id)
+    if m:
+        g = m.groups()
+        cluster = int(g[0])
+        mult = int(g[1])
+        return cluster, mult
+    else:
+        return None
+
+
+def error_profile(rcm, library, repertoire, limit=5):
+    from Bio import SeqIO
+    assert limit > 0
+    with open(library) as f:
+        reads = [rec for rec in SeqIO.parse(f, "fasta")]
+
+    id2read = {str(rec.id): rec.seq for rec in reads}
+
+    rcm = parse_rcm(rcm)
+
+    with open(repertoire) as f:
+        reads = [rec for rec in SeqIO.parse(f, "fasta")]
+
+    cluster2center = {parse_cluster_mult(str(read.id))[0]: str(read.seq) for read in reads}
+
+    from collections import defaultdict
+
+    cluster2read = defaultdict(list)
+
+    for id, cluster in rcm.iteritems():
+        cluster = int(cluster)
+        cluster2read[cluster].append(id2read[id])
+
+    errors = defaultdict(int)
+    errors01 = []
+    nreads = 0
+    for cluster, reads in cluster2read.iteritems():
+        if len(reads) < limit:
+            continue
+        center = cluster2center[cluster]
+
+        nreads += len(reads)
+        for read in reads:
+            for i in xrange(min(len(read), len(center))):
+                if read[i] != center[i]:
+                    errors[i] += 1
+                    errors01.append(float(i) / len(center))
+
+    maxlen = max(errors.iterkeys())
+    result = [0] * (maxlen + 1)
+    for i, err in errors.iteritems():
+        result[i] = err
+
+    error_rate = float(len(errors01)) / nreads
+
+    class Empty:
+        pass
+
+    res = Empty()
+    res.error_profile = result
+    res.errors01 = errors01
+    res.error_rate = error_rate
+    res.nreads = nreads
+    res.limit = limit
+    return res
+
+
+
+
+
 
 
 
