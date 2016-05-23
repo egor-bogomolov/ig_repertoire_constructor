@@ -1,17 +1,15 @@
 #include "reads_merger.hpp"
-#include <utils/string_tools.hpp>
 
-#include "logger/log_writers.hpp"
 #include <boost/program_options.hpp>
 
 namespace po = boost::program_options;
 namespace rm = reads_merger;
 
 void create_console_logger(string log_filename) {
-    using namespace logging;
-    logger *lg = create_logger(path::FileExists(log_filename) ? log_filename : "");
-    lg->add_writer(std::make_shared<console_writer>());
-    attach_logger(lg);
+	using namespace logging;
+	logger *lg = create_logger(path::FileExists(log_filename) ? log_filename : "");
+	lg->add_writer(std::make_shared<console_writer>());
+	attach_logger(lg);
 }
 
 int main(int argc, char *argv[]) {
@@ -28,11 +26,12 @@ int main(int argc, char *argv[]) {
 		("help", "Help message")
 		("min-overlap", po::value<size_t>(&settings.min_overlap)->default_value(50), "set minimal overlap size")
 		("max-mismatch", po::value<double>(&settings.max_mismatch_rate)->default_value(0.1), "set maximal mismatch rate")
-		("1", po::value< vector<string> >(&in_left_files), "input files containing left reads")
-		("2", po::value< vector<string> >(&in_right_files), "input files containing right reads")
-		("o", po::value< string >(&out_good_file), "output file for merged reads")
-		("bad", po::value< string >(&out_bad_file), "output file for non-merged reads")
-	;
+		("1", po::value<vector<string>>(&in_left_files), "input files containing left reads")
+		("2", po::value<vector<string>>(&in_right_files), "input files containing right reads")
+		("o", po::value<string>(&out_good_file), "output file for merged reads")
+		("bad", po::value<string>(&out_bad_file), "output file for non-merged reads")
+		("qual", po::value<size_t>(&settings.base_quality)->default_value(33), "set base quality")
+		;
 	po::variables_map vm;
 	po::store(po::parse_command_line(argc, argv, desc), vm);
 	po::notify(vm);    
@@ -42,10 +41,10 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 	if (in_left_files.size() != in_right_files.size()) {
+		INFO("Numbers of files with left and right reads are different.");
 		return 2;
 	}
 	//end parsing
-
 	seqan::SeqFileOut out_good(out_good_file.c_str());
 	seqan::SeqFileOut out_bad;
 	if (vm.count("bad")) {
