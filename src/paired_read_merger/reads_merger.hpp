@@ -92,6 +92,101 @@ namespace reads_merger {
 				return settings.base_quality;
 			}
 	};
+	
+	class SuffArrayPairer {
+		private:
+			merger_setting settings;
+			vector<int> col, num, p, p2, lcp; 
+			vector<vector<int>> sparse_table;
+			
+			void build_suff_array(const Dna5String &s, int len) {
+				int ma = max(len, 256);
+				col.resize(len);
+				p.resize(len);
+				p2.resize(len);
+				num.resize(len);
+				for (int i = 0; i < len; ++i) {
+					col[i] = s[i];
+					p[i] = i;
+				}	
+				for (int k2 = 1; k2 / 2 < len; k2 *= 2) {
+					int k = k2 / 2;
+					num.assign(len, 0);
+					for (int i = 0; i < len; ++i) {
+						++num[col[i] + 1];
+					}
+					for (int i = 0; i < ma; ++i) {
+						num[i + 1] += num[i];
+					}
+					for (int i = 0; i < len; ++i) {
+						p2[num[col[(p[i] - k + len) % len]]++] = (p[i] - k + len) % len;
+					}
+					
+					int cc = 0;
+					for (int i = 0; i < len; ++i) {
+						if (i && (col[p2[i]] != col[p2[i - 1]] || col[(p2[i] + k) % len] != col[(p2[i - 1] + k) % len])) {
+							cc++;
+						}
+						num[p2[i]] = cc;
+					}
+					for (int i = 0; i < len; ++i) {
+						p[i] = p2[i];
+						col[i] = num[i];
+					}
+				}
+				num.assign(len, 0);
+				for (int i = 0; i < len; ++i) {
+					++num[col[i] + 1];
+				}
+				for (int i = 0; i < ma; ++i) {
+					num[i + 1] += num[i];
+				}
+				for (int i = 0; i < len; ++i) {
+					p2[num[col[i]]] = i;
+					++num[col[i]];
+				}
+				for (int i = 0; i < len; ++i) {
+					p[i] = p2[i];
+				}
+				for (int i = 0; i < len; ++i) {
+					p2[p[i]] = i;
+				}
+			}
+			
+			void build_lcp(const Dna5String &s, int len) {
+				lcp.resize(len);
+				int now = 0;
+				for (int i = 0; i < len; ++i) {
+					int j = p2[i];
+					now = max(now - 1, 0);
+					if (j != len - 1) {
+						while (now < len && s[(p[j] + now) % len] == s[(p[j + 1] + now) % len]) {
+							++now;
+						}
+					} 
+					lcp[j] = now;
+					if (j != len - 1 && p[j + 1] == len - 1) {
+						now = 0;
+					}
+				}
+			}
+			/*
+			void build_sparse(int len) {
+				int log = 8;
+				while
+				sparse.assign(
+			}*/
+			
+		public:
+			SuffArrayPairer(const merger_setting &settings) : settings(settings) {}
+			PairerInfo find_best_overlap(const Dna5String &left, const Dna5String &right) {
+				size_t best = INFTY, pos = INFTY;
+				size_t left_len = length(left), right_len = length(right);
+				build_suff_array(left, int(left_len + 1 + right_len));
+				build_lcp(left, int(left_len + 1 + right_len));
+				return PairerInfo(pos);
+			}
+	};
 
 	class SequenceMerger {
 		private:
