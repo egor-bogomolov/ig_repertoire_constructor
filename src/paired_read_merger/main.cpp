@@ -13,6 +13,7 @@ void create_console_logger(string log_filename) {
 }
 
 int main(int argc, char *argv[]) {
+
 	vector<string> in_left_files, in_right_files;
 	string out_good_file;
 	string out_bad_file;
@@ -44,6 +45,10 @@ int main(int argc, char *argv[]) {
 		INFO("Numbers of files with left and right reads are different.");
 		return 2;
 	}
+	if (in_left_files.size() == 0) {
+		INFO("No files to read from.");
+		return 2;
+	}
 	//end parsing
 	seqan::SeqFileOut out_good(out_good_file.c_str());
 	seqan::SeqFileOut out_bad;
@@ -52,7 +57,6 @@ int main(int argc, char *argv[]) {
 	}
 	rm::Read left, right, result;
 	rm::SequenceMerger merger;
-	rm::SimplePairer pairer(settings); 
 	int cnt_good = 0, cnt_all = 0;
 	for (size_t i = 0; i < in_left_files.size(); ++i) {
 		seqan::SeqFileIn in_left(in_left_files[i].c_str());
@@ -61,7 +65,8 @@ int main(int argc, char *argv[]) {
 			left.read(in_left);
 			right.read(in_right);
 			right.reverseRead();
-			pair <rm::Read, bool> result = merger.Merge(left,right, pairer, cnt_all);	
+			pair <rm::Read, bool> result = merger.Merge<rm::SuffArrayPairer>(left,right, settings, cnt_all);	
+		//	pair <rm::Read, bool> result = merger.Merge<rm::SimplePairer>(left,right, settings, cnt_all);	
 			if (result.second) {
 				result.first.write(out_good);
 				++cnt_good;

@@ -89,10 +89,6 @@ namespace reads_merger {
 				}
 				return PairerInfo(pos);
 			}
-			
-			size_t quality() const {
-				return settings.base_quality;
-			}
 	};
 	
 	class SuffArrayPairer {
@@ -194,7 +190,7 @@ namespace reads_merger {
 				if (l > r) {
 					swap(l, r);
 				}
-				int lg = log[r - l];
+				int lg = log[r - l] - 1;
 				return min(sparse[l][lg], sparse[r - (1 << lg)][lg]);
 			}
 			
@@ -244,10 +240,6 @@ namespace reads_merger {
 					}
 				}
 				return PairerInfo(pos);
-			}
-			
-			size_t quality() const {
-				return settings.base_quality;
 			}
 	};
 
@@ -305,13 +297,16 @@ namespace reads_merger {
 			}
 		public:
 			template <class Pairer>
-				pair <Read, bool> Merge(const Read &left, const Read &right, const Pairer &pairer, size_t index) {
+				pair <Read, bool> Merge(const Read &left, const Read &right, const merger_setting &settings, size_t index) {
+					Pairer pairer(settings);
+			//		cerr << "Start pairing\n";
 					PairerInfo info = pairer.find_best_overlap(left.seq, right.seq);
+			//		cerr << "Finish pairing\n";
 					if (info.position == INFTY) {
 						return (make_pair(Read(), false));
 					}
 					CharString new_id = merge_ids(left.id, index);
-					CharString new_qual = merge_quals(left.seq, right.seq, left.qual, right.qual, info.position, pairer.quality());
+					CharString new_qual = merge_quals(left.seq, right.seq, left.qual, right.qual, info.position, settings.base_quality);
 					Dna5String new_seq = merge_seqs(left.seq, right.seq, left.qual, right.qual, info.position);
 					assert(length(new_qual) == length(new_seq));
 					return make_pair(Read(new_id, new_qual, new_seq), true);
