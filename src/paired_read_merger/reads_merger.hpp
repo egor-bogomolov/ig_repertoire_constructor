@@ -1,5 +1,6 @@
 #pragma once
 #include <utils/sequence_tools.hpp>
+#include <utils/string_tools.hpp>
 
 #include "logger/log_writers.hpp"
 
@@ -57,7 +58,6 @@ namespace reads_merger {
 		PairerInfo(size_t pos): position(pos) {}
 	};
 
-	// вместо простого можно k-меры
 	class SimplePairer {
 		private:
 			merger_setting settings;
@@ -87,6 +87,65 @@ namespace reads_merger {
 						best = dist, pos = i;
 					}
 				}
+				return PairerInfo(pos);
+			}
+	};
+	
+	class KHashPairer {
+		private:
+			int k;
+			merger_setting settings;
+			vector<size_t> left_hashes, right_hashes;
+			
+			size_t hamming_distance(size_t pos1, size_t max_mismatch, const Dna5String &left, const Dna5String &right) const {
+				size_t pos2 = 0, left_len = length(left);
+				size_t diff = 0;
+				while (diff <= max_mismatch && pos1 < left_len) {
+					if (pos1 < left_len - k + 1 && left_hashes[pos1] == right_hashes[pos2]) {
+						pos1 += k;
+						pos2 += k;
+					} else {
+						if (left[pos1] != right[pos2]) {
+							++diff;
+						}
+						++pos1;
+						++pos2;
+					}
+				}
+				if (diff > max_mismatch) {
+					return INFTY;
+				} else {
+					return diff;
+				}
+			}
+			
+		public:
+			KHashPairer(const merger_setting &settings) : k(8), settings(settings) {}	
+		
+			PairerInfo find_best_overlap(const Dna5String &left, const Dna5String &right) {
+				size_t best = INFTY, pos = INFTY; 
+				size_t left_len = length(left), right_len = length(right);
+				string temp_left, temp_right;
+				for (size_t i = 0; i < left_len; ++i) {
+					temp_left += left[i];
+				}
+				for (size_t i = 0; i < right_len; ++i) {
+					temp_right += right[i];
+				}
+				StringToKHashes(temp_left, k, left_hashes);
+				StringToKHashes(temp_right, k, right_hashes);
+				for (size_t i = 0; i < left_len; ++i) {
+					size_t overlap = min(left_len - i, right_len);
+					if (overlap < settings.min_overlap) {
+						break;
+					}
+					size_t mismatch_num = size_t(settings.max_mismatch_rate * double(overlap));
+					size_t dist = hamming_distance(i, mismatch_num, left, right);
+					if (best > dist) {
+						best = dist, pos = i;
+					}
+				}	
+			
 				return PairerInfo(pos);
 			}
 	};
@@ -299,9 +358,7 @@ namespace reads_merger {
 			template <class Pairer>
 				pair <Read, bool> Merge(const Read &left, const Read &right, const merger_setting &settings, size_t index) {
 					Pairer pairer(settings);
-			//		cerr << "Start pairing\n";
 					PairerInfo info = pairer.find_best_overlap(left.seq, right.seq);
-			//		cerr << "Finish pairing\n";
 					if (info.position == INFTY) {
 						return (make_pair(Read(), false));
 					}
