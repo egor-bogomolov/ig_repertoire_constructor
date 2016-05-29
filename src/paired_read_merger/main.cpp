@@ -65,9 +65,10 @@ int main(int argc, char *argv[]) {
 			left.read(in_left);
 			right.read(in_right);
 			right.reverseRead();
-	//		pair <rm::Read, bool> result = merger.Merge<rm::SuffArrayPairer>(left,right, settings, cnt_all);	
+		//	pair <rm::Read, bool> result = merger.Merge<rm::SuffArrayPairer>(left,right, settings, cnt_all);	
 		//	pair <rm::Read, bool> result = merger.Merge<rm::SimplePairer>(left,right, settings, cnt_all);	
-			pair <rm::Read, bool> result = merger.Merge<rm::KHashPairer>(left,right, settings, cnt_all);	
+		//	pair <rm::Read, bool> result = merger.Merge<rm::KHashPairer>(left,right, settings, cnt_all);	
+			pair <rm::Read, bool> result = merger.Merge<rm::SmartKHashPairer>(left,right, settings, cnt_all);	
 			if (result.second) {
 				result.first.write(out_good);
 				++cnt_good;

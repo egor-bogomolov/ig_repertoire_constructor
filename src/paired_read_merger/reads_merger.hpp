@@ -140,7 +140,7 @@ namespace reads_merger {
 						break;
 					}
 					size_t mismatch_num = size_t(settings.max_mismatch_rate * double(overlap));
-					size_t dist = hamming_distance(i, mismatch_num, left, right);
+					size_t dist = hamming_distance(i, min(mismatch_num, best), left, right);
 					if (best > dist) {
 						best = dist, pos = i;
 					}
@@ -293,7 +293,7 @@ namespace reads_merger {
 						break;
 					}
 					size_t mismatch_num = size_t(settings.max_mismatch_rate * double(overlap));
-					size_t dist = check(int(i), int(left_len + 1), int(left_len), mismatch_num);
+					size_t dist = check(int(i), int(left_len + 1), int(left_len), min(mismatch_num, best));
 					if (best > dist) {
 						best = dist, pos = i;
 					}
@@ -301,8 +301,94 @@ namespace reads_merger {
 				return PairerInfo(pos);
 			}
 	};
-
-
+	
+	class SmartKHashPairer {
+		private:
+			int k;
+			merger_setting settings;
+			vector<size_t> left_hashes, right_hashes;
+			
+			size_t hamming_distance(size_t pos1, size_t max_mismatch, const Dna5String &left, const Dna5String &right) const {
+				size_t pos2 = 0, left_len = length(left);
+				size_t diff = 0;
+				while (diff <= max_mismatch && pos1 < left_len) {
+					if (pos1 < left_len - k + 1 && left_hashes[pos1] == right_hashes[pos2]) {
+						pos1 += k;
+						pos2 += k;
+					} else {
+						if (left[pos1] != right[pos2]) {
+							++diff;
+						}
+						++pos1;
+						++pos2;
+					}
+				}
+				if (diff > max_mismatch) {
+					return INFTY;
+				} else {
+					return diff;
+				}
+			}
+			
+		public:
+			SmartKHashPairer(const merger_setting &settings) : k(8), settings(settings) {}	
+		
+			PairerInfo find_best_overlap(const Dna5String &left, const Dna5String &right) {
+				size_t best = INFTY, pos = INFTY; 
+				size_t left_len = length(left), right_len = length(right);
+				string temp_left, temp_right;
+				for (size_t i = 0; i < left_len; ++i) {
+					temp_left += left[i];
+				}
+				for (size_t i = 0; i < right_len; ++i) {
+					temp_right += right[i];
+				}
+				StringToKHashes(temp_left, k, left_hashes);
+				StringToKHashes(temp_right, k, right_hashes);
+				vector<bool> ok(left_len, false);
+				vector<pair<size_t, size_t>> sorted_left_hashes, sorted_right_hashes;
+				sorted_left_hashes.resize(left_hashes.size());
+				sorted_right_hashes.resize(right_hashes.size());
+				for (size_t i = 0; i < left_hashes.size(); ++i) {
+					sorted_left_hashes[i] = make_pair(left_hashes[i], i);
+				}
+				for (size_t i = 0; i < right_hashes.size(); ++i) {
+					sorted_right_hashes[i] = make_pair(right_hashes[i], i);
+				}
+				sort(sorted_left_hashes.begin(), sorted_left_hashes.end());
+				sort(sorted_right_hashes.begin(), sorted_right_hashes.end());
+				size_t pointer = 0;
+				for (size_t i = 0; i < right_hashes.size(); ++i) {
+					while (pointer < left_hashes.size() && sorted_left_hashes[pointer].first < sorted_right_hashes[i].first) {
+						++pointer;
+					}
+					size_t pointer2 = pointer;
+					while (pointer2 < left_hashes.size() && sorted_left_hashes[pointer2].first == sorted_right_hashes[i].first) {
+						if (sorted_right_hashes[i].second <= sorted_left_hashes[pointer2].second) {
+							ok[sorted_left_hashes[pointer2].second - sorted_right_hashes[i].second] = true;
+						}
+						++pointer2;
+					}
+				}
+				for (size_t i = 0; i < left_len; ++i) {
+					size_t overlap = min(left_len - i, right_len);
+					if (overlap < settings.min_overlap) {
+						break;
+					}
+					if (!ok[i]) {
+						continue;
+					} 
+					size_t mismatch_num = size_t(settings.max_mismatch_rate * double(overlap));
+					size_t dist = hamming_distance(i, min(mismatch_num, best), left, right);
+					if (best > dist) {
+						best = dist, pos = i;
+					}
+				}	
+			
+				return PairerInfo(pos);
+			}
+	};
+	
 	class SequenceMerger {
 		private:
 			CharString merge_ids(const CharString &id, size_t index) {
